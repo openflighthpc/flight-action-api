@@ -27,49 +27,26 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-task :require_bundler do
-  $: << __dir__
-  $: << File.join(__dir__, 'lib')
-  ENV['BUNDLE_GEMFILE'] ||= File.join(__dir__, 'Gemfile')
-
-  require 'rubygems'
-  require 'bundler'
-
-  raise <<~ERROR.chomp unless ENV['RACK_ENV']
-    Can not require the application because the RACK_ENV has not been set.
-    Please export the env to your environment and try again:
-
-    export RACK_ENV=production
-  ERROR
-
-  Bundler.require(:default, ENV['RACK_ENV'].to_sym)
+DEFAULT_LOGGER = Logger.new($stdout).tap do |logger|
+  logger.level = case Figaro.env.log_level!.to_s
+  when 'fatal'
+    Logger::FATAL
+  when 'error'
+    Logger::ERROR
+  when 'warn'
+    Logger::WARN
+  when 'info'
+    Logger::INFO
+  when 'debug'
+    Logger::DEBUG
+  else
+    raise 'Unrecognised log level'
+  end
 end
 
-task require: :require_bundler do
-  require 'sinatra'
-  require 'config/initializers/figaro'
-  require 'config/initializers/logger'
-  # require 'app/records'
-  # require 'app/models'
-  # require 'app/proxies'
-  # require 'app/token'
-  # require 'app/serializers'
-  # require 'app'
+configure do
+  set :show_exceptions, :after_handler
+  set :logger, DEFAULT_LOGGER
+  enable :logging
 end
-
-task console: :require do
-  Bundler.require(:default, ENV['RACK_ENV'].to_sym, :pry)
-  binding.pry
-end
-
-# task 'token:admin', [:days] => :require do |task, args|
-#   token = Token.new(admin: true)
-#                .tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-#   puts token.generate_jwt
-# end
-
-# task 'token:user', [:days] => :require do |task, args|
-#   token = Token.new.tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-#   puts token.generate_jwt
-# end
 

@@ -36,8 +36,6 @@ register Sinja
 
 BEARER_REGEX = /\ABearer\s(.*)\Z/
 
-class TemplateConflictError < StandardError; end
-
 configure_jsonapi do |c|
   # c.conflict_exceptions << TemplateConflictError
   # c.validation_exceptions << ActiveModel::ValidationError

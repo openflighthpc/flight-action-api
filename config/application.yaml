@@ -1,0 +1,31 @@
+# IMPORTANT:
+# This file contains the default configuration values of the server.
+# Modifications to this file should be handled with care. They maybe
+# lost the next time the application is updated and create a security
+# risk by exposing the shared secret.
+
+# RECOMMENDATION:
+# All configuration values/overrides should be done via the environment as
+# opposed to modifying the configs. This particularly applies to the required
+# keys which must be set before the application has started
+
+# EXAMPLE:
+# To set the shared secret in the environment:
+# export jwt_shared_secret=...Your shared secret ...
+# export ... All the other REQUIRED configs ...
+
+# REQUIRED:
+# jwt_shared_secret:  # [REQUIRED]
+
+# DYNAMIC DEFAULTS:
+# The following may use relative paths from the install directory
+# or hard coded to be an absolute path
+
+# STATIC DEFAULTS:
+log_level: info
+
+development:
+  log_level:  debug
+
+test:
+  log_level: error
