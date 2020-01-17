@@ -26,34 +26,3 @@
 # For more information on Action Server, please visit:
 # https://github.com/openflighthpc/action-server
 #===============================================================================
-
-source "https://rubygems.org"
-
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem 'activemodel', require: 'active_model'
-gem 'activesupport'
-gem 'figaro'
-gem 'hashie'
-# gem 'json_api_client'
-gem 'jwt'
-gem 'rake'
-gem 'puma'
-gem 'sinatra'
-gem 'sinja', '> 1.0.0'
-
-group :development, :test do
-  group :pry do
-    gem 'pry'
-    gem 'pry-byebug'
-  end
-end
-
-group :test do
-  gem 'climate_control'
-  gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-  # gem 'webmock'
-  # gem 'vcr'
-end

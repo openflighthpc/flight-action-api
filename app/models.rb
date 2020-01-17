@@ -27,33 +27,43 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-source "https://rubygems.org"
+# Sinja has a weird "feature" (bug?) where it can not serialize Hash objects
+# tl;dr Sinja thinks the Hash is the options to the serializer NOT the model
+# Using a decorator design pattern for the models is a work around
+class BaseHashieDashModel
+  def self.inherited(klass)
+    data_class = Class.new(Hashie::Dash) do
+      include Hashie::Extensions::IgnoreUndeclared
+      include ActiveModel::Validations
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+      def self.method_added(m)
+        parent.delegate(m, to: :data)
+      end
+    end
 
-gem 'activemodel', require: 'active_model'
-gem 'activesupport'
-gem 'figaro'
-gem 'hashie'
-# gem 'json_api_client'
-gem 'jwt'
-gem 'rake'
-gem 'puma'
-gem 'sinatra'
-gem 'sinja', '> 1.0.0'
+    klass.const_set('DataHash', data_class)
+    klass.delegate(*(ActiveModel::Validations.instance_methods - Object.methods), to: :data)
+  end
 
-group :development, :test do
-  group :pry do
-    gem 'pry'
-    gem 'pry-byebug'
+  attr_reader :data
+
+  def initialize(*a)
+    @data = self.class::DataHash.new(*a)
   end
 end
 
-group :test do
-  gem 'climate_control'
-  gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-  # gem 'webmock'
-  # gem 'vcr'
+class Command < BaseHashieDashModel
 end
+
+class Node < BaseHashieDashModel
+end
+
+class Group < BaseHashieDashModel
+end
+
+class Ticket < BaseHashieDashModel
+end
+
+class Job < BaseHashieDashModel
+end
+

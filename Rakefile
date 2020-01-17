@@ -46,14 +46,18 @@ task :require_bundler do
 end
 
 task require: :require_bundler do
+  require 'active_support/concern'
+  require 'active_support/core_ext/numeric/time'
+  require 'active_support/core_ext/string'
+  require 'active_support/core_ext/module/delegation'
+
   require 'sinatra'
   require 'config/initializers/figaro'
   require 'config/initializers/logger'
-  # require 'app/records'
-  # require 'app/models'
-  # require 'app/proxies'
+  require 'app/models'
+  require 'app/facades'
   # require 'app/token'
-  # require 'app/serializers'
+  require 'app/serializers'
   require 'app'
 end
 
