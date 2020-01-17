@@ -99,5 +99,9 @@ helpers do
   # end
 end
 
+resource :groups do
+  index { [] }
+end
+
 freeze_jsonapi
 

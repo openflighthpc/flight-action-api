@@ -54,7 +54,7 @@ task require: :require_bundler do
   # require 'app/proxies'
   # require 'app/token'
   # require 'app/serializers'
-  # require 'app'
+  require 'app'
 end
 
 task console: :require do
