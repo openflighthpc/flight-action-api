@@ -57,8 +57,11 @@ end
 
 class Node < BaseHashieDashModel
   DataHash.class_exec do
+    include Hashie::Extensions::Dash::PropertyTranslation
+
     property :name, required: true
     property :params, required: true
+    property :ranks, default: [], transform_with: ->(v) { (v.dup << 'default').uniq }
   end
 end
 

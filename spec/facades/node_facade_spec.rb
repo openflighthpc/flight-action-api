@@ -40,13 +40,13 @@ RSpec.describe NodeFacade do
   context 'when in an isolated standalone mode' do
     around do |e|
       with_facade_dummies do
-        described_class.facade_instance = subject
+        described_class.facade_instance = \
+          described_class::Standalone.new(nodes_data)
         e.call
       end
     end
 
-    let(:nodes_data) { {} }
-    subject { described_class::Standalone.new(nodes_data) }
+    let(:nodes_data) { raise NotImplementedError }
 
     describe '::find_by_name' do
       context 'with an empty set of nodes' do
@@ -54,6 +54,55 @@ RSpec.describe NodeFacade do
 
         it 'returns nil' do
           expect(described_class.find_by_name('missing')).to be_nil
+        end
+      end
+
+      def generate_test_data
+        {
+          node1: {
+            key: 'node1'
+          },
+          node2: {
+            key: 'node2',
+            ranks: ['duplicate', 'duplicate']
+          },
+          'node3' => {
+            'ranks' => ['different', 'default'],
+            'key' => 'node3'
+          }
+        }
+      end
+
+      [:node1, :node2, 'node3'].each do |key|
+        context "with the #{key} test set" do
+          let(:nodes_data) { generate_test_data }
+          let(:name) { key.to_s }
+          let(:ranks) do
+            raw_ranks = nodes_data[key][:ranks]&.dup || nodes_data[key]['ranks']&.dup || []
+            raw_ranks << 'default'
+            raw_ranks.uniq
+          end
+          subject { described_class.find_by_name(name) }
+
+          it 'returns a a Node' do
+            expect(subject).to be_a(Node)
+          end
+
+          it 'correctly names the node' do
+            expect(subject.name).to eq(name)
+          end
+
+          it 'correctly sets the rank' do
+            expect(subject.ranks).to eq(ranks)
+          end
+
+          it 'strips the ranks from the parameters' do
+            expect(subject.params.keys).not_to include(:ranks)
+          end
+
+          it 'sets the parameters' do
+            expect(subject.params[:key]).to eq(name.to_s)
+          end
         end
       end
     end

@@ -126,7 +126,13 @@ module NodeFacade
       delete('__meta__')
     end
 
-    def find_by_name(_)
+    def find_by_name(input)
+      name = input.to_s
+      return nil unless key?(name)
+      data = self[name].symbolize_keys
+      ranks = data[:ranks] || []
+      params = data.reject { |k, _| k == :ranks }
+      Node.new(name: name, params: params, ranks: ranks)
     end
   end
 end
