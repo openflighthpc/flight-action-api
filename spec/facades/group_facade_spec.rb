@@ -65,8 +65,11 @@ end
 
 RSpec.describe GroupFacade do
   context 'when in exploding mode' do
-    # Currently exploding is the only supported mode
-    # around { 'noop' }
+    around(:all) do |example|
+      GroupFacade.instance_variable_set(:@facade_instance, described_class::Exploding.new)
+      example.call
+      GroupFacade.instance_variable_set(:@facade_instance, nil)
+    end
 
     describe '::find_by_name' do
       context 'with a stubbed NodeFacade' do
