@@ -48,6 +48,22 @@ RSpec.describe NodeFacade do
 
     let(:nodes_data) { raise NotImplementedError }
 
+    def generate_test_data
+      {
+        node1: {
+          key: 'node1'
+        },
+        node2: {
+          key: 'node2',
+          ranks: ['duplicate', 'duplicate']
+        },
+        'node3' => {
+          'ranks' => ['different', 'default'],
+          'key' => 'node3'
+        }
+      }
+    end
+
     describe '::find_by_name' do
       context 'with an empty set of nodes' do
         let(:nodes_data) { {} }
@@ -55,22 +71,6 @@ RSpec.describe NodeFacade do
         it 'returns nil' do
           expect(described_class.find_by_name('missing')).to be_nil
         end
-      end
-
-      def generate_test_data
-        {
-          node1: {
-            key: 'node1'
-          },
-          node2: {
-            key: 'node2',
-            ranks: ['duplicate', 'duplicate']
-          },
-          'node3' => {
-            'ranks' => ['different', 'default'],
-            'key' => 'node3'
-          }
-        }
       end
 
       [:node1, :node2, 'node3'].each do |key|
@@ -108,6 +108,20 @@ RSpec.describe NodeFacade do
             expect(described_class.find_by_name(name)).to be(subject)
           end
         end
+      end
+    end
+
+    describe '::index_all' do
+      let(:nodes_data) { generate_test_data }
+      subject { described_class.index_all }
+
+      it 'returns an array of Node objects' do
+        expect(subject).to be_a(Array)
+        subject.each { |n| expect(n).to be_a(Node) }
+      end
+
+      it 'returns the correctly named nodes' do
+        expect(subject.map(&:name)).to contain_exactly(*nodes_data.keys.map(&:to_s))
       end
     end
   end

@@ -108,9 +108,14 @@ module NodeFacade
   module Base
     # Query for a Node object by its name alone
     # @param name [String] the name of the node
-    # @return [Node] the node object
-    # @return [nil] if it could not resolve the name
+    # @return [Node, nil] the node object or nil if it could not resolve the name
     def find_by_name(name)
+      raise NotImplementedError
+    end
+
+    # Query for all the available nodes
+    # @return [Array<Node>] the list of nodes
+    def index_all
       raise NotImplementedError
     end
   end
@@ -136,6 +141,10 @@ module NodeFacade
         params = data.reject { |k, _| k == :ranks }
         Node.new(name: name, params: params, ranks: ranks)
       end
+    end
+
+    def index_all
+      @index_all ||= keys.map { |k| find_by_name(k) }
     end
   end
 end
