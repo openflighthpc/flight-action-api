@@ -48,6 +48,11 @@ RSpec.describe Group do
     it 'ignores excess delimitors' do
       expect(described_class.explode_names(',,,n,,')).to eq(['n'])
     end
+
+    it 'can expand ranges' do
+      nodes = (1..10).map { |i| "node#{i}" }
+      expect(described_class.explode_names('node[1-10]')).to contain_exactly(*nodes)
+    end
   end
 end
 

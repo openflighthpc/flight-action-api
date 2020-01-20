@@ -59,12 +59,22 @@ class Node < BaseHashieDashModel
 end
 
 class Group < BaseHashieDashModel
-  EXPLODE_REGEX = /\A[[:alnum:]]+(\[\d+\-\d+\])?\Z/
+  EXPLODE_REGEX = /\A[[:alnum:]]+(?<range>\[(?<low>\d+)\-(?<high>\d+)\])?\Z/
 
   def self.explode_names(input)
     parts = input.split(',').reject(&:empty?)
     return nil unless parts.all? { |p| EXPLODE_REGEX.match?(p) }
-    parts
+    parts.map do |part|
+      captures = EXPLODE_REGEX.match(part).named_captures.reject { |_, v| v.nil? }
+      if captures.key?('range')
+        range = captures['range']
+        low = captures['low'].to_i
+        high = captures['high'].to_i
+        (low..high).map { |i| "#{part.chomp(range)}#{i}" }
+      else
+        part
+      end
+    end.flatten
   end
 end
 
