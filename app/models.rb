@@ -56,8 +56,10 @@ class Command < BaseHashieDashModel
 end
 
 class Node < BaseHashieDashModel
-  property :name, required: true
-  property :params, required: true
+  DataHash.class_exec do
+    property :name, required: true
+    property :params, required: true
+  end
 end
 
 class Group < BaseHashieDashModel
