@@ -35,3 +35,28 @@ RSpec.describe NodeFacade::Standalone do
     expect(facade[:__meta__]).to be_nil
   end
 end
+
+RSpec.describe NodeFacade do
+  context 'when in an isolated standalone mode' do
+    around do |e|
+      with_facade_dummies do
+        described_class.facade_instance = subject
+        e.call
+      end
+    end
+
+    let(:nodes_data) { {} }
+    subject { described_class::Standalone.new(nodes_data) }
+
+    describe '::find_by_name' do
+      context 'with an empty set of nodes' do
+        let(:nodes_data) { {} }
+
+        it 'returns nil' do
+          expect(described_class.find_by_name('missing')).to be_nil
+        end
+      end
+    end
+  end
+end
+

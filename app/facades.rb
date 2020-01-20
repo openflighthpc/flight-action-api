@@ -125,6 +125,9 @@ module NodeFacade
       super
       delete('__meta__')
     end
+
+    def find_by_name(_)
+    end
   end
 end
 
