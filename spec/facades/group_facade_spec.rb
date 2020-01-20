@@ -66,9 +66,10 @@ end
 RSpec.describe GroupFacade do
   context 'when in exploding mode' do
     around(:all) do |example|
-      GroupFacade.instance_variable_set(:@facade_instance, described_class::Exploding.new)
-      example.call
-      GroupFacade.instance_variable_set(:@facade_instance, nil)
+      with_facade_dummies do
+        GroupFacade.facade_instance = described_class::Exploding.new
+        example.call
+      end
     end
 
     describe '::find_by_name' do

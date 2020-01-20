@@ -65,13 +65,29 @@ RSpec.configure do |c|
   def admin_headers
     header 'Content-Type', 'application/vnd.api+json'
     header 'Accept', 'application/vnd.api+json'
-    header 'Authorization', "Bearer #{Token.new(admin: true).generate_jwt}"
+    # header 'Authorization', "Bearer #{Token.new(admin: true).generate_jwt}"
   end
 
   def user_headers
     header 'Content-Type', 'application/vnd.api+json'
     header 'Accept', 'application/vnd.api+json'
-    header 'Authorization', "Bearer #{Token.new.generate_jwt}"
+    # header 'Authorization', "Bearer #{Token.new.generate_jwt}"
+  end
+
+  FACADE_CLASSES = [NodeFacade, GroupFacade]
+  def with_facade_dummies
+    old_facades = FACADE_CLASSES.map do |klass|
+      old = begin
+              klass.facade_instance
+            rescue NotImplementedError
+              nil
+            end
+      [klass, old]
+    end
+    FACADE_CLASSES.each { |c| c.facade_instance = c::Dummy.new }
+    yield if block_given?
+  ensure
+    old_facades.each { |c, o| c.facade_instance = o }
   end
 
   def parse_last_request_body

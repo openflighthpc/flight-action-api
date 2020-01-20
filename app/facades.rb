@@ -38,25 +38,23 @@ module HasFacade
   class_methods do
     delegate_missing_to :facade_instance
 
+    attr_writer :facade_instance
+
+    def facade_instance
+      @facade_instance || raise(NotImplementedError)
+    end
+
     def define_facade(name, super_class = Object, &b)
       klass = Class.new(super_class)
       self.const_set(name, klass)
       klass.include(self::Base)
       klass.class_exec(&b) if b
     end
-
-    def facade_instance
-      raise NotImplementedError
-    end
   end
 end
 
 module GroupFacade
   include HasFacade
-
-  def self.facade_instance
-    @facade_instance = Exploding.new
-  end
 
   module Base
     # Query for a Group object by its name alone
@@ -67,6 +65,8 @@ module GroupFacade
       raise NotImplementedError
     end
   end
+
+  define_facade('Dummy')
 
   define_facade('Exploding') do
     EXPLODE_REGEX = /\A(?<leader>[[:alnum:]]+)(\[(?<low>\d+)\-(?<high>\d+)\])?\Z/
@@ -105,10 +105,6 @@ end
 module NodeFacade
   include HasFacade
 
-  def self.facade_instance
-    @facade_instance = Standalone.new
-  end
-
   module Base
     # Query for a Node object by its name alone
     # @param name [String] the name of the node
@@ -118,6 +114,8 @@ module NodeFacade
       raise NotImplementedError
     end
   end
+
+  define_facade('Dummy')
 
   define_facade('Standalone')
 end
