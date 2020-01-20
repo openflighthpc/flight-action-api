@@ -27,45 +27,18 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-# Sinja has a weird "feature" (bug?) where it can not serialize Hash objects
-# tl;dr Sinja thinks the Hash is the options to the serializer NOT the model
-# Using a decorator design pattern for the models is a work around
-class BaseHashieDashModel
-  def self.inherited(klass)
-    data_class = Class.new(Hashie::Dash) do
-      include Hashie::Extensions::IgnoreUndeclared
-      include ActiveModel::Validations
 
-      def self.method_added(m)
-        parent.delegate(m, to: :data)
+require 'spec_helper'
+
+RSpec.describe Group do
+  describe '::explode_names' do
+    [
+      'node[', 'node]', 'node[1]', 'node[1-]', 'node[-1]', 'node[a-1]', 'node[1-a]'
+    ].each do |name|
+      it "returns nil for illegal name: #{name}" do
+        expect(described_class.explode_names(name)).to eq(nil)
       end
     end
-
-    klass.const_set('DataHash', data_class)
-    klass.delegate(*(ActiveModel::Validations.instance_methods - Object.methods), to: :data)
   end
-
-  attr_reader :data
-
-  def initialize(*a)
-    @data = self.class::DataHash.new(*a)
-  end
-end
-
-class Command < BaseHashieDashModel
-end
-
-class Node < BaseHashieDashModel
-end
-
-class Group < BaseHashieDashModel
-  def self.explode_names(name)
-  end
-end
-
-class Ticket < BaseHashieDashModel
-end
-
-class Job < BaseHashieDashModel
 end
 
