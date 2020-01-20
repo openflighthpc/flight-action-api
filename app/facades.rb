@@ -117,6 +117,14 @@ module NodeFacade
 
   define_facade('Dummy')
 
-  define_facade('Standalone')
+  define_facade('Standalone', Hash) do
+    include Hashie::Extensions::MergeInitializer
+    include Hashie::Extensions::IndifferentAccess
+
+    def initialize(*_)
+      super
+      delete('__meta__')
+    end
+  end
 end
 
