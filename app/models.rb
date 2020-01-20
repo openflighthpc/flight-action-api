@@ -56,6 +56,8 @@ class Command < BaseHashieDashModel
 end
 
 class Node < BaseHashieDashModel
+  property :name, required: true
+  property :params, required: true
 end
 
 class Group < BaseHashieDashModel
@@ -81,6 +83,11 @@ class Group < BaseHashieDashModel
         part
       end
     end.flatten
+  end
+
+  DataHash.class_exec do
+    property  :name, required: true
+    property  :nodes, default: []
   end
 end
 
