@@ -43,13 +43,17 @@ module HasFacade
     delegate_missing_to :facade_instance
 
     def facade_instance
-      @facade_instance = self::Standalone.new
+      raise NotImplementedError
     end
   end
 end
 
 module GroupFacade
   include HasFacade
+
+  def self.facade_instance
+    @facade_instance = Standalone.new
+  end
 
   module Base
     # Query for a Group object by its name alone
@@ -73,6 +77,10 @@ end
 
 module NodeFacade
   include HasFacade
+
+  def self.facade_instance
+    @facade_instance = Standalone.new
+  end
 
   module Base
     # Query for a Node object by its name alone
