@@ -59,7 +59,12 @@ class Node < BaseHashieDashModel
 end
 
 class Group < BaseHashieDashModel
-  def self.explode_names(name)
+  EXPLODE_REGEX = /\A[[:alnum:]]+(\[\d+\-\d+\])?\Z/
+
+  def self.explode_names(input)
+    parts = input.split(',').reject(&:empty?)
+    return nil unless parts.all? { |p| EXPLODE_REGEX.match?(p) }
+    parts
   end
 end
 

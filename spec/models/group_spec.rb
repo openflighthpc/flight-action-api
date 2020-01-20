@@ -33,11 +33,20 @@ require 'spec_helper'
 RSpec.describe Group do
   describe '::explode_names' do
     [
-      'node[', 'node]', 'node[1]', 'node[1-]', 'node[-1]', 'node[a-1]', 'node[1-a]'
+      'n[', 'n]', 'n[]', 'n[1]', 'n[-]', 'n[1-]', 'n[-1]', 'n[a-1]', 'n[1-a]', 'n0,n[', '[1-2]'
     ].each do |name|
       it "returns nil for illegal name: #{name}" do
         expect(described_class.explode_names(name)).to eq(nil)
       end
+    end
+
+    it 'can explode names delimited by commas' do
+      nodes = ['n', 'node1', 'node2', 'node3']
+      expect(described_class.explode_names(nodes.join(','))).to contain_exactly(*nodes)
+    end
+
+    it 'ignores excess delimitors' do
+      expect(described_class.explode_names(',,,n,,')).to eq(['n'])
     end
   end
 end
