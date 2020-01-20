@@ -115,6 +115,12 @@ RSpec.describe GroupFacade do
         end
       end
     end
+
+    describe '::index_all' do
+      it 'returns an empty array' do
+        expect(described_class.index_all).to eq([])
+      end
+    end
   end
 end
 

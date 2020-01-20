@@ -64,6 +64,14 @@ module GroupFacade
     def find_by_name(name)
       raise NotImplementedError
     end
+
+    # Query for all the statically available groups. This method may not
+    # include all the ephemeral groups available in `find_by_name`
+    #
+    # @return [Array<Group>] the list of static groups
+    def index_all
+      raise NotImplementedError
+    end
   end
 
   define_facade('Dummy')
@@ -98,6 +106,10 @@ module GroupFacade
       return nil if node_names.nil?
       nodes = node_names.map { |n| NodeFacade.find_by_name(n) }
       Group.new(name: name, nodes: nodes)
+    end
+
+    def index_all
+      []
     end
   end
 end
