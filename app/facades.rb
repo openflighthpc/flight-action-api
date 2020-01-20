@@ -33,14 +33,17 @@ module HasFacade
   included do
     module self::Base
     end
-
-    class self::Standalone
-      include self.parent::Base
-    end
   end
 
   class_methods do
     delegate_missing_to :facade_instance
+
+    def define_facade(name, super_class = Object, &b)
+      klass = Class.new(super_class)
+      self.const_set(name, klass)
+      klass.include(self::Base)
+      klass.class_exec(&b) if b
+    end
 
     def facade_instance
       raise NotImplementedError
@@ -52,7 +55,7 @@ module GroupFacade
   include HasFacade
 
   def self.facade_instance
-    @facade_instance = Standalone.new
+    @facade_instance = Exploding.new
   end
 
   module Base
@@ -65,9 +68,33 @@ module GroupFacade
     end
   end
 
-  class Standalone
+  define_facade('Exploding') do
+    EXPLODE_REGEX = /\A(?<leader>[[:alnum:]]+)(\[(?<low>\d+)\-(?<high>\d+)\])?\Z/
+    PADDING_REGEX = /0*\Z/
+
+    def self.explode_names(input)
+      parts = input.split(',').reject(&:empty?)
+      return nil unless parts.all? { |p| EXPLODE_REGEX.match?(p) }
+      parts.map do |part|
+        captures = EXPLODE_REGEX.match(part).named_captures.reject { |_, v| v.nil? }
+        if captures.key?('low')
+          leader = captures['leader']
+          max_pads = PADDING_REGEX.match(leader).to_s.length
+          stripped_leader = leader.sub(PADDING_REGEX, '')
+          low = captures['low'].to_i
+          high = captures['high'].to_i
+          (low..high).map do |index|
+            pads = max_pads - index.to_s.length + 1
+            "#{stripped_leader}#{'0' * pads if pads > 0}#{index}"
+          end
+        else
+          part
+        end
+      end.flatten
+    end
+
     def find_by_name(name)
-      node_names = Group.explode_names(name)
+      node_names = self.class.explode_names(name)
       return nil if node_names.nil?
       nodes = node_names.map { |n| NodeFacade.find_by_name(n) }
       Group.new(name: name, nodes: nodes)
@@ -91,5 +118,7 @@ module NodeFacade
       raise NotImplementedError
     end
   end
+
+  define_facade('Standalone')
 end
 

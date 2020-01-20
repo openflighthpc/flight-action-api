@@ -63,30 +63,6 @@ class Node < BaseHashieDashModel
 end
 
 class Group < BaseHashieDashModel
-  EXPLODE_REGEX = /\A(?<leader>[[:alnum:]]+)(\[(?<low>\d+)\-(?<high>\d+)\])?\Z/
-  PADDING_REGEX = /0*\Z/
-
-  def self.explode_names(input)
-    parts = input.split(',').reject(&:empty?)
-    return nil unless parts.all? { |p| EXPLODE_REGEX.match?(p) }
-    parts.map do |part|
-      captures = EXPLODE_REGEX.match(part).named_captures.reject { |_, v| v.nil? }
-      if captures.key?('low')
-        leader = captures['leader']
-        max_pads = PADDING_REGEX.match(leader).to_s.length
-        stripped_leader = leader.sub(PADDING_REGEX, '')
-        low = captures['low'].to_i
-        high = captures['high'].to_i
-        (low..high).map do |index|
-          pads = max_pads - index.to_s.length + 1
-          "#{stripped_leader}#{'0' * pads if pads > 0}#{index}"
-        end
-      else
-        part
-      end
-    end.flatten
-  end
-
   DataHash.class_exec do
     property  :name, required: true
     property  :nodes, default: []

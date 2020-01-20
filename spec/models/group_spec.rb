@@ -31,36 +31,5 @@
 require 'spec_helper'
 
 RSpec.describe Group do
-  describe '::explode_names' do
-    [
-      'n[', 'n]', 'n[]', 'n[1]', 'n[-]', 'n[1-]', 'n[-1]', 'n[a-1]', 'n[1-a]', 'n0,n[', '[1-2]'
-    ].each do |name|
-      it "returns nil for illegal name: #{name}" do
-        expect(described_class.explode_names(name)).to eq(nil)
-      end
-    end
-
-    it 'can explode names delimited by commas' do
-      nodes = ['n', 'node1', 'node2', 'node3']
-      expect(described_class.explode_names(nodes.join(','))).to contain_exactly(*nodes)
-    end
-
-    it 'ignores excess delimitors' do
-      expect(described_class.explode_names(',,,n,,')).to eq(['n'])
-    end
-
-    it 'can expand ranges' do
-      nodes = (1..10).map { |i| "node#{i}" }
-      expect(described_class.explode_names('node[1-10]')).to contain_exactly(*nodes)
-    end
-
-    it 'can pad zeros in the range expansion' do
-      s_nodes = (1..9).map { |i| "node00#{i}" }
-      d_nodes = (10..99).map { |i| "node0#{i}" }
-      t_nodes = (100..110).map { |i| "node#{i}" }
-      nodes = [*s_nodes, *d_nodes, *t_nodes]
-      expect(described_class.explode_names('node00[001-110]')).to contain_exactly(*nodes)
-    end
-  end
 end
 
