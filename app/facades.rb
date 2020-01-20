@@ -55,6 +55,7 @@ module GroupFacade
     # Query for a Group object by its name alone
     # @param name [String] the name of the group
     # @return [Group] the group object containing the nodes
+    # @return [nil] if it could not resolve the name
     def find_by_name(name)
       raise NotImplementedError
     end
@@ -62,7 +63,9 @@ module GroupFacade
 
   class Standalone
     def find_by_name(name)
-      nodes = Group.explode_names(name).map do |node_name|
+      node_names = Group.explode_names(name)
+      return nil if node_names.nil?
+      nodes = node_names.map do |node_name|
         Node.new(name: node_name, params: {})
       end
       Group.new(name: name, nodes: nodes)

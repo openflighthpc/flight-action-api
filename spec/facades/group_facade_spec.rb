@@ -60,6 +60,16 @@ RSpec.describe GroupFacade do
           end
         end
       end
+
+      context 'when the name can not be exploded' do
+        before do
+          allow(Group).to receive(:explode_names).and_return(nil)
+        end
+
+        it 'returns nil' do
+          expect(described_class.find_by_name('stubbed')).to eq(nil)
+        end
+      end
     end
   end
 end
