@@ -65,10 +65,22 @@ module GroupFacade
     def find_by_name(name)
       node_names = Group.explode_names(name)
       return nil if node_names.nil?
-      nodes = node_names.map do |node_name|
-        Node.new(name: node_name, params: {})
-      end
+      nodes = node_names.map { |n| NodeFacade.find_by_name(n) }
       Group.new(name: name, nodes: nodes)
+    end
+  end
+end
+
+module NodeFacade
+  include HasFacade
+
+  module Base
+    # Query for a Node object by its name alone
+    # @param name [String] the name of the node
+    # @return [Node] the node object
+    # @return [nil] if it could not resolve the name
+    def find_by_name(name)
+      raise NotImplementedError
     end
   end
 end

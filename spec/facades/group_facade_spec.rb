@@ -35,7 +35,13 @@ RSpec.describe GroupFacade do
     # around { 'noop' }
 
     describe '::find_by_name' do
-      context 'with an explodable group' do
+      context 'with a stubbed NodeFacade' do
+        before do
+          allow(NodeFacade).to receive(:find_by_name).and_wrap_original do |_, name|
+            Node.new(name: name, params: {})
+          end
+        end
+
         let(:node_names) { ['node1', 'node2'] }
         let(:name) { node_names.join(',') }
         subject { described_class.find_by_name(name) }
