@@ -53,6 +53,14 @@ RSpec.describe Group do
       nodes = (1..10).map { |i| "node#{i}" }
       expect(described_class.explode_names('node[1-10]')).to contain_exactly(*nodes)
     end
+
+    it 'can pad zeros in the range expansion' do
+      s_nodes = (1..9).map { |i| "node00#{i}" }
+      d_nodes = (10..99).map { |i| "node0#{i}" }
+      t_nodes = (100..110).map { |i| "node#{i}" }
+      nodes = [*s_nodes, *d_nodes, *t_nodes]
+      expect(described_class.explode_names('node00[001-110]')).to contain_exactly(*nodes)
+    end
   end
 end
 
