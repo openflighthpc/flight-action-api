@@ -27,45 +27,39 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-module HasFacade
-  extend ActiveSupport::Concern
+require 'spec_helper'
 
-  included do
-    module self::Base
-    end
+RSpec.describe GroupFacade do
+  context 'when in standalone mode' do
+    # Currently standalone is the only supported mode
+    # around { 'noop' }
 
-    class self::Standalone
-      include self.parent::Base
-    end
-  end
+    describe '::find_by_name' do
+      context 'with an explodable group' do
+        let(:node_names) { ['node1', 'node2'] }
+        let(:name) { node_names.join(',') }
+        subject { described_class.find_by_name(name) }
 
-  class_methods do
-    delegate_missing_to :facade_instance
+        it 'returns a Group object' do
+          expect(subject).to be_a(Group)
+        end
 
-    def facade_instance
-      @facade_instance = self::Standalone.new
-    end
-  end
-end
+        describe 'Group#nodes' do
+          it 'returns the nodes as an Array' do
+            expect(subject.nodes).to be_a(Array)
+          end
 
-module GroupFacade
-  include HasFacade
+          it 'returns each node object as a Node' do
+            subject.nodes.each do |node|
+              expect(node).to be_a(Node)
+            end
+          end
 
-  module Base
-    # Query for a Group object by its name alone
-    # @param name [String] the name of the group
-    # @return [Group] the group object containing the nodes
-    def find_by_name(name)
-      raise NotImplementedError
-    end
-  end
-
-  class Standalone
-    def find_by_name(name)
-      nodes = Group.explode_names(name).map do |node_name|
-        Node.new(name: node_name, params: {})
+          it 'returns the correct node names' do
+            expect(subject.nodes.map(&:name)).to contain_exactly(*node_names)
+          end
+        end
       end
-      Group.new(name: name, nodes: nodes)
     end
   end
 end
