@@ -34,13 +34,22 @@ Figaro.application = Figaro::Application.new(
 )
 Figaro.load
       .reject { |_, v| v.nil? }
-      .each { |key, value| ENV[key] ||= value }
+      .each { |key, value| ENV[key] ||= value.to_s }
 
 # Hard sets the app's root directory to the current code base
 ENV['app_root_dir'] = File.expand_path('../..', __dir__)
 root_dir = ENV['app_root_dir']
 
-relative_keys = []
+# Enforce the requirements for Full Upstream Mode
+ENV['full_upstream'] = nil unless Figaro.env.full_upstream == 'true'
+Figaro.require_keys('remote_url') if Figaro.env.full_upstream
+
+# Enforce the requirements for Partial Upstream Mode
+# NOTE: This is an requirement for Full Upstream and most be done after the fact
+Figaro.require_keys('remote_cluster', 'remote_jwt') if Figaro.env.remote_url
+
+# Enforce the generally required keys
+relative_keys = ['node_config_path']
 Figaro.require_keys(*['jwt_shared_secret', 'log_level', *relative_keys])
 
 # Sets relative keys from the install directory

@@ -32,7 +32,7 @@ source "https://rubygems.org"
 git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 gem 'activemodel', require: 'active_model'
-gem 'activesupport', require: 'active_support'
+gem 'activesupport', require: 'active_support/core_ext'
 gem 'figaro'
 gem 'hashie'
 # gem 'json_api_client'

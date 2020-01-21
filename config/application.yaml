@@ -17,15 +17,36 @@
 # REQUIRED:
 # jwt_shared_secret:  # [REQUIRED]
 
+# FULL UPSTREAM MODE:
+# Setting the following line will put the server in Full Upstream Mode.
+# The server must also be configured in PARTIAL UPSTREAM MODE
+# full_upstream: true
+
+# PARTIAL UPSTREAM MODE:
+# Setting the following line will put the server in Partial Upstream MODE
+# remote_url:
+# remote_jwt:
+remote_cluster: default
+
+# STANDALONE NODE AND EXPLODING GROUP MODES
+# The server will be in STANDALONE NODE MODE if neither of the UPSTREAM MODES
+# have been selected.
+#
+# The server will be in EXPLODING GROUP MODE if FULL UPSTREAM MODE has not
+# been selected.
+
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
 # or hard coded to be an absolute path
+node_config_path: config/nodes.yaml
 
 # STATIC DEFAULTS:
 log_level: info
 
 development:
+  node_config_path: config/nodes.example.yaml
   log_level:  debug
 
 test:
   log_level: error
+
