@@ -145,18 +145,15 @@ module NodeFacade
 
     def find_by_name(input)
       name = input.to_s
-      @find_by_name ||= {}
-      @find_by_name[name] ||= begin
-        return nil unless key?(name)
-        data = self[name].symbolize_keys
-        ranks = data[:ranks] || []
-        params = data.reject { |k, _| k == :ranks }
-        Node.new(name: name, params: params, ranks: ranks)
-      end
+      return nil unless key?(name)
+      data = self[name].symbolize_keys
+      ranks = data[:ranks] || []
+      params = data.reject { |k, _| k == :ranks }
+      Node.new(name: name, params: params, ranks: ranks)
     end
 
     def index_all
-      @index_all ||= keys.map { |k| find_by_name(k) }
+      keys.map { |k| find_by_name(k) }
     end
   end
 end

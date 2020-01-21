@@ -103,10 +103,6 @@ RSpec.describe NodeFacade do
           it 'sets the parameters' do
             expect(subject.params[:key]).to eq(name.to_s)
           end
-
-          it 'caches the node object' do
-            expect(described_class.find_by_name(name)).to be(subject)
-          end
         end
       end
     end
