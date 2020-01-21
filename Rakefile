@@ -51,6 +51,7 @@ task require: :require_bundler do
   require 'config/initializers/logger'
   require 'app/models'
   require 'app/facades'
+  require 'config/initializers/facades'
   # require 'app/token'
   require 'app/serializers'
   require 'app'

@@ -100,7 +100,27 @@ helpers do
 end
 
 resource :groups do
+  helpers do
+    def find(id)
+      GroupFacade.find_by_name(id)
+    end
+  end
+
   index { [] }
+
+  show
+end
+
+resource :nodes do
+  helpers do
+    def find(id)
+      NodeFacade.find_by_name(id)
+    end
+  end
+
+  index { NodeFacade.index_all }
+
+  show
 end
 
 freeze_jsonapi
