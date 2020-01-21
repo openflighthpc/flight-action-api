@@ -73,7 +73,7 @@ RSpec.describe GroupFacade do
     end
 
     describe '::find_by_name' do
-      context 'with a stubbed NodeFacade' do
+      context 'with a stubbed NodeFacade that returns Node objects' do
         before do
           allow(NodeFacade).to receive(:find_by_name).and_wrap_original do |_, name|
             Node.new(name: name, params: {})
@@ -102,6 +102,21 @@ RSpec.describe GroupFacade do
           it 'returns the correct node names' do
             expect(subject.nodes.map(&:name)).to contain_exactly(*node_names)
           end
+        end
+      end
+
+      context 'with a stubbed NodeFacade that returns nil' do
+        before do
+          allow(NodeFacade).to receive(:find_by_name).and_return(nil)
+        end
+
+        let(:node_names) { ['node1', 'node2'] }
+        let(:name) { node_names.join(',') }
+        subject { described_class.find_by_name(name) }
+
+        it 'returns an empty array of nodes' do
+          expect(subject.nodes).to be_a(Array)
+          expect(subject.nodes).to be_empty
         end
       end
 

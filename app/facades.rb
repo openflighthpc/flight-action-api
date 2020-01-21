@@ -104,7 +104,7 @@ module GroupFacade
     def find_by_name(name)
       node_names = self.class.explode_names(name)
       return nil if node_names.nil?
-      nodes = node_names.map { |n| NodeFacade.find_by_name(n) }
+      nodes = node_names.map { |n| NodeFacade.find_by_name(n) }.reject(&:nil?)
       Group.new(name: name, nodes: nodes)
     end
 
