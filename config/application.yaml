@@ -1,4 +1,4 @@
-# == DO NOT EDIT - MANAGED FILE ===============================================
+# == DO NOT EDIT - MANAGED FILE ================================================
 # This is an internal managed file and used to set the default configurations.
 # Any changes to this file MIGHT BE LOST the next time the application is
 # updated.
@@ -11,7 +11,7 @@
 #
 # Refer to the reference document for full details on the configuration keys:
 # config/application.yaml.reference
-# =============================================================================
+# ==============================================================================
 
 # EXAMPLE:
 # To set the shared secret in the environment:
@@ -52,5 +52,6 @@ development:
   log_level:  debug
 
 test:
+  node_config_path: config/empty.yaml
   log_level: error
 

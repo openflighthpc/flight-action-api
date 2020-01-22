@@ -70,18 +70,23 @@ class Group < BaseHashieDashModel
 end
 
 class Command < BaseHashieDashModel
-  include Hashie::Extensions::Dash::PropertyTranslation
+  DataHash.class_exec do
+    include Hashie::Extensions::Dash::PropertyTranslation
 
-  property :name,         required: true
-  property :summary,      required: true
-  property :description,  from: :summary
-  property :scripts,      required: true
+    property :name,         required: true
+    property :summary,      required: true
+    property :description,  from: :summary
+    property :scripts,      required: true
+  end
 end
 
 class Script < BaseHashieDashModel
-  property :command,    required: true
-  property :variables,  required: true
-  property :body,       required: true
+  DataHash.class_exec do
+    property :command,    required: true
+    property :rank,       required: true
+    property :variables,  required: true
+    property :body,       required: true
+  end
 end
 
 class Ticket < BaseHashieDashModel

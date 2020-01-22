@@ -30,5 +30,22 @@
 require 'spec_helper'
 
 RSpec.describe Command do
+  context 'with a simple command setup' do
+    # There is a chicken and egg situation when creating Commands.
+    # The _command variable is used to bootstrap it
+    let(:_command) do
+      Command.new(name: 'dummy', summary: 'dummy', scripts: {})
+    end
+
+    let(:script) do
+      Script.new(command: _command, rank: 'dummy', body: 'exit 1', variables: [])
+    end
+
+    let(:command) { _command.tap { |c| c.scripts = { script.rank => script } } }
+
+    it 'is valid' do
+      expect(command).to be_valid
+    end
+  end
 end
 

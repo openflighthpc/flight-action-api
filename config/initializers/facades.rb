@@ -37,6 +37,6 @@ NodeFacade.facade_instance =  if Figaro.env.remote_url
                                 raise 'Partial Upstream Mode is not currently supported'
                               else
                                 yaml_str = File.read Figaro.env.node_config_path!
-                                NodeFacade::Standalone.new(YAML.load yaml_str)
+                                NodeFacade::Standalone.new(YAML.load(yaml_str) || {})
                               end
 
