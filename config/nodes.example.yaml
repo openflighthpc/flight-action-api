@@ -1,0 +1,23 @@
+__meta__:
+  random_key: >
+    The __meta__ section of the nodes config is ignored by the application.
+    It can be used to store code references and YAML anchors. As such there
+    is no proscribed format for this section
+
+google:
+  fqdn: www.google.com
+  IP:   8.8.8.8
+
+cloudflare:
+  fqdn: www.cloudflare.com
+  IP:   1.1.1.1
+
+node1:
+  ranks: [retry, metal]
+  fqdn: node1.example.com
+  IP:   10.100.0.1
+
+node2:
+  ranks: [retry, metal]
+  fqdn: node2.example.com
+  IP:   10.100.0.2
