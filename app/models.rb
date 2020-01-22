@@ -56,15 +56,15 @@ class Node < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
 
-    property :name, required: true
+    property :name,   required: true
     property :params, required: true
-    property :ranks, default: [], transform_with: ->(v) { (v.dup << 'default').uniq }
+    property :ranks,  default: [], transform_with: ->(v) { (v.dup << 'default').uniq }
   end
 end
 
 class Group < BaseHashieDashModel
   DataHash.class_exec do
-    property  :name, required: true
+    property  :name,  required: true
     property  :nodes, default: []
   end
 end
@@ -79,7 +79,7 @@ class Command < BaseHashieDashModel
     property :scripts,      required: true
 
     validates :name,        presence: true, format: {
-      with: /\A[^_]*\Z/, message: 'must not contain underscores'
+      with: /\A[^_]*\Z/,    message: 'must not contain underscores'
     }
     validates :summary,     presence: true
     validates :description, presence: true
@@ -91,6 +91,8 @@ class Command < BaseHashieDashModel
     def lookup_script(*ranks)
       scripts[(ranks & scripts.keys).first || 'default']
     end
+
+    private
 
     def validate_scripts_have_matching_ranks
       return unless scripts.is_a?(Hash)
@@ -133,6 +135,8 @@ class Script < BaseHashieDashModel
              transform_with: ->(v) { Array.wrap(v).map(&:to_s) }
 
     validate :validate_variables_are_not_empty
+
+    private
 
     def validate_variables_are_not_empty
       errors.add(:variables, "must not contain empty string") if variables.include?('')
