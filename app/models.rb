@@ -88,8 +88,8 @@ class Command < BaseHashieDashModel
     validate :validate_scripts_are_valid
     validate :validate_scripts_are_scripts
 
-    def find_script(rank)
-      scripts[rank] || scripts['default']
+    def lookup_script(*ranks)
+      scripts[(ranks & scripts.keys).first || 'default']
     end
 
     def validate_scripts_are_scripts

@@ -123,18 +123,24 @@ RSpec.describe Command do
       expect(subject).to be_valid
     end
 
-    describe '#find_script' do
+    describe '#lookup_script' do
       it 'can find the default script' do
-        expect(subject.find_script('default')).to eq(default)
+        expect(subject.lookup_script('default')).to eq(default)
       end
 
       it 'returns the default if the rank is missing' do
-        expect(subject.find_script('missing')).to eq(default)
+        expect(subject.lookup_script('missing', 'missing2')).to eq(default)
       end
 
       it 'can find an alternative script' do
         rank = ranks.first
-        expect(subject.find_script(rank)).to eq(scripts[rank])
+        expect(subject.lookup_script(rank)).to eq(scripts[rank])
+      end
+
+      it 'selects the first match' do
+        rank = ranks.last
+        lookup = ['missing', rank, ranks.first]
+        expect(subject.lookup_script(*lookup)).to eq(scripts[rank])
       end
     end
   end
