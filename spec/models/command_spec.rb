@@ -101,6 +101,43 @@ RSpec.describe Command do
       end
     end
   end
+
+  context 'with a command with multiple scripts' do
+    let(:ranks) { ['first', 'second', 'third'] }
+    let(:default) { Script.new(body: 'echo default') }
+    let(:scripts) do
+      ranks.map { |r| [r, Script.new(body: "echo #{r}")] }
+           .to_h
+           .tap { |h| h['default'] = default }
+    end
+
+    subject do
+      described_class.new(
+        name: 'test',
+        summary: 'test',
+        scripts: scripts
+      )
+    end
+
+    it 'is valid' do
+      expect(subject).to be_valid
+    end
+
+    describe '#find_script' do
+      it 'can find the default script' do
+        expect(subject.find_script('default')).to eq(default)
+      end
+
+      it 'returns the default if the rank is missing' do
+        expect(subject.find_script('missing')).to eq(default)
+      end
+
+      it 'can find an alternative script' do
+        rank = ranks.first
+        expect(subject.find_script(rank)).to eq(scripts[rank])
+      end
+    end
+  end
 end
 
 RSpec.describe Script do
@@ -122,6 +159,11 @@ RSpec.describe Script do
       it 'must not contain empty string' do
         subject.variables = ['']
         expect(subject).not_to be_valid
+      end
+
+      it 'can be unset' do
+        subject.variables = nil
+        expect(subject.variables).to eq([])
       end
 
       it 'may contain various other strings' do

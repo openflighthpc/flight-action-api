@@ -88,6 +88,10 @@ class Command < BaseHashieDashModel
     validate :validate_scripts_are_valid
     validate :validate_scripts_are_scripts
 
+    def find_script(rank)
+      scripts[rank] || scripts['default']
+    end
+
     def validate_scripts_are_scripts
       return [] unless scripts.is_a?(Hash)
       scripts.reject { |_, s| s.is_a?(Script) }
@@ -118,7 +122,7 @@ class Script < BaseHashieDashModel
     include Hashie::Extensions::Dash::Coercion
 
     property :body,       required: true, coerce: String
-    property :variables,  required: true,
+    property :variables,  required: true, default: [],
              transform_with: ->(v) { Array.wrap(v).map(&:to_s) }
 
     validate :validate_variables_are_not_empty
