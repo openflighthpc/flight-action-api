@@ -114,21 +114,17 @@ end
 
 class Script < BaseHashieDashModel
   DataHash.class_exec do
-    property :variables,  required: true
-    property :body,       required: true
+    include Hashie::Extensions::Dash::PropertyTranslation
+    include Hashie::Extensions::Dash::Coercion
 
-    validate :validate_variables_are_strings
+    property :body,       required: true, coerce: String
+    property :variables,  required: true,
+             transform_with: ->(v) { Array.wrap(v).map(&:to_s) }
 
-    def validate_variables_are_strings
-      if variables.is_a?(Array)
-        variables.reject { |v| v.is_a?(String) }
-                 .each do |var|
-          errors.add(:variables, "contains the following non string value: #{var}")
-        end
-        errors.add(:variables, "must not contain empty string") if variables.include?('')
-      else
-        errors.add(:variables, 'must be an array of strings')
-      end
+    validate :validate_variables_are_not_empty
+
+    def validate_variables_are_not_empty
+      errors.add(:variables, "must not contain empty string") if variables.include?('')
     end
   end
 end

@@ -113,14 +113,10 @@ RSpec.describe Script do
     end
 
     describe '#variables' do
-      it 'must be an array' do
-        subject.variables = 'string'
-        expect(subject).not_to be_valid
-      end
-
-      it 'must only contain strings' do
-        subject.variables = [nil, 'default']
-        expect(subject).not_to be_valid
+      it 'can wrap bare strings' do
+        str = 'string'
+        subject.variables = str
+        expect(subject.variables).to contain_exactly(str)
       end
 
       it 'must not contain empty string' do
