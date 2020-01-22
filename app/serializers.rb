@@ -42,6 +42,8 @@ end
 class GroupSerializer
   include JSONAPI::Serializer
 
+  has_many :nodes
+
   def id
     object.name
   end

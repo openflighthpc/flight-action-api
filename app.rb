@@ -75,10 +75,6 @@ configure_jsonapi do |c|
 end
 
 helpers do
-  def serialize_model(model, options = {})
-    JSONAPI::Serializer.serialize(model, options)
-  end
-
   # def jwt_token
   #   if match = BEARER_REGEX.match(env['HTTP_AUTHORIZATION'] || '')
   #     match.captures.first
@@ -109,6 +105,10 @@ resource :groups, pkre: /[-(?:%5B)(?:%5D),\w]+/ do
   index { [] }
 
   show
+
+  has_many :nodes do
+    fetch { resource.nodes }
+  end
 end
 
 resource :nodes, pkre: /[-\w]+/ do
