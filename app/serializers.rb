@@ -33,10 +33,18 @@ end
 
 class NodeSerializer
   include JSONAPI::Serializer
+
+  def id
+    object.name
+  end
 end
 
 class GroupSerializer
   include JSONAPI::Serializer
+
+  def id
+    object.name
+  end
 end
 
 class TicketSerializer
