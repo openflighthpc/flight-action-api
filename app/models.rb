@@ -52,9 +52,6 @@ class BaseHashieDashModel
   end
 end
 
-class Command < BaseHashieDashModel
-end
-
 class Node < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
@@ -70,6 +67,21 @@ class Group < BaseHashieDashModel
     property  :name, required: true
     property  :nodes, default: []
   end
+end
+
+class Command < BaseHashieDashModel
+  include Hashie::Extensions::Dash::PropertyTranslation
+
+  property :name,         required: true
+  property :summary,      required: true
+  property :description,  from: :summary
+  property :scripts,      required: true
+end
+
+class Script < BaseHashieDashModel
+  property :command,    required: true
+  property :variables,  required: true
+  property :body,       required: true
 end
 
 class Ticket < BaseHashieDashModel

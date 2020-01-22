@@ -27,9 +27,8 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-
 require 'spec_helper'
 
-RSpec.describe Group do
+RSpec.describe Command do
 end
 
