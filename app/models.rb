@@ -84,24 +84,30 @@ class Command < BaseHashieDashModel
     validates :summary,     presence: true
     validates :description, presence: true
 
-    validate :validate_has_default_script
+    validate :validate_has_a_default_script
     validate :validate_scripts_are_valid
-    validate :validate_scripts_are_scripts
+    validate :validate_scripts_have_matching_ranks
 
     def lookup_script(*ranks)
       scripts[(ranks & scripts.keys).first || 'default']
     end
 
-    def validate_scripts_are_scripts
-      return [] unless scripts.is_a?(Hash)
-      scripts.reject { |_, s| s.is_a?(Script) }
-             .each do |name, _|
-        errors.add(:"#{name}_script", 'is not a Script object')
+    def validate_scripts_have_matching_ranks
+      return unless scripts.is_a?(Hash)
+      scripts.each do |rank, script|
+        if script.is_a?(Script) && script.rank == rank
+          # noop
+        elsif script.is_a?(Script)
+          errors.add(:"#{rank}_script",
+                     "does not match its script's rank: #{script.rank}")
+        else
+          errors.add(:"#{rank}_script", 'is not a Script object')
+        end
       end
     end
 
     def validate_scripts_are_valid
-      return [] unless scripts.is_a?(Hash)
+      return unless scripts.is_a?(Hash)
       scripts.select { |_, s| s.respond_to?(:valid?) }
              .reject { |_, s| s.valid? }
              .each do |name, script|
@@ -109,7 +115,7 @@ class Command < BaseHashieDashModel
       end
     end
 
-    def validate_has_default_script
+    def validate_has_a_default_script
       return if scripts.is_a?(Hash) && scripts['default']
       errors.add(:scripts, 'does not contain the default script')
     end
@@ -121,6 +127,7 @@ class Script < BaseHashieDashModel
     include Hashie::Extensions::Dash::PropertyTranslation
     include Hashie::Extensions::Dash::Coercion
 
+    property :rank,       required: true
     property :body,       required: true, coerce: String
     property :variables,  required: true, default: [],
              transform_with: ->(v) { Array.wrap(v).map(&:to_s) }

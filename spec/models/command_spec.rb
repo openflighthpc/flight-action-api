@@ -31,7 +31,7 @@ require 'spec_helper'
 
 RSpec.shared_context 'basic test command and script' do
   let(:script) do
-    Script.new(body: 'exit 1', variables: [])
+    Script.new(body: 'exit 1', variables: [], rank: 'default')
   end
 
   let(:command) do
@@ -99,14 +99,19 @@ RSpec.describe Command do
         allow(script).to receive(:invalid?).and_return(true)
         expect(subject).not_to be_valid
       end
+
+      it 'must having matching ranks' do
+        subject.scripts.merge!({ 'wrong' => script })
+        expect(subject).not_to be_valid
+      end
     end
   end
 
   context 'with a command with multiple scripts' do
     let(:ranks) { ['first', 'second', 'third'] }
-    let(:default) { Script.new(body: 'echo default') }
+    let(:default) { Script.new(body: 'echo default', rank: 'default') }
     let(:scripts) do
-      ranks.map { |r| [r, Script.new(body: "echo #{r}")] }
+      ranks.map { |r| [r, Script.new(body: "echo #{r}", rank: r)] }
            .to_h
            .tap { |h| h['default'] = default }
     end
