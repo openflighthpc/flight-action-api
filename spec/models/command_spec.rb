@@ -111,6 +111,28 @@ RSpec.describe Script do
     it 'is valid' do
       expect(command).to be_valid
     end
+
+    describe '#variables' do
+      it 'must be an array' do
+        subject.variables = 'string'
+        expect(subject).not_to be_valid
+      end
+
+      it 'must only contain strings' do
+        subject.variables = [nil, 'default']
+        expect(subject).not_to be_valid
+      end
+
+      it 'must not contain empty string' do
+        subject.variables = ['']
+        expect(subject).not_to be_valid
+      end
+
+      it 'may contain various other strings' do
+        subject.variables = ['a', 'A', '1', 'a-b_c']
+        expect(subject).to be_valid
+      end
+    end
   end
 end
 

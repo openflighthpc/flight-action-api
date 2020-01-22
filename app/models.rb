@@ -116,6 +116,20 @@ class Script < BaseHashieDashModel
   DataHash.class_exec do
     property :variables,  required: true
     property :body,       required: true
+
+    validate :validate_variables_are_strings
+
+    def validate_variables_are_strings
+      if variables.is_a?(Array)
+        variables.reject { |v| v.is_a?(String) }
+                 .each do |var|
+          errors.add(:variables, "contains the following non string value: #{var}")
+        end
+        errors.add(:variables, "must not contain empty string") if variables.include?('')
+      else
+        errors.add(:variables, 'must be an array of strings')
+      end
+    end
   end
 end
 
