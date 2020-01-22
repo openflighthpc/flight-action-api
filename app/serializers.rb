@@ -29,6 +29,12 @@
 
 class CommandSerializer
   include JSONAPI::Serializer
+
+  def id
+    object.name
+  end
+
+  attributes :description, :summary
 end
 
 class NodeSerializer

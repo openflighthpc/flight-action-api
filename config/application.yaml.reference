@@ -73,6 +73,14 @@ node_config_path:
 # =============================================================================
 
 # =============================================================================
+# Commands Config Path
+# The commands must be configured via a static YAML config file. The path to
+# the commands config maybe either absolute or relative to the install
+# directory.
+# =============================================================================
+commands_config_path:
+
+# =============================================================================
 # Log Level
 # Specify which level of logging should be used. The supported values are:
 # fatal, error, warn, info, or debug

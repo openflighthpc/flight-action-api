@@ -158,3 +158,56 @@ module NodeFacade
   end
 end
 
+module CommandFacade
+  include HasFacade
+
+  module Base
+    # Query for a Command object by its name alone
+    # @param name [String] the name of the command
+    # @return [Command] the command object
+    # @return [nil] if the command is missing
+    def find_by_name(name)
+      raise NotImplementedError
+    end
+
+    # Query for all the available commands
+    # @return [Array<Node>] the list of commands
+    def index_all
+    end
+  end
+
+  define_facade('Dummy')
+
+  define_facade('Standalone', Hash) do
+    include Hashie::Extensions::MergeInitializer
+    include Hashie::Extensions::IndifferentAccess
+
+    def initialize(*_)
+      super
+      delete('__meta__')
+    end
+
+    def index_all
+      map
+    end
+
+    def find_by_name(name)
+      data = self[name.to_s].to_h
+      scripts = data.reject { |k, _| k == 'help' }
+                    .map do |rank, attr|
+        attr = attr.to_h.symbolize_keys
+        script = Script.new rank: rank, body: attr[:script], variables: attr[:variables]
+        [rank, script]
+      end.to_h
+      help = data['help'].to_h.symbolize_keys
+      Command.new(name: name, scripts: scripts, **help)
+    end
+
+    def each
+      super do |name, _|
+        yield(find_by_name(name)) if block_given?
+      end
+    end
+  end
+end
+

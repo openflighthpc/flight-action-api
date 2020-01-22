@@ -40,3 +40,7 @@ NodeFacade.facade_instance =  if Figaro.env.remote_url
                                 NodeFacade::Standalone.new(YAML.load(yaml_str) || {})
                               end
 
+cmd_yaml = YAML.load(File.read(Figaro.env.commands_config_path!) || {})
+CommandFacade.facade_instance = CommandFacade::Standalone.new(cmd_yaml)
+CommandFacade.index_all # Ensures all the commands can be loaded
+

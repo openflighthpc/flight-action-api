@@ -1,0 +1,34 @@
+__meta__:
+  # This section is ignored by the API
+
+dig:
+  help:
+    summary: 'Run a DNS probe on the hosts'
+  default:
+    variables: [fqdn]
+    script:
+      dig $fqdn
+
+ping:
+  help:
+    summary: 'send ICMP ECHO_REQUEST to network hosts'
+    description: >
+      Check if the host is up by sending it ICMP echo requests. This utility
+      wraps the standard Linux iputils library. See for further details,
+      'man ping'
+  default:
+    variables: [IP]
+    script: ping -c 1 $IP
+  retry:
+    variables: [IP, MAX]
+    script: |-
+      count=0
+      while [ $count -le $MAX ]
+      do
+        ((count++))
+        if ping -c 1 $IP; then
+          exit 0
+        fi
+      done
+      exit $?
+

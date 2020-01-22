@@ -123,5 +123,17 @@ resource :nodes, pkre: /[-\w]+/ do
   show
 end
 
+resource :commands, pkre: /[-\w]+/ do
+  helpers do
+    def find(id)
+      CommandFacade.find_by_name(id)
+    end
+  end
+
+  index { CommandFacade.index_all }
+
+  show
+end
+
 freeze_jsonapi
 
