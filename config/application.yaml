@@ -1,13 +1,17 @@
-# IMPORTANT:
-# This file contains the default configuration values of the server.
-# Modifications to this file should be handled with care. They maybe
-# lost the next time the application is updated and create a security
-# risk by exposing the shared secret.
-
-# RECOMMENDATION:
-# All configuration values/overrides should be done via the environment as
-# opposed to modifying the configs. This particularly applies to the required
-# keys which must be set before the application has started
+# == DO NOT EDIT - MANAGED FILE ===============================================
+# This is an internal managed file and used to set the default configurations.
+# Any changes to this file MIGHT BE LOST the next time the application is
+# updated.
+#
+# Any value in this config may be overridden via the environment. This provides
+# various benefits not limited to:
+# * It prevents data loss when the application is updated, and
+# * It prevents sensitive keys (e.g. the shared secret) from being checked into
+#   the repo by accident
+#
+# Refer to the reference document for full details on the configuration keys:
+# config/application.yaml.reference
+# =============================================================================
 
 # EXAMPLE:
 # To set the shared secret in the environment:
