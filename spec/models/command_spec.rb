@@ -29,71 +29,87 @@
 
 require 'spec_helper'
 
+RSpec.shared_context 'basic test command and script' do
+  let(:script) do
+    Script.new(body: 'exit 1', variables: [])
+  end
+
+  let(:command) do
+    Command.new(
+      name: 'name1-something',
+      summary: 'dummy',
+      scripts: { 'default' => script }
+    )
+  end
+end
+
 RSpec.describe Command do
   context 'with a simple command setup' do
-    let(:script) do
-      Script.new(body: 'exit 1', variables: [])
-    end
-
-    let(:command) do
-      Command.new(
-        name: 'name1-something',
-        summary: 'dummy',
-        scripts: { 'default' => script }
-      )
-    end
+    include_context 'basic test command and script'
+    subject { command }
 
     it 'is valid' do
-      expect(command).to be_valid
+      expect(subject).to be_valid
     end
 
     describe '#name' do
       it 'can not be blank' do
-        command.name = ''
-        expect(command).not_to be_valid
+        subject.name = ''
+        expect(subject).not_to be_valid
       end
 
       it 'can not contain _' do
-        command.name = 'bad_name'
-        expect(command).not_to be_valid
+        subject.name = 'bad_name'
+        expect(subject).not_to be_valid
       end
     end
 
     describe 'summary' do
       it 'can not be blank' do
-        command.summary = ''
-        expect(command).not_to be_valid
+        subject.summary = ''
+        expect(subject).not_to be_valid
       end
     end
 
     describe 'description' do
       it 'can not be blank' do
-        command.description = ''
-        expect(command).not_to be_valid
+        subject.description = ''
+        expect(subject).not_to be_valid
       end
     end
 
     describe 'scripts' do
       it 'must be a hash' do
-        command.scripts = [script]
-        expect(command).not_to be_valid
+        subject.scripts = [script]
+        expect(subject).not_to be_valid
       end
 
       it 'must have the default script' do
-        command.scripts = {}
-        expect(command).not_to be_valid
+        subject.scripts = {}
+        expect(subject).not_to be_valid
       end
 
       it 'must contain Script objects' do
-        command.scripts.merge!({ 'string' => 'string' })
-        expect(command).not_to be_valid
+        subject.scripts.merge!({ 'string' => 'string' })
+        expect(subject).not_to be_valid
       end
 
       it 'must have valid scripts' do
         allow(script).to receive(:valid?).and_return(false)
         allow(script).to receive(:invalid?).and_return(true)
-        expect(command).not_to be_valid
+        expect(subject).not_to be_valid
       end
+    end
+  end
+end
+
+RSpec.describe Script do
+  context 'with a simple command setup' do
+    include_context 'basic test command and script'
+    subject { script }
+
+    it 'is valid' do
+      expect(command).to be_valid
     end
   end
 end

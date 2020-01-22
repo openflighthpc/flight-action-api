@@ -73,6 +73,11 @@ class Command < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
 
+    property :name,         required: true
+    property :summary,      required: true
+    property :description,  from: :summary
+    property :scripts,      required: true
+
     validates :name,        presence: true, format: {
       with: /\A[^_]*\Z/, message: 'must not contain underscores'
     }
@@ -82,11 +87,6 @@ class Command < BaseHashieDashModel
     validate :validate_has_default_script
     validate :validate_scripts_are_valid
     validate :validate_scripts_are_scripts
-
-    property :name,         required: true
-    property :summary,      required: true
-    property :description,  from: :summary
-    property :scripts,      required: true
 
     def validate_scripts_are_scripts
       return [] unless scripts.is_a?(Hash)
