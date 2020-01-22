@@ -99,7 +99,7 @@ helpers do
   # end
 end
 
-resource :groups do
+resource :groups, pkre: /[-(?:%5B)(?:%5D),\w]+/ do
   helpers do
     def find(id)
       GroupFacade.find_by_name(id)
@@ -111,7 +111,7 @@ resource :groups do
   show
 end
 
-resource :nodes do
+resource :nodes, pkre: /[-\w]+/ do
   helpers do
     def find(id)
       NodeFacade.find_by_name(id)
