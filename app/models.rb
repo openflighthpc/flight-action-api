@@ -194,6 +194,9 @@ class Job < BaseHashieDashModel
     property :id, default: ->() { SecureRandom.hex(20) }
     property :node
     property :ticket
+    property :stdout
+    property :stderr
+    property :status
 
     def run!
       cwd = Figaro.env.working_directory_path!
@@ -206,9 +209,9 @@ class Job < BaseHashieDashModel
 
         # Job Definition ===============================================================
         # Ticket: #{ticket.id}
-        # ID: #{id}
-        # Node: #{node.name}
-        # Rank: #{script.rank}
+        # ID:     #{id}
+        # Node:   #{node.name}
+        # Rank:   #{script.rank}
         # Working Directory:
         cd #{cwd}
         # Environment Variables:
@@ -220,6 +223,23 @@ class Job < BaseHashieDashModel
         # NOTE: This definition is not literally executed. See documentation for details
       INFO
       DEFAULT_LOGGER.info "Starting Job: #{self.id}"
+      out, err, code = Open3.capture3(envs, script.body, chdir: cwd)
+      self.stdout = out
+      self.stderr = err
+      self.status = code.to_i
+      DEFAULT_LOGGER.info <<~INFO
+
+        # Job Results ==================================================================
+        # Ticket: #{ticket.id}
+        # ID:     #{id}
+        # Status: #{self.status}
+        # STDOUT:
+        #{self.stdout}
+
+        # STDERR:
+        #{self.stderr}
+        # End Job Results ==============================================================
+      INFO
     ensure
       DEFAULT_LOGGER.info "Finished Job: #{self.id}"
     end
