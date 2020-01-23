@@ -196,6 +196,7 @@ class Job < BaseHashieDashModel
     property :ticket
 
     def run!
+      cwd = Figaro.env.working_directory_path!
       script = ticket.command.lookup_script(*node.ranks)
       envs = script.variables
                    .map { |v| [v, node.params[v]] }
@@ -208,6 +209,8 @@ class Job < BaseHashieDashModel
         # ID: #{id}
         # Node: #{node.name}
         # Rank: #{script.rank}
+        # Working Directory:
+        cd #{cwd}
         # Environment Variables:
         #{envs.map { |k, v| "#{k}=#{v}" }.join("\n")}
 

@@ -42,8 +42,9 @@ remote_cluster: default
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
 # or hard coded to be an absolute path
-node_config_path:     config/nodes.yaml
-commands_config_path: config/commands.yaml
+node_config_path:       config/nodes.yaml
+commands_config_path:   config/commands.yaml
+working_directory_path: libexec
 
 # STATIC DEFAULTS:
 log_level: info

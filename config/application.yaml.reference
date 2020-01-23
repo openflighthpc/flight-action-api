@@ -81,6 +81,14 @@ node_config_path:
 commands_config_path:
 
 # =============================================================================
+# Working Directory Path
+# This gives the directory the commands will be executed within. This can be
+# used to call other scripts within a command. The path maybe either absolute
+# or relative to the install directory.
+# =============================================================================
+working_directory_path:
+
+# =============================================================================
 # Log Level
 # Specify which level of logging should be used. The supported values are:
 # fatal, error, warn, info, or debug
