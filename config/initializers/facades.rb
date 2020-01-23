@@ -42,5 +42,35 @@ NodeFacade.facade_instance =  if Figaro.env.remote_url
 
 cmd_yaml = YAML.load(File.read(Figaro.env.commands_config_path!) || {})
 CommandFacade.facade_instance = CommandFacade::Standalone.new(cmd_yaml)
-CommandFacade.index_all # Ensures all the commands can be loaded
+
+# Ensure all the facades are valid
+CommandFacade.index_all.each do |command|
+  next if command.valid?
+  msg = <<~ERROR
+    An error has occurred whilst loading the commands config:
+    #{Figaro.env.commands_config_path!}
+
+    CAUSE:
+    #{command.errors.full_messages}
+
+    COMMAND DETAILS:
+    name:         #{command.name.to_s}
+    summary:      #{command.summary.to_s}
+    description:  #{command.description.to_s}
+  ERROR
+
+  if command.scripts.is_a?(Hash)
+    command.scripts.values.select { |s| s.is_a?(Script) }.each do |script|
+      msg += <<~SCRIPT
+
+        # SCRIPT: #{script.rank.to_s}
+        rank:       #{script.rank.to_s}
+        variables:  #{script.variables.to_s}
+        body:       #{script.body.to_s}
+      SCRIPT
+    end
+  end
+
+  raise msg
+end
 

@@ -73,10 +73,10 @@ class Command < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
 
-    property :name,         required: true
-    property :summary,      required: true
+    property :name
+    property :summary
     property :description,  from: :summary
-    property :scripts,      required: true
+    property :scripts,      default: {}
 
     validates :name,        presence: true, format: {
       with: /\A[^_]*\Z/,    message: 'must not contain underscores'
@@ -129,10 +129,12 @@ class Script < BaseHashieDashModel
     include Hashie::Extensions::Dash::PropertyTranslation
     include Hashie::Extensions::Dash::Coercion
 
-    property :rank,       required: true
-    property :body,       required: true, coerce: String
-    property :variables,  required: true, default: [],
-             transform_with: ->(v) { Array.wrap(v).map(&:to_s) }
+    property :rank
+    property :body,       coerce: String
+    property :variables,  default: [], transform_with: ->(v) { Array.wrap(v).map(&:to_s) }
+
+    validates :rank,  presence: true
+    validates :body,  presence: true
 
     validate :validate_variables_are_not_empty
 
