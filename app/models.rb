@@ -28,6 +28,7 @@
 #===============================================================================
 
 require 'securerandom'
+require 'open3'
 
 # Sinja has a weird "feature" (bug?) where it can not serialize Hash objects
 # tl;dr Sinja thinks the Hash is the options to the serializer NOT the model
@@ -195,6 +196,26 @@ class Job < BaseHashieDashModel
     property :ticket
 
     def run!
+      script = ticket.command.lookup_script(*node.ranks)
+      envs = script.variables
+                   .map { |v| [v, node.params[v]] }
+                   .to_h
+                   .tap { |e| e['name'] = node.name }
+      DEFAULT_LOGGER.info <<~INFO
+
+        # Job Definition ===============================================================
+        # Ticket: #{ticket.id}
+        # ID: #{id}
+        # Node: #{node.name}
+        # Rank: #{script.rank}
+        # Environment Variables:
+        #{envs.map { |k, v| "#{k}=#{v}" }.join("\n")}
+
+        # Execute Script:
+        #{script.body}
+        # End Job Definition ===========================================================
+        # NOTE: This definition is not literally executed. See documentation for details
+      INFO
       DEFAULT_LOGGER.info "Starting Job: #{self.id}"
     ensure
       DEFAULT_LOGGER.info "Finished Job: #{self.id}"
