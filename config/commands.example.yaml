@@ -8,6 +8,9 @@ dig:
     variables: [fqdn]
     script:
       dig $fqdn
+  metal:
+    script:
+      dig $name
 
 ping:
   help:
@@ -42,4 +45,14 @@ ping:
         fi
       done
       exit $?
+
+run_script:
+  help:
+    summary: 'Demo action for running scripts from the filesystem'
+  default:
+    script:
+      ./default.sh $name
+  metal:
+    script:
+      ./metal.sh $name
 
