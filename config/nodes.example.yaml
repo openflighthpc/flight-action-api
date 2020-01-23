@@ -12,6 +12,8 @@ cloudflare:
   fqdn: www.cloudflare.com
   IP:   1.1.1.1
 
+dummy: {}
+
 node1:
   ranks: [retry, metal]
   fqdn: node1.example.com

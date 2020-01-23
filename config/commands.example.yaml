@@ -18,12 +18,23 @@ ping:
       'man ping'
   default:
     variables: [IP]
-    script: ping -c 1 $IP
+    script: |-
+      if [[ -z "$IP" ]]; then
+        echo "The IP for node '$name' has not been set!" >&2
+        exit 1
+      fi
+      ping -c 1 $IP
   retry:
     variables: [IP, MAX]
     script: |-
+      if [[ -z "$IP" ]]; then
+        echo "The IP for node '$name' has not been set!" >&2
+        exit 1
+      fi
+      MAX=${MAX:="100"}
+
       count=0
-      while [ $count -le ${MAX:="100"} ]
+      while [ $count -le $MAX ]
       do
         ((count++))
         if ping -c 1 "$IP"; then

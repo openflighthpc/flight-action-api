@@ -226,7 +226,7 @@ class Job < BaseHashieDashModel
       out, err, code = Open3.capture3(envs, script.body, chdir: cwd)
       self.stdout = out
       self.stderr = err
-      self.status = code.to_i
+      self.status = code.exitstatus
       DEFAULT_LOGGER.info <<~INFO
 
         # Job Results ==================================================================
