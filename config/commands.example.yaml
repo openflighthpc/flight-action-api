@@ -23,10 +23,10 @@ ping:
     variables: [IP, MAX]
     script: |-
       count=0
-      while [ $count -le $MAX ]
+      while [ $count -le ${MAX:="100"} ]
       do
         ((count++))
-        if ping -c 1 $IP; then
+        if ping -c 1 "$IP"; then
           exit 0
         fi
       done
