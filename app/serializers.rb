@@ -68,5 +68,7 @@ class JobSerializer
 
   has_one :node
   has_one :ticket
+
+  attributes :stdout, :stderr, :status
 end
 
