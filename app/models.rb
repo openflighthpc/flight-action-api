@@ -202,7 +202,7 @@ class Job < BaseHashieDashModel
       cwd = Figaro.env.working_directory_path!
       script = ticket.command.lookup_script(*node.ranks)
       envs = script.variables
-                   .map { |v| [v, node.params[v]] }
+                   .map { |v| [v, node.params[v.to_sym]] }
                    .to_h
                    .tap { |e| e['name'] = node.name }
       DEFAULT_LOGGER.info <<~INFO
