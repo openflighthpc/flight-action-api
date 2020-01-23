@@ -145,7 +145,7 @@ resource :tickets, pkre: /\w+/ do
     def serialize_model(model, options = {})
       if model.is_a?(Ticket)
         model.generate_and_run! if model.run_when_serialized
-        options[:include] = 'jobs,jobs.node'
+        options[:include] = 'command,context,jobs,jobs.node'
       end
       super
     end

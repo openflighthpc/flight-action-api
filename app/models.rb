@@ -172,6 +172,10 @@ class Ticket < BaseHashieDashModel
       self.jobs = if command
         nodes.map { |n| Job.new(node: n, ticket: self) }
       else
+        DEFAULT_LOGGER.error <<~ERROR.squish
+          Ticket '#{self.id}' does not have a command! This is likely a client error.
+          Continuing without adding any jobs.
+        ERROR
         []
       end
       self.jobs.each do |job|

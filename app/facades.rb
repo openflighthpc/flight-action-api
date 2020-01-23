@@ -192,6 +192,7 @@ module CommandFacade
     end
 
     def find_by_name(name)
+      return unless self.key?(name.to_s)
       data = self[name.to_s].to_h
       scripts = data.reject { |k, _| k == 'help' }
                     .map do |rank, attr|
