@@ -135,5 +135,40 @@ resource :commands, pkre: /[-\w]+/ do
   show
 end
 
+resource :tickets, pkre: /\w+/ do
+  helpers do
+    # Explicitly prevent the Ticket from being loaded
+    def find(_)
+      nil
+    end
+
+    def serialize_model(model, options = {})
+      if model.is_a?(Ticket)
+        model.generate_and_run! if model.run_when_serialized
+        options[:include] = 'jobs,jobs.node'
+      end
+      super
+    end
+  end
+
+  create do |_|
+    ticket = Ticket.new
+    ticket.run_when_serialized = true
+    next [ticket.id, ticket]
+  end
+
+  has_one :command do
+    graft(sideload_on: :create) do |rio|
+      resource.command = CommandFacade.find_by_name(rio[:id])
+    end
+  end
+
+  has_one :context do
+    graft(sideload_on: :create) do |rio|
+      resource.context = NodeFacade.find_by_name(rio[:id])
+    end
+  end
+end
+
 freeze_jsonapi
 

@@ -57,9 +57,16 @@ end
 
 class TicketSerializer
   include JSONAPI::Serializer
+
+  has_one :command
+  has_one :context
+  has_many :jobs
 end
 
 class JobSerializer
   include JSONAPI::Serializer
+
+  has_one :node
+  has_one :ticket
 end
 

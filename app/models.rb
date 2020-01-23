@@ -27,6 +27,8 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
+require 'securerandom'
+
 # Sinja has a weird "feature" (bug?) where it can not serialize Hash objects
 # tl;dr Sinja thinks the Hash is the options to the serializer NOT the model
 # Using a decorator design pattern for the models is a work around
@@ -147,8 +149,52 @@ class Script < BaseHashieDashModel
 end
 
 class Ticket < BaseHashieDashModel
+  DataHash.class_exec do
+    property :id, default: ->() { SecureRandom.hex(20) }
+    property :context
+    property :command
+    property :jobs
+
+    property :run_when_serialized, default: false
+
+    def nodes
+      if context.is_a?(Node)
+        [context]
+      elsif context.is_a?(Group)
+        context.nodes
+      else
+        []
+      end
+    end
+
+    def generate_and_run!
+      DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
+      self.jobs = if command
+        nodes.map { |n| Job.new(node: n, ticket: self) }
+      else
+        []
+      end
+      self.jobs.each do |job|
+        DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
+      end
+      self.jobs.each(&:run!)
+    ensure
+      DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
+    end
+  end
 end
 
 class Job < BaseHashieDashModel
+  DataHash.class_exec do
+    property :id, default: ->() { SecureRandom.hex(20) }
+    property :node
+    property :ticket
+
+    def run!
+      DEFAULT_LOGGER.info "Starting Job: #{self.id}"
+    ensure
+      DEFAULT_LOGGER.info "Finished Job: #{self.id}"
+    end
+  end
 end
 
