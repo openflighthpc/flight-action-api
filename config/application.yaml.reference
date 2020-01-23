@@ -49,10 +49,10 @@ remote_jwt:
 # It is automatically selected when the 'remote_url' has not been set.
 #
 # This will cause the server to load the node data from a static YAML config.
-# The 'node_config_path' MUST specify either the absolute path to the config,
+# The 'nodes_config_path' MUST specify either the absolute path to the config,
 # or the relative path from the installed directory.
 # =============================================================================
-node_config_path:
+nodes_config_path:
 
 # =============================================================================
 # Exploding Group Mode - DEFAULT

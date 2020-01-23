@@ -42,7 +42,7 @@ remote_cluster: default
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
 # or hard coded to be an absolute path
-node_config_path:       config/nodes.yaml
+nodes_config_path:      config/nodes.yaml
 commands_config_path:   config/commands.yaml
 working_directory_path: libexec
 
@@ -50,12 +50,13 @@ working_directory_path: libexec
 log_level: info
 
 development:
-  node_config_path:     config/nodes.example.yaml
-  commands_config_path: config/commands.example.yaml
+  nodes_config_path:      config/nodes.example.yaml
+  commands_config_path:   config/commands.example.yaml
   working_directory_path: libexec-dev
-  log_level:  debug
+  log_level:              debug
 
 test:
-  node_config_path: config/empty.yaml
-  log_level: error
+  nodes_config_path:    config/empty.yaml
+  commands_config_path: config/empty.yaml
+  log_level:            error
 

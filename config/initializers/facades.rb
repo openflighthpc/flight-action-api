@@ -36,12 +36,12 @@ GroupFacade.facade_instance = if Figaro.env.full_upstream
 NodeFacade.facade_instance =  if Figaro.env.remote_url
                                 raise 'Partial Upstream Mode is not currently supported'
                               else
-                                yaml_str = File.read Figaro.env.node_config_path!
+                                yaml_str = File.read Figaro.env.nodes_config_path!
                                 NodeFacade::Standalone.new(YAML.load(yaml_str) || {})
                               end
 
-cmd_yaml = YAML.load(File.read(Figaro.env.commands_config_path!) || {})
-               .map { |k, v| [k == '__meta__' ? k : k.gsub('_', '-'), v] }
+cmd_yaml = YAML.load(File.read(Figaro.env.commands_config_path!)) || {}
+cmd_yaml = cmd_yaml.map { |k, v| [k == '__meta__' ? k : k.gsub('_', '-'), v] }.to_h
 CommandFacade.facade_instance = CommandFacade::Standalone.new(cmd_yaml)
 
 # Ensure all the facades are valid
