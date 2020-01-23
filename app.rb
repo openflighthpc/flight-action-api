@@ -165,7 +165,12 @@ resource :tickets, pkre: /\w+/ do
 
   has_one :context do
     graft(sideload_on: :create) do |rio|
-      resource.context = NodeFacade.find_by_name(rio[:id])
+      resource.context = case rio[:type]
+      when 'nodes'
+        NodeFacade.find_by_name(rio[:id])
+      when 'groups'
+        GroupFacade.find_by_name(rio[:id])
+      end
     end
   end
 end
