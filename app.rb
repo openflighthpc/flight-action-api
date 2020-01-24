@@ -31,6 +31,10 @@ require 'sinja'
 require 'sinja/method_override'
 require 'hashie'
 
+before do
+  env['HTTP_ACCEPT'] = 'application/vnd.api+json'
+end
+
 use Sinja::MethodOverride
 register Sinja
 
