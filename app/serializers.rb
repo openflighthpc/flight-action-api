@@ -34,7 +34,7 @@ class CommandSerializer
     object.name
   end
 
-  attributes :description, :summary
+  attributes :name, :description, :summary
 end
 
 class NodeSerializer
@@ -43,6 +43,8 @@ class NodeSerializer
   def id
     object.name
   end
+
+  attributes :name
 end
 
 class GroupSerializer
@@ -53,10 +55,17 @@ class GroupSerializer
   def id
     object.name
   end
+
+  attributes :name
 end
 
 class TicketSerializer
   include JSONAPI::Serializer
+
+  # Dummy attribute so the 'attributes' key is always set
+  # Some clients (incorrectly) assume the 'attributes' key will always be set
+  # https://github.com/qvantel/jsonapi-client/issues/25
+  attribute(:true) { true }
 
   has_one :command
   has_one :context
