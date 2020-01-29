@@ -127,7 +127,7 @@ resource :nodes, pkre: /[-\w]+/ do
   show
 end
 
-resource :commands, pkre: /[-\w]+/ do
+resource :commands, pkre: /[-[[:alnum:]]]+/ do
   helpers do
     def find(id)
       CommandFacade.find_by_name(id)
