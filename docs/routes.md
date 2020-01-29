@@ -253,6 +253,7 @@ The life cycle of a request SHOULD complete the following stages:
 * Build the `jobs` resource from the `nodes` list and `command`,
 * Run each `job`, and
 * Issues a synchronous response to the client.
+[Refer here for further details](ticket-lifecycle.md)
 
 ```
 POST /tickets
