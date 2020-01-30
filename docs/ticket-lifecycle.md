@@ -38,7 +38,7 @@ The `jobs` set SHALL be compiled according to the following protocol:
 2. Else If the context is a `group`, then a `job` is generated for each `node` within the `group`,
 3. Else a single element `jobs` set is generated for the `node` given by the `context`.
 
-## Assigning a Script to a Job
+## Using Ranks to Assign a Script to a Job
 
 There are two options on how to proceed here
 
