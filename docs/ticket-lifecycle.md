@@ -6,66 +6,89 @@ This document primary purposes is to describe the creation cycle of `tickets`/`j
 * `commands`
 * `scripts`/`pool`
 * `ranks`
-* `variables`/`variable dictionary`
+* `variables`
 
 These concepts are independent but otherwise related to the resources of the same names. Not all of these concepts have corresponding resources.
 
-This document is intended for system administrators and integrators. API consumers should look through the [routes documentation](routes.md) instead. The following describes in detail what happens when a "ticket resource" is created.
+The order of the following sections form the logical sequence of events, but additional batching and job scheduling may occur.
 
-*NOTE*: The goal is to provide documentation on how `tickets`/`jobs` are processed, however the run order of individual events has not been preserved. In practice, once a list of `jobs` has been generated, each `job` is processed sequentially.
+This document is intended for system administrators and integrators. API consumers should look through the [routes documentation](routes.md) instead. The following describes in detail what happens when a "ticket resource" is created.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
-## Step 1: Process the request inputs and build the ticket model
+## Resolving the Context and Command
 
-The first step stage is processing the request for the related `context` and `command`. The `command` is looked up via the `CommandFacade` ([refer to README for details](../README.md)] by its `id` which also doubles as its `name`. This SHOULD assign the `command` to the `ticket` or SHALL be a missing association.
+### tl;dr 
 
-The `context` SHOULD be either a `group` or `node` resource identifier object and will be looked up by ID via the `GroupFacade` or `NodeFacade` respectively. The relationship SHALL be a missing association if the lookup fails to find a `context` or if a different api type was provided.
+Make sure each request is assigned to a `command` and either a `group` or `node`.
+Everything should work as expected ...
 
-If either the `context` or `command` is missing, then a empty `jobs` set SHALL be assigned to the `ticket`. 
-This makes the following operation fairly trivial and will not be discussed in detail.
+### Detailed
+
+All requests SHOULD have a related `context` and `command` resources identifiers. These identifiers are looked up against the applications "data backend" (mode specific) and MAY resolve to models. The `context` resource identifier SHOULD be of types `nodes` or `groups`. The `command` MUST be of type `commands`.
+
+If the `context` is not of types `nodes` or `groups` it SHALL be considered missing. The following conditions apply to both the `context` and `command` equally. The resource SHALL be considered missing if the identifier is:
+* omitted from the request, or
+* could not be resolved into a model from it's `type`
+
+The `ticket` SHALL be assigned an empty set of jobs if either the `context` or `command` is missing. This is a fairly trivial request which will bypass most of the following stages.
 
 The `jobs` set SHALL be compiled according to the following protocol:
 1. If the `command` or `context` is missing, then `jobs` forms an empty set,
 2. Else If the context is a `group`, then a `job` is generated for each `node` within the `group`,
 3. Else a single element `jobs` set is generated for the `node` given by the `context`.
 
-Each `job` relates directly to the `ticket` and there transiently related to its `command`.
+## Assigning a Script to a Job
 
-## Step 2: Select the scripts for each node by rank
+There are two options on how to proceed here
 
-Next a `script` must be selected for the `job`. This is done by comparing the `job`'s `node` against its `command`.
-*NOTE*: `jobs` are transiently related to a `command` via it's `ticket`.
+### tl;dr
 
-By design a `command` can have multiple `scripts` classified by `rank`. This is so a different `script` can be ran on a per node basis for the same `command`.
+Each `command` MUST have a `default script` which will be ran unless otherwise configured.
+Feel free to move on ...
 
-All `commands` MUST have a default ranked script (`default script`) but MAY have many other ranks of scripts. The set of available ranked scripts for a particular `command` is known as a `pool`. Each `node` MAY have a list of `ranks`. The `pool` is compared against the `node`'s `ranks` to select the `script` for the `job`.
+### Detailed
+
+Sometimes it is useful to have multiple `scripts` for the same `command`. This allows each `node` to run a slightly different version of the `command`. The ranking mechanism is responsible for matching a `script` to a `node`. Broadly the `command` has many `scripts` catagorised by `rank` and the `node` defines the priority order for those `ranks`.
+
+All `commands` MUST have a default ranked script (`default script`) but MAY have many other ranks of scripts. The set of available ranked scripts for a particular `command` is known as a `pool`. Each `node` MAY have a list of `ranks`. The `pool` is compared against the `ranks` to select the `script`.
 
 * If the `node` has (remaining) `ranks`:
-    1. The first(/next) `rank` from `ranks` is compared against the `pool` for the `command`
-    2. Repeat from the beginning with the next `rank` if no `script` is found
-    3. Selects the `script` from the `pool` with matching `rank`
+  1. The first(/next) `rank` from `ranks` is compared against the `pool`
+  2. Repeat from the beginning with the next `rank` if no `script` is found
+  3. Selects the `script` from the `pool` with the matching `rank`
 * Otherwise:
   * Select the `default script`
 
-This process of matching a `node` against a `command` is guaranteed to find a `script` even if it's the `default script`. The `default script` can be either used as a fallback or to disable a `command` on a per `node` basis.
+This process of matching a `node` against a `command` is guaranteed to find a `script` as it can use the `default script` as a fallback. This allows `default script` to either define a generic version or "disable" it with an error on a per `node` basis.
 
-## Step 3: Generate the variable dictionary for the job
+## Setting Shell Variables and Executing the Job
 
-Before a `job` can be ran, it needs to be given access to its "variables". Each `script` MAY have an associated list of `variables` which form the "keys" to the `job`'s `variable dictionary`. The `variable dictionary` SHALL be empty for a `scipt` without `variables`.
+### tl;dr
 
-The "values" to the `variable dictionary` are generated from the `node` "parameters". These "parameters" form the full set of possible "variables". The values of the `variables` in the `variable dictionary` SHALL be either the values contained within the parameters or empty string.
+You should probably read this ...
 
-## Step 4: Setup and run the jobs
+### Detailed
 *README: Injection Attack Risk!*
 
-Each `job` is ran in a dedicated `bash` shell which then executes the `script` body. The `variable dictionary` is directly set into the shell's environment and thus is available to the `script` using regular bash variables. The working directory of the bash shell is set in the main [application config](../config/application.yaml).
+As an alternative to using `ranks` to customising the `script`, shell variables MAY be set into the environment. All the jobs SHALL be spawned using `/bin/sh` which MAY be symlinked to `/bin/bash` depending on distribution.
 
-These "variables are the raw parameters returned from the `NodeFacade`; no form of output sanitization has been performed. It is the responsibility of the system administrator/ integrator to ensure the `NodeFacade` is configured with a trusted source.
+The term `variables` refer to following two related concepts:
+* an array of "keys" which are stored against the `script`, and
+* they "key-value" pairs that form shell variables.
 
-There is no mechanism to feed inputs from the API consumer into the script execution and therefore mitigates the threat of an injection attack from this source.
+Each `node` has a `parameters` dictionary which is used to convert the `variables` from an array to "key-value" pairs. The value SHALL come from `parameters` when the key exists in the dictionary. The value SHALL be empty string when the key does not exist in `parameters`.
 
-## Step 5: "Log", Serialize and issue the response
+The working directory of the process is also set as per the [application configuration](../config/application.yaml.reference).
+
+Care MUST be taken when working with `variables` as they form an injection attack vector. It is the joint responsibility of the developers, system administrators, and integrators to mitigate this risk. The following design considerations have been made:
+* It is not possible pass client inputs as `variable`, and
+* The `variables` are directly set into the environment and thus bypass string interpolation.
+
+*NOTE FOR SYSTEM ADMINISTRATORS AND INTEGRATORS*
+It is your responsibility to ensure the `variables` come from a trusted source. No form of input sanitization has been preformed.
+
+## Final Notes
 
 Through out `ticket` creation life cycle, the results of the above steps would have been logged. Refer to [application config](../config/application.yaml]) for the log location.
 
