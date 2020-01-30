@@ -102,9 +102,9 @@ The `pumactl` command can be used to preform various start/stop/restart actions 
 bin/pumactl stop
 ```
 
-## WIP - Authentication
+## Authentication
 
-The API requires all requests to carry with a [jwt](https://jwt.io). Admin tokens must set the `admin` flag to `true` within their body. All other valid tokens are assumed to have `user` level privileges. Admins have full `read`/`write` access, where a `user` only has `read` access.
+The API requires all requests to carry with a [jwt](https://jwt.io). All tokens have permission to view and execute the `commands`.
 
 The following `rake` tasks are used to generate tokens with 30 days expiry. Tokens from other sources will be accepted as long as they:
 1. Where signed with the same shared secret,
@@ -115,10 +115,6 @@ As the shared secret is environment dependant, the `RACK_ENV` must be set within
 ```
 # Set the rack environment
 export RACK_ENV=production
-
-# Generate a user token
-rake token:admin    # Valid for 30 days [Default]
-rake token:admin[1] # Valid for 1 day   [Smallest]
 
 # Generate a user token
 rake token:user       # Valid for 30 days [Default]
