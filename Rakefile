@@ -52,7 +52,7 @@ task require: :require_bundler do
   require 'app/models'
   require 'app/facades'
   require 'config/initializers/facades'
-  # require 'app/token'
+  require 'app/token'
   require 'app/serializers'
   require 'app'
 end
@@ -62,14 +62,16 @@ task console: :require do
   binding.pry
 end
 
-# task 'token:admin', [:days] => :require do |task, args|
-#   token = Token.new(admin: true)
-#                .tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-#   puts token.generate_jwt
-# end
+# Intentionally disabled
+task 'token:admin', [:days] => :require do |task, args|
+  raise NotImplementedError
+  token = Token.new(admin: true)
+               .tap { |t| t.exp_days = args[:days].to_i if args[:days] }
+  puts token.generate_jwt
+end
 
-# task 'token:user', [:days] => :require do |task, args|
-#   token = Token.new.tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-#   puts token.generate_jwt
-# end
+task 'token:user', [:days] => :require do |task, args|
+  token = Token.new.tap { |t| t.exp_days = args[:days].to_i if args[:days] }
+  puts token.generate_jwt
+end
 

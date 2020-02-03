@@ -33,42 +33,77 @@ bin/bundle install --without development test --path vendor
 
 ### Configuration
 
-The main configuration value required by the server directly is the `jwt_shared_secret`. This must be exported into the environment.
+This application can be configured by setting the configuration values into the environment. Refer to the configuration [reference](config/application.yaml.reference) and [defaults](config/application.yaml) for an exhaustive list.
+
+Regardless of the following mode selection, the `jwt_shared_secret` must be exported into the environment. This will be used to generate and validate the authorization tokens and must be kept private.
 
 ```
 export jwt_shared_secret=<keep-this-secret-safe>
 ```
-#### WIP Remove References to `upstream` and `standalone` - Standalone Mode
-#### WIP - Document update config syntax
 
-Standalone mode is activated by default as `remote_url` has not been set. The `cluster` and `groups` functionality is disabled when in standalone mode. Any requests for clusters/groups will result in a `Not Found` error, or will be ignored (see [api specification](docs/routes.md) for further details).
+The default modes the application ships with is `standalone` nodes and `exploding` groups. They are responsible for the following:
+* `standalone`: read the available `nodes` from the node config,
+* `exploding`: expand group names into a list of nodes
 
-Instead the `nodes` list will be loaded from the "topology". The path to the `topology_config` is configurable as either an absolute or relative path to the install directory ([see for further details](config/application.yaml.reference)). By default it will be loaded from: `config/topology.yaml`.
+There also needs to be a predefined set of `commands` available to be ran.
 
-The following will explicitly set the server into `standalone` mode.
-NOTE: It will implicitly use these settings when `remote_url` is not set
+*NOTE*: For System Administrators and Integrators
+Please refer to the [additional documentation](docs/ticket-lifecycle.md) on how the application processes tickets. This covers the advanced functioning of the application and security implications. It also gives context to the various configuration options.
+
+#### Commands Config
+
+The `commands` must be configured with a static YAML file with the following structure. Refer to the [example commands config](config/commands.example.yaml) for the config used in the `development` environment.
+
+The `help` section is required as it is used by client-side to generate help pages. The required `summary` should be a single line summary of the command, where the optional description maybe longer.
+
+In additional to `help` text, multiple `ranks` of `scripts` maybe defined. The `default` rank is required but all other `ranks` are optional. The `ranks` are  use to select which `script` to execute on a per `node` basis.
+
+The `variables` can optional be used to configure the environment the `script` is ran in. They should be an array of keys to the `node` parameters below. This way each `script` can select which `node` parameters should be exposed to the script.
 
 ```
-unset remote_url
-export topology_config=config/topology.yaml
-
-cat <<'EOF' >config/topology.yaml
-... Topology Config Content ...
-EOF
-```
-
-An example topology config could look like:
-
-```
-nodes:
-  node01:
-    role: compute
-    ip:   10.101.0.1
-  <node-id>:
-    <param-key>: <value>
+<command-name>:
+  help:
+    summary: <command-summary>
+    description: <command-description>
+  default:
+    variables: <variables-to-associated-script>
+    script: <body-script-to-be-executed>
+  <rank>:
+    variables:
+    script:
+  <other-rank>
     ...
   ...
 ```
+
+#### Standalone Nodes
+
+When the `nodes` are in `standalone` mode, they are read from a static YAML file with the following structure. See the [example nodes config](config/nodes.example.yaml) for the version which is used when running in the `development` environment.
+
+```
+<node-name>:
+  ranks: [rank1, rank2, ...]
+  key1: value1
+  key2: value2
+  ....
+...
+```
+
+The `ranks` key is optional and maybe either a single string or an array of them. This alters the `script` lookup order against the `command` according to the `ranks` mechanism.
+
+All other keys are considered `parameters` to the `node` and are available to the `variables` mechanism.
+
+#### Exploding Nodes
+
+This mode enables `group` support by performing name expansion on the name. No specific configuration is required for this `mode`. Refer to the [routes documentation](docs/routes.md) for further details.
+
+#### Partial Upstream Mode
+
+Not Supported
+
+#### Full Upstream Mode
+
+Not Supported
 
 ### WIP - Integrating with systemd and OpenFlightHPC/FlightRunway
 
@@ -102,9 +137,9 @@ The `pumactl` command can be used to preform various start/stop/restart actions 
 bin/pumactl stop
 ```
 
-## WIP - Authentication
+## Authentication
 
-The API requires all requests to carry with a [jwt](https://jwt.io). Admin tokens must set the `admin` flag to `true` within their body. All other valid tokens are assumed to have `user` level privileges. Admins have full `read`/`write` access, where a `user` only has `read` access.
+The API requires all requests to carry with a [jwt](https://jwt.io). All tokens have permission to view and execute the `commands`.
 
 The following `rake` tasks are used to generate tokens with 30 days expiry. Tokens from other sources will be accepted as long as they:
 1. Where signed with the same shared secret,
@@ -115,10 +150,6 @@ As the shared secret is environment dependant, the `RACK_ENV` must be set within
 ```
 # Set the rack environment
 export RACK_ENV=production
-
-# Generate a user token
-rake token:admin    # Valid for 30 days [Default]
-rake token:admin[1] # Valid for 1 day   [Smallest]
 
 # Generate a user token
 rake token:user       # Valid for 30 days [Default]

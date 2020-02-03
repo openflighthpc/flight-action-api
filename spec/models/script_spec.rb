@@ -27,57 +27,51 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-class CommandSerializer
-  include JSONAPI::Serializer
+require 'spec_helper'
 
-  def id
-    object.name
+RSpec.describe Script do
+  context 'with a simple command setup' do
+    let(:script) do
+      Script.new(body: 'exit 1', variables: [], rank: 'default')
+    end
+
+    let(:command) do
+      Command.new(
+        name: 'name1-something',
+        summary: 'dummy',
+        scripts: { 'default' => script }
+      )
+    end
+
+    subject { script }
+
+    it 'is valid' do
+      expect(command).to be_valid
+    end
+
+    describe '#variables' do
+      it 'can wrap bare strings' do
+        str = 'string'
+        subject.variables = str
+        expect(subject.variables).to contain_exactly(str)
+      end
+
+      it 'must not contain empty string' do
+        subject.variables = ['']
+        expect(subject).not_to be_valid
+      end
+
+      it 'can be unset' do
+        subject.variables = nil
+        expect(subject.variables).to eq([])
+      end
+
+      it 'may contain various other strings' do
+        subject.variables = ['a', 'A', '1', 'a-b_c']
+        expect(subject).to be_valid
+      end
+    end
   end
-
-  attributes :name, :description, :summary
 end
 
-class NodeSerializer
-  include JSONAPI::Serializer
-
-  def id
-    object.name
-  end
-
-  attributes :name
-end
-
-class GroupSerializer
-  include JSONAPI::Serializer
-
-  has_many :nodes
-
-  def id
-    object.name
-  end
-
-  attributes :name
-end
-
-class TicketSerializer
-  include JSONAPI::Serializer
-
-  # Dummy attribute so the 'attributes' key is always set
-  # Some clients (incorrectly) assume the 'attributes' key will always be set
-  # https://github.com/qvantel/jsonapi-client/issues/25
-  attribute(:true) { true }
-
-  has_one :command
-  has_one :context
-  has_many :jobs
-end
-
-class JobSerializer
-  include JSONAPI::Serializer
-
-  has_one :node
-  has_one :ticket
-
-  attributes :stdout, :stderr, :status
-end
 

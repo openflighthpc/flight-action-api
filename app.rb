@@ -31,6 +31,10 @@ require 'sinja'
 require 'sinja/method_override'
 require 'hashie'
 
+before do
+  env['HTTP_ACCEPT'] = 'application/vnd.api+json'
+end
+
 use Sinja::MethodOverride
 register Sinja
 
@@ -49,50 +53,52 @@ configure_jsonapi do |c|
   # end
 
   # Resource roles
-  # c.default_roles = {
-  #   index: [:user, :admin],
-  #   show: [:user, :admin],
-  #   create: :admin,
-  #   update: :admin,
-  #   destroy: :admin
-  # }
+  c.default_roles = {
+    index: :user,
+    show: :user,
+    create: :user,
+    update: :user,
+    destroy: :user
+  }
 
-  # # To-one relationship roles
-  # c.default_has_one_roles = {
-  #   pluck: [:user, :admin],
-  #   prune: :admin,
-  #   graft: :admin
-  # }
+  # To-one relationship roles
+  c.default_has_one_roles = {
+    pluck: :user,
+    prune: :user,
+    graft: :user
+  }
 
-  # # To-many relationship roles
-  # c.default_has_many_roles = {
-  #   fetch: [:user, :admin],
-  #   clear: :admin,
-  #   replace: :admin,
-  #   merge: :admin,
-  #   subtract: :admin
-  # }
+  # To-many relationship roles
+  c.default_has_many_roles = {
+    fetch: :user,
+    clear: :user,
+    replace: :user,
+    merge: :user,
+    subtract: :user
+  }
 end
 
 helpers do
-  # def jwt_token
-  #   if match = BEARER_REGEX.match(env['HTTP_AUTHORIZATION'] || '')
-  #     match.captures.first
-  #   else
-  #     ''
-  #   end
-  # end
+  def jwt_token
+    if match = BEARER_REGEX.match(env['HTTP_AUTHORIZATION'] || '')
+      match.captures.first
+    else
+      ''
+    end
+  end
 
-  # def role
-  #   token = Token.from_jwt(jwt_token)
-  #   if token.admin && token.valid
-  #     :admin
-  #   elsif token.valid
-  #     :user
-  #   else
-  #     :unknown
-  #   end
-  # end
+  def role
+    token = Token.from_jwt(jwt_token)
+    if token.admin && token.valid
+      # NOTE: Compatibility HACK with foreign admin tokens
+      # TODO: Remove once the authorization strategy has been reviewed
+      :user
+    elsif token.valid
+      :user
+    else
+      :unknown
+    end
+  end
 end
 
 resource :groups, pkre: /[-(?:%5B)(?:%5D),\w]+/ do
@@ -123,7 +129,7 @@ resource :nodes, pkre: /[-\w]+/ do
   show
 end
 
-resource :commands, pkre: /[-\w]+/ do
+resource :commands, pkre: /[-[[:alnum:]]]+/ do
   helpers do
     def find(id)
       CommandFacade.find_by_name(id)

@@ -27,25 +27,20 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-require 'spec_helper'
-
-RSpec.shared_context 'basic test command and script' do
-  let(:script) do
-    Script.new(body: 'exit 1', variables: [], rank: 'default')
-  end
-
-  let(:command) do
-    Command.new(
-      name: 'name1-something',
-      summary: 'dummy',
-      scripts: { 'default' => script }
-    )
-  end
-end
-
 RSpec.describe Command do
   context 'with a simple command setup' do
-    include_context 'basic test command and script'
+    let(:script) do
+      Script.new(body: 'exit 1', variables: [], rank: 'default')
+    end
+
+    let(:command) do
+      Command.new(
+        name: 'name1-something',
+        summary: 'dummy',
+        scripts: { 'default' => script }
+      )
+    end
+
     subject { command }
 
     it 'is valid' do
@@ -150,38 +145,3 @@ RSpec.describe Command do
     end
   end
 end
-
-RSpec.describe Script do
-  context 'with a simple command setup' do
-    include_context 'basic test command and script'
-    subject { script }
-
-    it 'is valid' do
-      expect(command).to be_valid
-    end
-
-    describe '#variables' do
-      it 'can wrap bare strings' do
-        str = 'string'
-        subject.variables = str
-        expect(subject.variables).to contain_exactly(str)
-      end
-
-      it 'must not contain empty string' do
-        subject.variables = ['']
-        expect(subject).not_to be_valid
-      end
-
-      it 'can be unset' do
-        subject.variables = nil
-        expect(subject.variables).to eq([])
-      end
-
-      it 'may contain various other strings' do
-        subject.variables = ['a', 'A', '1', 'a-b_c']
-        expect(subject).to be_valid
-      end
-    end
-  end
-end
-
