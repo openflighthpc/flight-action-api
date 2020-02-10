@@ -1,0 +1,21 @@
+[Unit]
+Description=Flight Action Server
+Requires=network.target
+
+[Service]
+Type=forking
+User=root
+PIDFile=/opt/flight/opt/action-server/var/puma.pid
+EnvironmentFile=/opt/flight/etc/action-server.conf
+WorkingDirectory=/opt/flight/opt/action-server
+ExecStart=/bin/sh -c ' \
+  PATH=$PATH:/opt/flight/bin bin/puma -d -e production \
+    --redirect-append \
+    --redirect-stdout /opt/flight/var/log/action-server.log \
+    --redirect-stderr /opt/flight/var/log/action-server.log \
+'
+ExecStop=/opt/flight/opt/action-server/bin/pumactl stop
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
