@@ -12,7 +12,7 @@ The following are required to run this application:
 
 * OS:           Centos7
 * Ruby:         2.5+
-* Yum Packages: gcc
+* Yum Packages: gcc, make
 
 ### Manual installation
 
@@ -28,7 +28,7 @@ bundle install --without development test --path vendor
 
 # The following command can be ran without modifying the PATH variable by
 # prefixing `bin/` to the commands
-bin/bundle install --without development test --path vendor
+bin/bundle install --without development test pry --path vendor
 ```
 
 ### Configuration
