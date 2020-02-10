@@ -12,7 +12,7 @@ The following are required to run this application:
 
 * OS:           Centos7
 * Ruby:         2.5+
-* Yum Packages: gcc
+* Yum Packages: gcc, make
 
 ### Manual installation
 
