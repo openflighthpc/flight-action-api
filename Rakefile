@@ -27,6 +27,8 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
+TOP_LEVEL_OBJECT = self
+
 task :require_bundler do
   $: << __dir__
   $: << File.join(__dir__, 'lib')
@@ -49,6 +51,7 @@ task require: :require_bundler do
   require 'sinatra'
   require 'config/initializers/figaro'
   require 'config/initializers/logger'
+  TOP_LEVEL_OBJECT.send(:include, FlightFacade)
   require 'app/models'
   require 'app/facades'
   require 'config/initializers/facades'

@@ -27,6 +27,8 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
+require 'spec_helper'
+
 RSpec.describe Command do
   context 'with a simple command setup' do
     let(:script) do

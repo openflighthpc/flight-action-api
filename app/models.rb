@@ -30,48 +30,6 @@
 require 'securerandom'
 require 'open3'
 
-# Sinja has a weird "feature" (bug?) where it can not serialize Hash objects
-# tl;dr Sinja thinks the Hash is the options to the serializer NOT the model
-# Using a decorator design pattern for the models is a work around
-class BaseHashieDashModel
-  def self.inherited(klass)
-    data_class = Class.new(Hashie::Dash) do
-      include Hashie::Extensions::IgnoreUndeclared
-      include ActiveModel::Validations
-
-      def self.method_added(m)
-        parent.delegate(m, to: :data)
-      end
-    end
-
-    klass.const_set('DataHash', data_class)
-    klass.delegate(*(ActiveModel::Validations.instance_methods - Object.methods), to: :data)
-  end
-
-  attr_reader :data
-
-  def initialize(*a)
-    @data = self.class::DataHash.new(*a)
-  end
-end
-
-class Node < BaseHashieDashModel
-  DataHash.class_exec do
-    include Hashie::Extensions::Dash::PropertyTranslation
-
-    property :name,   required: true
-    property :params, required: true
-    property :ranks,  default: [], transform_with: ->(v) { (v.dup << 'default').uniq }
-  end
-end
-
-class Group < BaseHashieDashModel
-  DataHash.class_exec do
-    property  :name,  required: true
-    property  :nodes, default: []
-  end
-end
-
 class Command < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
