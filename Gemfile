@@ -34,7 +34,7 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 gem 'activemodel', require: 'active_model'
 gem 'activesupport', require: 'active_support/core_ext'
 gem 'figaro'
-gem 'flight_facade', '>= 0.1.3', require: 'flight_facade/included'
+gem 'flight_facade', '>= 0.1.5', require: 'flight_facade/included'
 gem 'hashie'
 # gem 'json_api_client'
 gem 'jwt'
