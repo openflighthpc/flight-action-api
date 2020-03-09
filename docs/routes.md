@@ -177,7 +177,7 @@ Content-Type: application/vnd.api+json
 
 ### Show
 
-Return a single `command` by its ID. The `name`, `summary`, and `description` attributes can be used to generate command line help text.
+Return a single `command` by its ID. The `name`, `summary`, and `description` attributes can be used to generate command line help text. The `aliases` are an array of alternative names that SHOULD be interpreted as the same command. The `aliases` MUST NOT be used as a substitute `id`. It is the responsibility of the client to map the `aliases` to the appropriate `id`.
 
 ```
 GET /commands/:id
@@ -194,7 +194,8 @@ Content-Type: application/vnd.api+json
     "attributes": {
       "name": "<name>",
       "summary": "<summary>",
-      "description": "<description">
+      "description": "<description">,
+      "aliases": ["<alias-name>", ...]
     },
     "links": ... see JSON:API spec ...
   }, ... see JSON:API spec ...
