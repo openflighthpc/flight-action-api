@@ -34,13 +34,17 @@ class Command < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
 
+    CMD_NAME_REGEX = /\A[^_]*\Z/
+    CMD_NAME_MESSAGE = 'must not contain underscores'
+
     property :name
     property :summary
     property :description,  from: :summary
     property :scripts,      default: {}
+    # property :aliases,      default: [],  transform_with: ->(v) { Array.wrap(v) }
 
     validates :name,        presence: true, format: {
-      with: /\A[^_]*\Z/,    message: 'must not contain underscores'
+      with: CMD_NAME_REGEX,    message: CMD_NAME_MESSAGE
     }
     validates :summary,     presence: true
     validates :description, presence: true

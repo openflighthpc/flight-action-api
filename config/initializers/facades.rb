@@ -58,6 +58,7 @@ CommandFacade.index_all.each do |command|
     name:         #{command.name.to_s}
     summary:      #{command.summary.to_s}
     description:  #{command.description.to_s}
+    aliases:      #{command.aliases.to_s}
   ERROR
 
   if command.scripts.is_a?(Hash)

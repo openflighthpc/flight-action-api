@@ -4,6 +4,7 @@ __meta__:
 dig:
   help:
     summary: 'Run a DNS probe on the hosts'
+    aliases: 'resolve-dns'
   default:
     variables: [fqdn]
     script:
@@ -19,6 +20,7 @@ ping:
       Check if the host is up by sending it ICMP echo requests. This utility
       wraps the standard Linux iputils library. See for further details,
       'man ping'
+    aliases: ['are-you-still-there', 'icmp-ping']
   default:
     variables: [IP]
     script: |-
