@@ -78,13 +78,13 @@ end
 # Ensure the aliases and names are all unique
 dups = CommandFacade.index_all.map { |c| [c.name, c.aliases] }.flatten
                     .each_with_object(Hash.new(0)) { |n, h| h[n] += 1 }
-                    .select { |_, v| v > 1 }
+                    .select { |_, v| v > 1 }.keys
 
 unless dups.empty?
   raise <<~ERROR.squish
     Can not continue as duplicate names/ aliases have been dectected.
     Please remove the following duplications:
-    #{dups.keys.join(', ')}
+    #{dups.join(', ')}
   ERROR
 end
 
