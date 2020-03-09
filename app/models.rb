@@ -36,6 +36,13 @@ class Command < BaseHashieDashModel
 
     CMD_NAME_REGEX = /\A[^_]+\Z/
 
+    # NOTE: The name and aliases must all be unique as they are used on the command line
+    # However due to the absence of a DBMS, this can't be done in model logic
+    # Revisit as necessary
+    #
+    # This constrain is enforced in config/initializers/facades.rb when loading from
+    # a static YAML file
+
     property :name
     property :summary
     property :description,  from: :summary
