@@ -34,17 +34,16 @@ class Command < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
 
-    CMD_NAME_REGEX = /\A[^_]*\Z/
-    CMD_NAME_MESSAGE = 'must not contain underscores'
+    CMD_NAME_REGEX = /\A[^_]+\Z/
 
     property :name
     property :summary
     property :description,  from: :summary
     property :scripts,      default: {}
-    # property :aliases,      default: [],  transform_with: ->(v) { Array.wrap(v) }
+    property :aliases,      default: [],  transform_with: ->(v) { Array.wrap(v) }
 
     validates :name,        presence: true, format: {
-      with: CMD_NAME_REGEX,    message: CMD_NAME_MESSAGE
+      with: CMD_NAME_REGEX,    message: 'must not contain underscores'
     }
     validates :summary,     presence: true
     validates :description, presence: true
@@ -77,6 +76,14 @@ class Command < BaseHashieDashModel
     validate do
       next if scripts.is_a?(Hash) && scripts['default']
       errors.add(:scripts, 'does not contain the default script')
+    end
+
+    # Ensures all the command aliases are valid CLI names
+    validate do
+      aliases.each do |name|
+        next if CMD_NAME_REGEX =~ name
+        errors.add(:aliases, "#{name} must be alphanumeric and may contain hypens")
+      end
     end
 
     def lookup_script(*ranks)
