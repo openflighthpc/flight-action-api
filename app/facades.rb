@@ -42,6 +42,7 @@ module CommandFacade
     # Query for all the available commands
     # @return [Array<Node>] the list of commands
     def index_all
+      raise NotImplementedError
     end
   end
 
