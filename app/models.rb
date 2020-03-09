@@ -49,32 +49,23 @@ class Command < BaseHashieDashModel
     validates :summary,     presence: true
     validates :description, presence: true
 
-    validate :validate_has_a_default_script
-    validate :validate_scripts_are_valid
-    validate :validate_scripts_have_matching_ranks
-
-    def lookup_script(*ranks)
-      scripts[(ranks & scripts.keys).first || 'default']
-    end
-
-    private
-
-    def validate_scripts_have_matching_ranks
-      return unless scripts.is_a?(Hash)
+    # Ensures the scripts hash's keys match the rank stored within each script
+    validate do
+      next unless scripts.is_a?(Hash)
       scripts.each do |rank, script|
         if script.is_a?(Script) && script.rank == rank
           # noop
         elsif script.is_a?(Script)
-          errors.add(:"#{rank}_script",
-                     "does not match its script's rank: #{script.rank}")
+          errors.add(:"#{rank}_script", "does not match its script's rank: #{script.rank}")
         else
           errors.add(:"#{rank}_script", 'is not a Script object')
         end
       end
     end
 
-    def validate_scripts_are_valid
-      return unless scripts.is_a?(Hash)
+    # Ensures each script is valid
+    validate do
+      next unless scripts.is_a?(Hash)
       scripts.select { |_, s| s.respond_to?(:valid?) }
              .reject { |_, s| s.valid? }
              .each do |name, script|
@@ -82,9 +73,14 @@ class Command < BaseHashieDashModel
       end
     end
 
-    def validate_has_a_default_script
-      return if scripts.is_a?(Hash) && scripts['default']
+    # Ensures there is a default script
+    validate do
+      next if scripts.is_a?(Hash) && scripts['default']
       errors.add(:scripts, 'does not contain the default script')
+    end
+
+    def lookup_script(*ranks)
+      scripts[(ranks & scripts.keys).first || 'default']
     end
   end
 end
@@ -101,11 +97,7 @@ class Script < BaseHashieDashModel
     validates :rank,  presence: true
     validates :body,  presence: true
 
-    validate :validate_variables_are_not_empty
-
-    private
-
-    def validate_variables_are_not_empty
+    validate do
       errors.add(:variables, "must not contain empty string") if variables.include?('')
     end
   end
