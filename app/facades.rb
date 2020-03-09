@@ -51,9 +51,21 @@ module CommandFacade
     include Hashie::Extensions::MergeInitializer
     include Hashie::Extensions::IndifferentAccess
 
-    def initialize(*_)
-      super
-      delete('__meta__')
+    def initialize(input)
+      cmd_hash = input.to_h.stringify_keys.tap { |h| h.delete('__meta__') }
+                  .map do |raw_name, data|
+        name = raw_name.to_s.gsub('_', '-')
+        help = data['help'].symbolize_keys
+        scripts = data.reject { |k, _| k == 'help' }
+                      .map do |rank, attr|
+          attr = attr.to_h.symbolize_keys
+          script = Script.new rank: rank, body: attr[:script], variables: attr[:variables]
+          [rank, script]
+        end.to_h
+        cmd = Command.new(name: name, scripts: scripts, **help)
+        [name, cmd]
+      end
+      super(cmd_hash)
     end
 
     def index_all
@@ -61,22 +73,11 @@ module CommandFacade
     end
 
     def find_by_name(name)
-      return unless self.key?(name.to_s)
-      data = self[name.to_s].to_h
-      scripts = data.reject { |k, _| k == 'help' }
-                    .map do |rank, attr|
-        attr = attr.to_h.symbolize_keys
-        script = Script.new rank: rank, body: attr[:script], variables: attr[:variables]
-        [rank, script]
-      end.to_h
-      help = data['help'].to_h.symbolize_keys
-      Command.new(name: name, scripts: scripts, **help)
+      [name.to_s]
     end
 
     def each
-      super do |name, _|
-        yield(find_by_name(name)) if block_given?
-      end
+      super { |_, cmd| yield cmd }
     end
   end
 end

@@ -41,7 +41,6 @@ NodeFacade.facade_instance =  if Figaro.env.remote_url
                               end
 
 cmd_yaml = YAML.load(File.read(Figaro.env.commands_config_path!)) || {}
-cmd_yaml = cmd_yaml.map { |k, v| [k == '__meta__' ? k : k.gsub('_', '-'), v] }.to_h
 CommandFacade.facade_instance = CommandFacade::Standalone.new(cmd_yaml)
 
 # Ensure all the facades are valid
