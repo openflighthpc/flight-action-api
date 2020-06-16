@@ -32,7 +32,7 @@ require 'spec_helper'
 RSpec.describe Script do
   context 'with a simple command setup' do
     let(:script) do
-      Script.new(body: 'exit 1', variables: [], rank: 'default')
+      Script.new(path: '/dev/null', rank: 'default')
     end
 
     let(:command) do
@@ -48,30 +48,5 @@ RSpec.describe Script do
     it 'is valid' do
       expect(command).to be_valid
     end
-
-    describe '#variables' do
-      it 'can wrap bare strings' do
-        str = 'string'
-        subject.variables = str
-        expect(subject.variables).to contain_exactly(str)
-      end
-
-      it 'must not contain empty string' do
-        subject.variables = ['']
-        expect(subject).not_to be_valid
-      end
-
-      it 'can be unset' do
-        subject.variables = nil
-        expect(subject.variables).to eq([])
-      end
-
-      it 'may contain various other strings' do
-        subject.variables = ['a', 'A', '1', 'a-b_c']
-        expect(subject).to be_valid
-      end
-    end
   end
 end
-
-

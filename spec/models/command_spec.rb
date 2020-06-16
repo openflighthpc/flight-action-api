@@ -32,7 +32,7 @@ require 'spec_helper'
 RSpec.describe Command do
   context 'with a simple command setup' do
     let(:script) do
-      Script.new(body: 'exit 1', variables: [], rank: 'default')
+      Script.new(path: '/dev/null', rank: 'default')
     end
 
     let(:command) do
@@ -106,9 +106,9 @@ RSpec.describe Command do
 
   context 'with a command with multiple scripts' do
     let(:ranks) { ['first', 'second', 'third'] }
-    let(:default) { Script.new(body: 'echo default', rank: 'default') }
+    let(:default) { Script.new(path: '/dev/null', rank: 'default') }
     let(:scripts) do
-      ranks.map { |r| [r, Script.new(body: "echo #{r}", rank: r)] }
+      ranks.map { |r| [r, Script.new(path: '/dev/null', rank: r)] }
            .to_h
            .tap { |h| h['default'] = default }
     end

@@ -91,19 +91,10 @@ class Script < BaseHashieDashModel
     include Hashie::Extensions::Dash::Coercion
 
     property :rank
-    property :body,       coerce: String
-    property :variables,  default: [], transform_with: ->(v) { Array.wrap(v).map(&:to_s) }
+    property :path,  coerce: String
 
     validates :rank,  presence: true
-    validates :body,  presence: true
-
-    validate :validate_variables_are_not_empty
-
-    private
-
-    def validate_variables_are_not_empty
-      errors.add(:variables, "must not contain empty string") if variables.include?('')
-    end
+    validates :path,  presence: true
   end
 end
 
@@ -128,6 +119,7 @@ class Ticket < BaseHashieDashModel
 
     def generate_and_run!
       DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
+      # XXX Consider if not having a command is an error.
       self.jobs = if command
         nodes.map { |n| Job.new(node: n, ticket: self) }
       else
@@ -159,10 +151,9 @@ class Job < BaseHashieDashModel
     def run!
       cwd = Figaro.env.working_directory_path!
       script = ticket.command.lookup_script(*node.ranks)
-      envs = script.variables
-                   .map { |v| [v, node.params[v.to_sym]] }
-                   .to_h
-                   .tap { |e| e['name'] = node.name }
+      envs = node.params
+        .tap { |e| e['name'] = node.name }
+        .stringify_keys
       DEFAULT_LOGGER.info <<~INFO
 
         # Job Definition ===============================================================
@@ -170,18 +161,13 @@ class Job < BaseHashieDashModel
         # ID:     #{id}
         # Node:   #{node.name}
         # Rank:   #{script.rank}
-        # Working Directory:
-        cd #{cwd}
+        # Script: #{script.path}
+        # Working Directory: #{cwd}
         # Environment Variables:
         #{envs.map { |k, v| "#{k}=#{v}" }.join("\n")}
-
-        # Execute Script:
-        #{script.body}
-        # End Job Definition ===========================================================
-        # NOTE: This definition is not literally executed. See documentation for details
       INFO
       DEFAULT_LOGGER.info "Starting Job: #{self.id}"
-      out, err, code = Open3.capture3(envs, script.body, chdir: cwd)
+      out, err, code = Open3.capture3(envs, script.path, chdir: cwd)
       self.stdout = out
       self.stderr = err
       self.status = code.exitstatus
@@ -203,4 +189,3 @@ class Job < BaseHashieDashModel
     end
   end
 end
-

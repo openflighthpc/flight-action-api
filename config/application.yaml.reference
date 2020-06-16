@@ -72,13 +72,13 @@ nodes_config_path:
 # This mode does not have any dedicated configuration values.
 # =============================================================================
 
+
 # =============================================================================
-# Commands Config Path
-# The commands must be configured via a static YAML config file. The path to
-# the commands config maybe either absolute or relative to the install
-# directory.
+# Command Directory Path
+# This gives the directory the commands will be loaded from.  A command is a
+# subdirectory of this path containing a `metadata.yaml` file.
 # =============================================================================
-commands_config_path:
+command_directory_path:
 
 # =============================================================================
 # Working Directory Path

@@ -1,0 +1,6 @@
+help:
+  summary: 'send ICMP ECHO_REQUEST to network hosts'
+  description: >
+    Check if the host is up by sending it ICMP echo requests. This utility
+    wraps the standard Linux iputils library. See for further details,
+    'man ping'
