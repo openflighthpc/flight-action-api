@@ -41,16 +41,12 @@ register Sinja
 BEARER_REGEX = /\ABearer\s(.*)\Z/
 
 configure_jsonapi do |c|
-  # c.conflict_exceptions << TemplateConflictError
-  # c.validation_exceptions << ActiveModel::ValidationError
+  # c.not_found_exceptions << NotFoundError
+  c.validation_exceptions << ActiveModel::ValidationError
 
-  # c.validation_formatter = ->(e) do
-  #   e.model.errors.messages
-    # relations = e.model.relations.keys.map(&:to_sym)
-    # e.model.errors.messages.map do |src, msg|
-    #   relations.include?(src) ? [src, msg, 'relationships'] : [src, msg]
-    # end
-  # end
+  c.validation_formatter = ->(e) do
+    e.model.errors.messages.transform_values { |v| v.join(', ') }
+  end
 
   # Resource roles
   c.default_roles = {

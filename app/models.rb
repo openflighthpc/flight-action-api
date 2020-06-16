@@ -30,6 +30,16 @@
 require 'securerandom'
 require 'open3'
 
+# class NotFoundError < StandardError
+#   attr_reader :model, :id
+
+#     def initialize(model, id)
+#       @model = model
+#       @id = id
+#       super("Not found: #{model} #{id}")
+#     end
+# end
+
 class Command < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
