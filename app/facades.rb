@@ -66,7 +66,7 @@ module CommandFacade
       scripts = data.reject { |k, _| k == 'help' }
                     .map do |rank, attr|
         attr = attr.to_h.symbolize_keys
-        script = Script.new rank: rank, body: attr[:script], variables: attr[:variables]
+        script = Script.new(rank: rank, path: attr[:path])
         [rank, script]
       end.to_h
       help = data['help'].to_h.symbolize_keys
@@ -80,4 +80,3 @@ module CommandFacade
     end
   end
 end
-

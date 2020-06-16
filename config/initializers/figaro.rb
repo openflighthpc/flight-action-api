@@ -50,7 +50,7 @@ Figaro.require_keys('remote_cluster', 'remote_jwt') if Figaro.env.remote_url
 
 # Enforce the generally required keys
 relative_keys = ['nodes_config_path',
-                 'commands_config_path',
+                 'command_directory_path',
                  'working_directory_path']
 Figaro.require_keys(*['jwt_shared_secret', 'log_level', *relative_keys])
 
