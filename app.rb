@@ -150,16 +150,19 @@ resource :tickets, pkre: /\w+/ do
 
     def serialize_model(model, options = {})
       if model.is_a?(Ticket)
-        model.generate_and_run! if model.run_when_serialized
         options[:include] = 'command,context,jobs,jobs.node'
       end
       super
+    end
+
+    def validate!
+      resource.validate!
+      resource.generate_and_run
     end
   end
 
   create do |_|
     ticket = Ticket.new
-    ticket.run_when_serialized = true
     next [ticket.id, ticket]
   end
 
@@ -182,4 +185,3 @@ resource :tickets, pkre: /\w+/ do
 end
 
 freeze_jsonapi
-

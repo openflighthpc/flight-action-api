@@ -105,7 +105,8 @@ class Ticket < BaseHashieDashModel
     property :command
     property :jobs
 
-    property :run_when_serialized, default: false
+    validates :context,  presence: true
+    validates :command,  presence: true
 
     def nodes
       if context.is_a?(Node)
@@ -117,22 +118,13 @@ class Ticket < BaseHashieDashModel
       end
     end
 
-    def generate_and_run!
+    def generate_and_run
       DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
-      # XXX Consider if not having a command is an error.
-      self.jobs = if command
-        nodes.map { |n| Job.new(node: n, ticket: self) }
-      else
-        DEFAULT_LOGGER.error <<~ERROR.squish
-          Ticket '#{self.id}' does not have a command! This is likely a client error.
-          Continuing without adding any jobs.
-        ERROR
-        []
-      end
+      self.jobs = nodes.map { |n| Job.new(node: n, ticket: self) }
       self.jobs.each do |job|
         DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
       end
-      self.jobs.each(&:run!)
+      self.jobs.each(&:run)
     ensure
       DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
     end
@@ -148,7 +140,7 @@ class Job < BaseHashieDashModel
     property :stderr
     property :status
 
-    def run!
+    def run
       cwd = Figaro.env.working_directory_path!
       script = ticket.command.lookup_script(*node.ranks)
       envs = node.params
