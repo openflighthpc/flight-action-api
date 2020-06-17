@@ -41,7 +41,7 @@ register Sinja
 BEARER_REGEX = /\ABearer\s(.*)\Z/
 
 configure_jsonapi do |c|
-  # c.not_found_exceptions << NotFoundError
+  c.not_found_exceptions << NotFoundError
   c.validation_exceptions << ActiveModel::ValidationError
 
   c.validation_formatter = ->(e) do
@@ -155,6 +155,10 @@ resource :tickets, pkre: /\w+/ do
       resource.validate!
       resource.generate_and_run
     end
+
+    def not_found_relation(rio)
+      raise NotFoundError.new(rio[:type], rio[:id])
+    end
   end
 
   create do |_|
@@ -164,7 +168,7 @@ resource :tickets, pkre: /\w+/ do
 
   has_one :command do
     graft(sideload_on: :create) do |rio|
-      resource.command = CommandFacade.find_by_name(rio[:id])
+      resource.command = CommandFacade.find_by_name(rio[:id]) or not_found_relation(rio)
     end
   end
 
@@ -172,9 +176,16 @@ resource :tickets, pkre: /\w+/ do
     graft(sideload_on: :create) do |rio|
       resource.context = case rio[:type]
       when 'nodes'
-        NodeFacade.find_by_name(rio[:id])
+        NodeFacade.find_by_name(rio[:id]) or not_found_relation(rio)
       when 'groups'
-        GroupFacade.find_by_name(rio[:id])
+        GroupFacade.find_by_name(rio[:id]).tap do |group|
+          if group.nil?
+            not_found_relation(rio)
+          end
+          if GroupFacade.facade_instance.is_a?(GroupFacade::Exploding) && group.nodes.empty?
+            not_found_relation(rio)
+          end
+        end
       end
     end
   end
