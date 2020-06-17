@@ -1,0 +1,5 @@
+help:
+  summary: 'Power on a node or group'
+  description: >
+    Power on the specified node or all nodes in the specified group.
+
