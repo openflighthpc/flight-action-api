@@ -145,6 +145,7 @@ class Job < BaseHashieDashModel
       script = ticket.command.lookup_script(*node.ranks)
       envs = node.params
         .tap { |e| e['name'] = node.name }
+        .tap { |e| e['command'] = ticket.command.name }
         .stringify_keys
       DEFAULT_LOGGER.info <<~INFO
 

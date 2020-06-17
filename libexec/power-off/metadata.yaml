@@ -1,0 +1,5 @@
+help:
+  summary: 'Power off a node or group'
+  description: >
+    Power off the specified node or all nodes in the specified group.
+

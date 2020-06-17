@@ -1,0 +1,5 @@
+help:
+  summary: 'Get the power status for a node or group'
+  description: >
+    Get the power status for the specified node or all nodes in the specified group.
+
