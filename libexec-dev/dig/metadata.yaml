@@ -1,0 +1,2 @@
+help:
+  summary: 'Run a DNS probe on the hosts'

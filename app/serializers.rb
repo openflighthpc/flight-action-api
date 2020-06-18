@@ -80,4 +80,3 @@ class JobSerializer
 
   attributes :stdout, :stderr, :status
 end
-

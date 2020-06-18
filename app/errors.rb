@@ -27,26 +27,12 @@
 # https://github.com/openflighthpc/action-server
 #===============================================================================
 
-require 'spec_helper'
+class NotFoundError < StandardError
+  attr_reader :model, :id
 
-RSpec.describe Script do
-  context 'with a simple command setup' do
-    let(:script) do
-      Script.new(path: '/dev/null', rank: 'default')
-    end
-
-    let(:command) do
-      Command.new(
-        name: 'name1-something',
-        summary: 'dummy',
-        scripts: { 'default' => script }
-      )
-    end
-
-    subject { script }
-
-    it 'is valid' do
-      expect(command).to be_valid
-    end
+  def initialize(model, id)
+    @model = model.to_s.singularize
+    @id = id
+    super("Not Found: #{@model} #{@id}")
   end
 end

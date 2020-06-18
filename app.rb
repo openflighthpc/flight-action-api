@@ -41,16 +41,12 @@ register Sinja
 BEARER_REGEX = /\ABearer\s(.*)\Z/
 
 configure_jsonapi do |c|
-  # c.conflict_exceptions << TemplateConflictError
-  # c.validation_exceptions << ActiveModel::ValidationError
+  c.not_found_exceptions << NotFoundError
+  c.validation_exceptions << ActiveModel::ValidationError
 
-  # c.validation_formatter = ->(e) do
-  #   e.model.errors.messages
-    # relations = e.model.relations.keys.map(&:to_sym)
-    # e.model.errors.messages.map do |src, msg|
-    #   relations.include?(src) ? [src, msg, 'relationships'] : [src, msg]
-    # end
-  # end
+  c.validation_formatter = ->(e) do
+    e.model.errors.messages.transform_values { |v| v.join(', ') }
+  end
 
   # Resource roles
   c.default_roles = {
@@ -150,22 +146,29 @@ resource :tickets, pkre: /\w+/ do
 
     def serialize_model(model, options = {})
       if model.is_a?(Ticket)
-        model.generate_and_run! if model.run_when_serialized
         options[:include] = 'command,context,jobs,jobs.node'
       end
       super
+    end
+
+    def validate!
+      resource.validate!
+      resource.generate_and_run
+    end
+
+    def not_found_relation(rio)
+      raise NotFoundError.new(rio[:type], rio[:id])
     end
   end
 
   create do |_|
     ticket = Ticket.new
-    ticket.run_when_serialized = true
     next [ticket.id, ticket]
   end
 
   has_one :command do
     graft(sideload_on: :create) do |rio|
-      resource.command = CommandFacade.find_by_name(rio[:id])
+      resource.command = CommandFacade.find_by_name(rio[:id]) or not_found_relation(rio)
     end
   end
 
@@ -173,13 +176,19 @@ resource :tickets, pkre: /\w+/ do
     graft(sideload_on: :create) do |rio|
       resource.context = case rio[:type]
       when 'nodes'
-        NodeFacade.find_by_name(rio[:id])
+        NodeFacade.find_by_name(rio[:id]) or not_found_relation(rio)
       when 'groups'
-        GroupFacade.find_by_name(rio[:id])
+        GroupFacade.find_by_name(rio[:id]).tap do |group|
+          if group.nil?
+            not_found_relation(rio)
+          end
+          if GroupFacade.facade_instance.is_a?(GroupFacade::Exploding) && group.nodes.empty?
+            not_found_relation(rio)
+          end
+        end
       end
     end
   end
 end
 
 freeze_jsonapi
-
