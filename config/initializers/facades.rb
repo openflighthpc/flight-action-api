@@ -53,7 +53,7 @@ commands = pathname.children.map do |c|
 
   [ c.basename.to_s, md.merge(Hash[scripts]) ]
 end
-commands = Hash[commands]
+commands = Hash[commands.compact]
 CommandFacade.facade_instance = CommandFacade::Standalone.new(commands)
 
 CommandFacade.index_all.each do |command|

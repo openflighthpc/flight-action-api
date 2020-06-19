@@ -12,15 +12,16 @@ fi
 status=$(aws ec2 describe-instances \
                  --instance-ids "${ec2_id}" \
                  --region "${aws_region}" \
+                 --output json \
                  --query Reservations[0].Instances[0].State.Name
                  )
 
 case "$status" in
-    "running")
+    "\"running\"")
         echo ON
         exit 0
         ;;
-    "stopped")
+    "\"stopped\"")
         echo OFF
         exit 123
         ;;
