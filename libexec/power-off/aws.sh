@@ -9,6 +9,20 @@ if [[ -z "${aws_region}" ]]; then
     exit 1
 fi
 
+output=$(
 aws ec2 stop-instances  \
+    --output json \
     --instance-ids "${ec2_id}" \
     --region "${aws_region}"
+)
+
+exit_code=$?
+
+if [ ${exit_code} -eq 0 ] ; then
+    echo OK
+else
+    # Standard error from the `aws` call should be enough to debug this.
+    :
+fi
+
+exit ${exit_code}
