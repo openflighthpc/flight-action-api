@@ -17,15 +17,24 @@ status=$(aws ec2 describe-instances \
                  )
 
 case "$status" in
+    "\"pending\"")
+        echo PENDING
+        exit 0
+        ;;
     "\"running\"")
         echo ON
         exit 0
+        ;;
+    "\"stopping\"")
+        echo STOPPING
+        exit 123
         ;;
     "\"stopped\"")
         echo OFF
         exit 123
         ;;
     *)
+        echo "Unknown status: ${status}" >&2
         exit 1
         ;;
 esac
