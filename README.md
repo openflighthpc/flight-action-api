@@ -52,29 +52,33 @@ Please refer to the [additional documentation](docs/ticket-lifecycle.md) on how 
 
 #### Commands Config
 
-The `commands` must be configured with a static YAML file with the following structure. Refer to the [example commands config](config/commands.example.yaml) for the config used in the `development` environment.
+The `commands` are configured by creating sub directories of the `command_directory_path` directory.  A valid command directory contains a `metadata.yaml` file and an executable `default.sh` script.
 
-The `help` section is required as it is used by client-side to generate help pages. The required `summary` should be a single line summary of the command, where the optional description maybe longer.
-
-In additional to `help` text, multiple `ranks` of `scripts` maybe defined. The `default` rank is required but all other `ranks` are optional. The `ranks` are  use to select which `script` to execute on a per `node` basis.
-
-The `variables` can optional be used to configure the environment the `script` is ran in. They should be an array of keys to the `node` parameters below. This way each `script` can select which `node` parameters should be exposed to the script.
+A sample command is provided in this repository:
 
 ```
-<command-name>:
-  help:
-    summary: <command-summary>
-    description: <command-description>
-  default:
-    variables: <variables-to-associated-script>
-    script: <body-script-to-be-executed>
-  <rank>:
-    variables:
-    script:
-  <other-rank>
-    ...
-  ...
+$ ls libexec-dev/sample
+default.sh  metadata.yaml  metal.sh
+$ cat libexec-dev/sample/metadata.yaml
+help:
+  summary: 'sample action'
+  description: >
+    A sample action to serve as a simple example of how to create commands and
+    scripts.
+$ cat libexec-dev/sample/default.sh 
+#!/bin/bash
+echo "Running the default script for: $name"
+echo Done
+$ cat libexec-dev/sample/metal.sh 
+#!/bin/bash
+echo "Running the metal script for: $name"
+echo Doing metal stuff ....
+echo Done
 ```
+
+The `help` section in metadata.yaml is required as it is used by client-side to generate help pages. The required `summary` should be a single line summary of the command, where the optional description maybe longer.
+
+In additional to the `default.sh` script, other scripts can optionally be defined for other ranks.  The script selected for executation is based on the available scripts and the ranks for the current node.
 
 #### Standalone Nodes
 
