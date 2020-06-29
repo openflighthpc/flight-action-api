@@ -37,6 +37,7 @@ class Command < BaseHashieDashModel
     property :name
     property :summary
     property :description,  from: :summary
+    property :syntax,       default: nil
     property :scripts,      default: {}
 
     validates :name,        presence: true, format: {
@@ -103,6 +104,7 @@ class Ticket < BaseHashieDashModel
     property :id, default: ->() { SecureRandom.hex(20) }
     property :context
     property :command
+    property :arguments, default: []
     property :jobs
 
     validates :context,  presence: true
@@ -155,12 +157,13 @@ class Job < BaseHashieDashModel
         # Node:   #{node.name}
         # Rank:   #{script.rank}
         # Script: #{script.path}
+        # Args:   #{ticket.arguments}
         # Working Directory: #{cwd}
         # Environment Variables:
         #{envs.map { |k, v| "#{k}=#{v}" }.join("\n")}
       INFO
       DEFAULT_LOGGER.info "Starting Job: #{self.id}"
-      out, err, code = Open3.capture3(envs, script.path, chdir: cwd)
+      out, err, code = Open3.capture3(envs, script.path, *ticket.arguments, chdir: cwd)
       self.stdout = out
       self.stderr = err
       self.status = code.exitstatus

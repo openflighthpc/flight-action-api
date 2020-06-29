@@ -161,8 +161,8 @@ resource :tickets, pkre: /\w+/ do
     end
   end
 
-  create do |_|
-    ticket = Ticket.new
+  create do |attributes|
+    ticket = Ticket.new(arguments: attributes[:arguments])
     next [ticket.id, ticket]
   end
 
