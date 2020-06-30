@@ -38,6 +38,7 @@ class Command < BaseHashieDashModel
     property :summary
     property :description,  from: :summary
     property :syntax,       default: nil
+    property :confirmation, default: nil
     property :scripts,      default: {}
 
     validates :name,        presence: true, format: {

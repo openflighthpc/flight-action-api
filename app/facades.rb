@@ -64,13 +64,14 @@ module CommandFacade
       return unless self.key?(name.to_s)
       data = self[name.to_s].to_h
       scripts = data.reject { |k, _| k == 'help' }
+                    .reject { |k, _| k == 'confirmation' }
                     .map do |rank, attr|
         attr = attr.to_h.symbolize_keys
         script = Script.new(rank: rank, path: attr[:path])
         [rank, script]
       end.to_h
       help = data['help'].to_h.symbolize_keys
-      Command.new(name: name, scripts: scripts, **help)
+      Command.new(name: name, scripts: scripts, confirmation: data['confirmation'], **help)
     end
 
     def each

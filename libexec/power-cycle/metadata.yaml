@@ -3,3 +3,4 @@ help:
   description: >
     Power cycle (reboot) the specified node or all nodes in the specified group.
 
+confirmation: Power cycle %{nodes}, confirm to proceed [y/n]?

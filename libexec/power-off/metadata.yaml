@@ -3,3 +3,4 @@ help:
   description: >
     Power off the specified node or all nodes in the specified group.
 
+confirmation: Power off %{nodes}, confirm to proceed [y/n]?
