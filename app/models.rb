@@ -145,10 +145,12 @@ class Job < BaseHashieDashModel
 
     def run
       cwd = Figaro.env.working_directory_path!
+      script_root = Figaro.env.command_directory_path
       script = ticket.command.lookup_script(*node.ranks)
       envs = node.params
         .tap { |e| e['name'] = node.name }
         .tap { |e| e['command'] = ticket.command.name }
+        .tap { |e| e['SCRIPT_ROOT'] = script_root }
         .stringify_keys
       DEFAULT_LOGGER.info <<~INFO
 
