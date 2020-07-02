@@ -13,15 +13,42 @@ if [[ -z "${1}" ]]; then
     exit 1
 fi
 
+declare -A TYPE_MAP
+TYPE_MAP=(
+  [general-small]=t2.small
+  [general-large]=t2.large
+  [compute-2C-3.75GB]=c4.large
+  [compute-8C-15GB]=c4.2xlarge
+  [gpu-1GPU-8C-61GB]=p3.2xlarge
+  [gpu-4GPU-32C-244GB]=p3.8xlarge
+)
+
+validate_instance_type() {
+    if [ "${TYPE_MAP[${1}]}" == "" ]; then
+        echo -e "Unknown instance type ${1}.  Available instance types:\n" 1>&2
+        sorted_keys=()
+        while IFS= read -rd '' key; do
+            sorted_keys+=( "$key" )
+        done < <(printf '%s\0' "${!TYPE_MAP[@]}" | sort -z)
+        for key in "${sorted_keys[@]}" ; do
+            echo "${key}" 1>&2
+        done
+        exit 1
+    fi
+}
+
 change_instance_type() {
+    local ec2_type
+    ec2_type="${TYPE_MAP[$1]}"
     aws ec2 modify-instance-attribute  \
         --output json \
         --instance-id "${ec2_id}" \
         --region "${aws_region}" \
-        --instance-type "{\"Value\": \"${1}\"}"
+        --instance-type "{\"Value\": \"${ec2_type}\"}"
 }
 
 main() {
+    validate_instance_type "$@"
     local initial_status
     local retval
 
