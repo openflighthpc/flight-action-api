@@ -71,6 +71,7 @@ task 'token:admin', [:days] => :require do |task, args|
   puts token.generate_jwt
 end
 
+desc 'Generate a token'
 task 'token:user', [:days] => :require do |task, args|
   token = Token.new.tap { |t| t.exp_days = args[:days].to_i if args[:days] }
   puts token.generate_jwt

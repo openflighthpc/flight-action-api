@@ -22,3 +22,13 @@ node1:
 node2:
   ranks: [retry, metal]
   IP:   10.100.0.2
+
+cnode1:
+  ranks: [aws]
+  ec2_id: fake1
+  aws_region: eu-west-2
+
+cnode2:
+  ranks: [aws]
+  ec2_id: fake2
+  aws_region: eu-west-2

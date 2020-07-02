@@ -1,0 +1,9 @@
+help:
+  syntax: 'NAME TYPE'
+  summary: 'Change the instance type for a node or group'
+  description: |
+    Change the instance type for a node or all nodes in the specified group to TYPE.
+
+    WARNING: If the node is currently powered on, it will be powered off and then powered back on.
+
+confirmation: Change instance type for %{nodes}. If powered on it will be rebooted. Confirm to proceed [y/n]?
