@@ -3,7 +3,7 @@
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
-# This file is part of Action Server.
+# This file is part of Flight Action API.
 #
 # This program and the accompanying materials are made available under
 # the terms of the Eclipse Public License 2.0 which is available at
@@ -11,7 +11,7 @@
 # terms made available by Alces Flight Ltd - please direct inquiries
 # about licensing to licensing@alces-flight.com.
 #
-# Action Server is distributed in the hope that it will be useful, but
+# Flight Action API is distributed in the hope that it will be useful, but
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
 # IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
 # OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
@@ -19,12 +19,12 @@
 # details.
 #
 # You should have received a copy of the Eclipse Public License 2.0
-# along with Action Server. If not, see:
+# along with Flight Action API. If not, see:
 #
 #  https://opensource.org/licenses/EPL-2.0
 #
-# For more information on Action Server, please visit:
-# https://github.com/openflighthpc/action-server
+# For more information on Flight Action API, please visit:
+# https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
 GroupFacade.facade_instance = if Figaro.env.full_upstream

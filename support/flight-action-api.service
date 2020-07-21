@@ -1,0 +1,22 @@
+[Unit]
+Description=Flight Action API
+Requires=network.target
+
+[Service]
+Type=forking
+User=root
+PIDFile=/opt/flight/var/flight-action-api.pid
+EnvironmentFile=/opt/flight/etc/flight-action-api.conf
+WorkingDirectory=/opt/flight/opt/flight-action-api
+ExecStart=/bin/sh -c ' \
+  PATH=$PATH:/opt/flight/bin bin/puma -d -e production \
+    --redirect-append \
+    --redirect-stdout /opt/flight/var/log/flight-action-api.log \
+    --redirect-stderr /opt/flight/var/log/flight-action-api.log \
+    --pidfile         /opt/flight/var/flight-action-api.pid \
+'
+ExecStop=/opt/flight/opt/flight-action-api/bin/pumactl stop
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
