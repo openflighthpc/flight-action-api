@@ -44,7 +44,7 @@ root_dir = ENV['app_root_dir']
 relative_keys = ['nodes_config_path',
                  'command_directory_path',
                  'working_directory_path']
-Figaro.require_keys(*['jwt_shared_secret', 'log_level', *relative_keys])
+Figaro.require_keys(*['jwt_secret', 'log_level', *relative_keys])
 
 # Sets relative keys from the install directory
 # NOTE: Does not affect the path if it is already absolute

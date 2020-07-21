@@ -18,7 +18,7 @@
 # credentials. Consider setting it in the environment instead of the
 # application's config file.
 # =============================================================================
-jwt_shared_secret:
+jwt_secret:
 
 # =============================================================================
 # The 'nodes_config_path' MUST specify either the absolute path to the config,

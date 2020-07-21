@@ -15,11 +15,11 @@
 
 # EXAMPLE:
 # To set the shared secret in the environment:
-# export jwt_shared_secret=...Your shared secret ...
+# export jwt_secret=...Your shared secret ...
 # export ... All the other REQUIRED configs ...
 
 # REQUIRED:
-# jwt_shared_secret:  # [REQUIRED]
+# jwt_secret:  # [REQUIRED]
 
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
@@ -41,4 +41,3 @@ test:
   nodes_config_path:    config/empty.yaml
   command_directory_path: libexec-dev
   log_level:            error
-
