@@ -27,18 +27,9 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-GroupFacade.facade_instance = if Figaro.env.full_upstream
-                                raise 'Full Upstream Mode is not currently supported'
-                              else
-                                GroupFacade::Exploding.new
-                              end
-
-NodeFacade.facade_instance =  if Figaro.env.remote_url
-                                raise 'Partial Upstream Mode is not currently supported'
-                              else
-                                yaml_str = File.read Figaro.env.nodes_config_path!
-                                NodeFacade::Standalone.new(YAML.load(yaml_str) || {})
-                              end
+GroupFacade.facade_instance = GroupFacade::Exploding.new
+yaml_str = File.read Figaro.env.nodes_config_path!
+NodeFacade.facade_instance = NodeFacade::Standalone.new(YAML.load(yaml_str) || {})
 
 pathname = Pathname.new(Figaro.env.command_directory_path)
 commands = pathname.children.map do |c|
