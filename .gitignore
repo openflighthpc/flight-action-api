@@ -12,6 +12,7 @@
 /var
 /log
 /vendor
+tags
 
 # NOTE: This is a general ignore all yaml files in the config directory
 # There are a couple of configs which have manually be checked in
@@ -55,3 +56,6 @@ build-iPhoneSimulator/
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
+
+/libexec-dev
+/contrib

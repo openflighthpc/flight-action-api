@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/openflighthpc/action-server.svg?branch=master)](https://travis-ci.org/openflighthpc/action-server)
+[![Build Status](https://travis-ci.org/openflighthpc/flight-action-api.svg?branch=master)](https://travis-ci.org/openflighthpc/flight-action-api)
 
-# Action Server
+# Flight Action API
 
 Define easily configurable commands that can be preformed over a single or group of nodes.
 
@@ -19,8 +19,8 @@ The following are required to run this application:
 Start by cloning the repo, adding the binaries to your path, and install the gems. This guide assumes the `bin` directory is on your `PATH`. If you prefer not to modify your `PATH`, then some of the commands need to be prefixed with `/path/to/app/bin`.
 
 ```
-git clone https://github.com/openflighthpc/action-server
-cd action-server
+git clone https://github.com/openflighthpc/flight-action-api
+cd flight-action-api
 
 # Add the binaries to your path, which will be used by the remainder of this guide
 export PATH=$PATH:$(pwd)/bin
@@ -111,11 +111,11 @@ Not Supported
 
 ### Integrating with systemd and OpenFlightHPC/FlightRunway
 
-The [provided systemd unit file](support/action-server.service) has been designed to integrate with the `OpenFlightHPC` [flight-runway](https://github.com/openflighthpc/flight-runway) package. The following preconditions must be satisfied for the unit file to work:
+The [provided systemd unit file](support/flight-action-api.service) has been designed to integrate with the `OpenFlightHPC` [flight-runway](https://github.com/openflighthpc/flight-runway) package. The following preconditions must be satisfied for the unit file to work:
 1. `OpenFlightHPC` `flight-runway` must be installed,
-2. The server must be installed within `/opt/flight/opt/action-server`,
+2. The server must be installed within `/opt/flight/opt/flight-action-api`,
 3. The log directory must exist: `/opt/flight/var/log`, and
-4. The configuration file must exist: `/opt/flight/etc/action-server.conf`.
+4. The configuration file must exist: `/opt/flight/etc/flight-action-api.conf`.
 
 The configuration file will be loaded into the environment by `systemd` and can be used to override values within `config/application.yaml`. This is the recommended way to set the custom configuration values and provides the following benefits:
 1. The config will be preserved on update,
@@ -176,4 +176,4 @@ Copyright (C) 2020-present Alces Flight Ltd.
 
 This program and the accompanying materials are made available under the terms of the Eclipse Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or alternative license terms made available by Alces Flight Ltd - please direct inquiries about licensing to licensing@alces-flight.com.
 
-ActionServer is distributed in the hope that it will be useful, but WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. See the Eclipse Public License 2.0 for more details.
+Flight Action API is distributed in the hope that it will be useful, but WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. See the Eclipse Public License 2.0 for more details.
