@@ -1,24 +1,11 @@
-# == DO NOT EDIT - MANAGED FILE ================================================
-# This is an internal managed file and used to set the default configurations.
-# Any changes to this file MIGHT BE LOST the next time the application is
-# updated.
-#
-# Any value in this config may be overridden via the environment. This provides
-# various benefits not limited to:
-# * It prevents data loss when the application is updated, and
-# * It prevents sensitive keys (e.g. the shared secret) from being checked into
-#   the repo by accident
-#
+# ==============================================================================
 # Refer to the reference document for full details on the configuration keys:
 # config/application.yaml.reference
 # ==============================================================================
 
-# EXAMPLE:
-# To set the shared secret in the environment:
-# export jwt_secret=...Your shared secret ...
-# export ... All the other REQUIRED configs ...
-
 # REQUIRED:
+# Either set in this file or set as an environment variable.
+# export jwt_secret=...Your secret ...
 # jwt_secret:  # [REQUIRED]
 
 # DYNAMIC DEFAULTS:
