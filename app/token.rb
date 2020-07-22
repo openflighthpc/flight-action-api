@@ -42,13 +42,13 @@ class Token < Hashie::Trash
   }
 
   class << self
-    def jwt_shared_secret
-      Figaro.env.jwt_shared_secret
+    def jwt_secret
+      Figaro.env.jwt_secret
     end
 
     def from_jwt(token)
       body = begin
-        data, _ = JWT.decode(token, jwt_shared_secret, true, { algorithm: ALGORITHM })
+        data, _ = JWT.decode(token, jwt_secret, true, { algorithm: ALGORITHM })
         data.merge(**DEFAULTS).merge(valid: true)
       rescue JWT::ExpiredSignature
         DEFAULTS.merge(expired_error: false)
@@ -89,7 +89,7 @@ class Token < Hashie::Trash
   end
 
   def generate_jwt
-    JWT.encode(token_attributes, self.class.jwt_shared_secret, ALGORITHM)
+    JWT.encode(token_attributes, self.class.jwt_secret, ALGORITHM)
   end
 end
 

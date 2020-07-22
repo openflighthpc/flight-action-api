@@ -18,60 +18,13 @@
 # credentials. Consider setting it in the environment instead of the
 # application's config file.
 # =============================================================================
-jwt_shared_secret:
+jwt_secret:
 
 # =============================================================================
-# Full Upstream Mode - UNSUPPORTED
-# This mode will source both the node and group data from an upstream
-# 'nodeattr-server'. To activate this mode, the following must occur:
-# 1. The server must be configured in 'Partial Upstream Mode', and
-# 2. The 'full_upstream' flag must be set to 'true'
-# =============================================================================
-full_upstream:
-
-# =============================================================================
-# Partial Upstream Mode - UNSUPPORTED
-# This mode will source only the node data from an upstream 'nodeattr-server'.
-# It has no impact on the group configuration.
-#
-# This mode will be activated when 'remote_url' is set to the upstream server
-# location. The 'remote_cluster' and 'remote_jwt' MUST also be set for this
-# mode to function. The 'remote_cluster' MUST give the name of the cluster
-# and 'remote_jwt' MUST give the access token to the upstream server.
-# =============================================================================
-remote_url:
-remote_cluster:
-remote_jwt:
-
-# =============================================================================
-# Standalone Node Mode - DEFAULT
-# This is the default node mode when no upstream information has been given.
-# It is automatically selected when the 'remote_url' has not been set.
-#
-# This will cause the server to load the node data from a static YAML config.
 # The 'nodes_config_path' MUST specify either the absolute path to the config,
 # or the relative path from the installed directory.
 # =============================================================================
 nodes_config_path:
-
-# =============================================================================
-# Exploding Group Mode - DEFAULT
-# This is the default group mode and is mutually exclusive with Full Upstream
-# Mode. This mode is automatically selected IFF the 'full_upstream' flag has
-# not been set.
-#
-# All group names will be expanded in order to generate a list of nodes. This
-# is useful way to fully support groups without integrating with an external
-# service.
-#
-# It MAY be used in Partial Upstream Mode to disable named groups. However this
-# does come with an associated performance impact as each Node will be polled
-# individually. This will cause multiple requests to the usptream server
-# equivalent to the number of nodes.
-#
-# This mode does not have any dedicated configuration values.
-# =============================================================================
-
 
 # =============================================================================
 # Command Directory Path

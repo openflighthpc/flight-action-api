@@ -40,19 +40,11 @@ Figaro.load
 ENV['app_root_dir'] = File.expand_path('../..', __dir__)
 root_dir = ENV['app_root_dir']
 
-# Enforce the requirements for Full Upstream Mode
-ENV['full_upstream'] = nil unless Figaro.env.full_upstream == 'true'
-Figaro.require_keys('remote_url') if Figaro.env.full_upstream
-
-# Enforce the requirements for Partial Upstream Mode
-# NOTE: This is an requirement for Full Upstream and most be done after the fact
-Figaro.require_keys('remote_cluster', 'remote_jwt') if Figaro.env.remote_url
-
 # Enforce the generally required keys
 relative_keys = ['nodes_config_path',
                  'command_directory_path',
                  'working_directory_path']
-Figaro.require_keys(*['jwt_shared_secret', 'log_level', *relative_keys])
+Figaro.require_keys(*['jwt_secret', 'log_level', *relative_keys])
 
 # Sets relative keys from the install directory
 # NOTE: Does not affect the path if it is already absolute

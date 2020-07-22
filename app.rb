@@ -74,6 +74,10 @@ configure_jsonapi do |c|
   }
 end
 
+before do
+  NodeFacade.reload
+end
+
 helpers do
   def jwt_token
     if match = BEARER_REGEX.match(env['HTTP_AUTHORIZATION'] || '')

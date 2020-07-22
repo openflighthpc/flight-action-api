@@ -1,43 +1,12 @@
-# == DO NOT EDIT - MANAGED FILE ================================================
-# This is an internal managed file and used to set the default configurations.
-# Any changes to this file MIGHT BE LOST the next time the application is
-# updated.
-#
-# Any value in this config may be overridden via the environment. This provides
-# various benefits not limited to:
-# * It prevents data loss when the application is updated, and
-# * It prevents sensitive keys (e.g. the shared secret) from being checked into
-#   the repo by accident
-#
+# ==============================================================================
 # Refer to the reference document for full details on the configuration keys:
 # config/application.yaml.reference
 # ==============================================================================
 
-# EXAMPLE:
-# To set the shared secret in the environment:
-# export jwt_shared_secret=...Your shared secret ...
-# export ... All the other REQUIRED configs ...
-
 # REQUIRED:
-# jwt_shared_secret:  # [REQUIRED]
-
-# FULL UPSTREAM MODE:
-# Setting the following line will put the server in Full Upstream Mode.
-# The server must also be configured in PARTIAL UPSTREAM MODE
-# full_upstream: true
-
-# PARTIAL UPSTREAM MODE:
-# Setting the following line will put the server in Partial Upstream MODE
-# remote_url:
-# remote_jwt:
-remote_cluster: default
-
-# STANDALONE NODE AND EXPLODING GROUP MODES
-# The server will be in STANDALONE NODE MODE if neither of the UPSTREAM MODES
-# have been selected.
-#
-# The server will be in EXPLODING GROUP MODE if FULL UPSTREAM MODE has not
-# been selected.
+# Either set in this file or set as an environment variable.
+# export jwt_secret=...Your secret ...
+# jwt_secret:  # [REQUIRED]
 
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
@@ -59,4 +28,3 @@ test:
   nodes_config_path:    config/empty.yaml
   command_directory_path: libexec-dev
   log_level:            error
-

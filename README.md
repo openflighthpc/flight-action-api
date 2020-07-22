@@ -35,10 +35,10 @@ bin/bundle install --without development test pry --path vendor
 
 This application can be configured by setting the configuration values into the environment. Refer to the configuration [reference](config/application.yaml.reference) and [defaults](config/application.yaml) for an exhaustive list.
 
-Regardless of the following mode selection, the `jwt_shared_secret` must be exported into the environment. This will be used to generate and validate the authorization tokens and must be kept private.
+Regardless of the following mode selection, the `jwt_secret` must be exported into the environment. This will be used to generate and validate the authorization tokens and must be kept private.
 
 ```
-export jwt_shared_secret=<keep-this-secret-safe>
+export jwt_secret=<keep-this-secret-safe>
 ```
 
 The default modes the application ships with is `standalone` nodes and `exploding` groups. They are responsible for the following:
