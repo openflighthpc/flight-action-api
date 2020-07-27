@@ -9,11 +9,13 @@ if [[ -z "${aws_region}" ]]; then
     exit 1
 fi
 if [[ -z "${1}" ]]; then
-    echo "The new instance type has not been given!" >&2
+    echo "The new machine type has not been given!" >&2
     exit 1
 fi
 
 declare -A TYPE_MAP
+# NOTE: If changing this map also change the types listed in the metadata
+# description.
 TYPE_MAP=(
   [general-small]=t2.small
   [general-large]=t2.large
@@ -25,7 +27,7 @@ TYPE_MAP=(
 
 validate_instance_type() {
     if [ "${TYPE_MAP[${1}]}" == "" ]; then
-        echo -e "Unknown instance type ${1}.  Available instance types:\n" 1>&2
+        echo -e "Unknown machine type ${1}.  Available machine types:\n" 1>&2
         sorted_keys=()
         while IFS= read -rd '' key; do
             sorted_keys+=( "$key" )
@@ -68,7 +70,7 @@ main() {
         echo "OK"
     fi
 
-    echo -n "Changing instance type..."
+    echo -n "Changing machine type..."
     change_instance_type "$@" >/dev/null
     retval=$?
     if [ ${retval} -ne 0 ] ; then
