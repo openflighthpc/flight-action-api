@@ -1,9 +1,18 @@
 help:
   syntax: 'NAME TYPE'
-  summary: 'Change the instance type for a node or group'
+  summary: 'Change the machine type for a node or group'
+  # NOTE: If changing the type list below also change the TYPE_MAP in the
+  # script(s).
   description: |
-    Change the instance type for a node or all nodes in the specified group to TYPE.
+    Change the machine type for a node or all nodes in the specified group to TYPE.  The available types are:
+
+    compute-2C-3.75GB
+    compute-8C-15GB
+    general-large
+    general-small
+    gpu-1GPU-8C-61GB
+    gpu-4GPU-32C-244GB
 
     WARNING: If the node is currently powered on, it will be powered off and then powered back on.
 
-confirmation: Change instance type for %{nodes}. If powered on it will be rebooted. Confirm to proceed [y/n]?
+confirmation: Change machine type for %{nodes}. If powered on it will be rebooted. Confirm to proceed [y/n]?

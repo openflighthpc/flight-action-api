@@ -9,11 +9,13 @@ if [[ -z "${aws_region}" ]]; then
     exit 1
 fi
 if [[ -z "${1}" ]]; then
-    echo "The new instance type has not been given!" >&2
+    echo "The new machine type has not been given!" >&2
     exit 1
 fi
 
 declare -A TYPE_MAP
+# NOTE: If changing this map also change the types listed in the metadata
+# description.
 TYPE_MAP=(
   [general-small]=t2.small
   [general-large]=t2.large
@@ -25,7 +27,7 @@ TYPE_MAP=(
 
 validate_instance_type() {
     if [ "${TYPE_MAP[${1}]}" == "" ]; then
-        echo -e "Unknown instance type ${1}.  Available instance types:\n" 1>&2
+        echo -e "Unknown machine type ${1}.  Available machine types:\n" 1>&2
         sorted_keys=()
         while IFS= read -rd '' key; do
             sorted_keys+=( "$key" )
@@ -37,9 +39,18 @@ validate_instance_type() {
     fi
 }
 
+current_instance_type() {
+    aws ec2 describe-instances \
+        --instance-ids "${ec2_id}" \
+        --region "${aws_region}" \
+        --output text \
+        --query Reservations[0].Instances[0].InstanceType
+
+}
+
 change_instance_type() {
     local ec2_type
-    ec2_type="${TYPE_MAP[$1]}"
+    ec2_type="$1"
     aws ec2 modify-instance-attribute  \
         --output json \
         --instance-id "${ec2_id}" \
@@ -51,11 +62,23 @@ main() {
     validate_instance_type "$@"
     local initial_status
     local retval
+    local cur_ec2_type
+    local generic_type
+    local new_ec2_type
+
+    generic_type="$1"
+    new_ec2_type="${TYPE_MAP[$1]}"
+    cur_ec2_type=$( current_instance_type )
+
+    if [ "${cur_ec2_type}" == "${new_ec2_type}" ] ; then
+        echo "Machine type already ${generic_type}"
+        exit 0
+    fi
 
     initial_status=$( "${SCRIPT_ROOT:-.}"/power-status/aws.sh )
     if [ "${initial_status}" != "OFF" ] ; then
         echo -n "Powering off..."
-        timeout 5m "${SCRIPT_ROOT:-.}"/power-off/aws/sync.sh
+        timeout 2m "${SCRIPT_ROOT:-.}"/power-off/aws/sync.sh
         retval=$?
         if [ ${retval} -eq 124 ] ; then
             echo "Timed out waiting for node to power off" 1>&2
@@ -68,8 +91,8 @@ main() {
         echo "OK"
     fi
 
-    echo -n "Changing instance type..."
-    change_instance_type "$@" >/dev/null
+    echo -n "Changing machine type..."
+    change_instance_type "${new_ec2_type}" >/dev/null
     retval=$?
     if [ ${retval} -ne 0 ] ; then
         # Standard error already printed should be sufficient.
@@ -80,7 +103,7 @@ main() {
     case "$initial_status" in
         PENDING | ON )
             echo -n "Powering on..."
-	    timeout 5m "${SCRIPT_ROOT:-.}"/power-on/aws/sync.sh
+            timeout 5m "${SCRIPT_ROOT:-.}"/power-on/aws/sync.sh --wait-for-ssh
             retval=$?
             if [ ${retval} -eq 124 ] ; then
                 echo "Timed out waiting for node to power on" 1>&2
