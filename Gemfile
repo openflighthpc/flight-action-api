@@ -42,6 +42,7 @@ gem 'rake'
 gem 'puma'
 gem 'sinatra'
 gem 'sinja', '> 1.0.0'
+gem 'parallel'
 
 group :development, :test do
   group :pry do

@@ -34,6 +34,7 @@ GEM
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.5.2)
+    parallel (1.19.2)
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -99,6 +100,7 @@ DEPENDENCIES
   flight_facade (>= 0.1.5)
   hashie
   jwt
+  parallel
   pry
   pry-byebug
   puma

@@ -65,12 +65,21 @@ class Ticket < BaseHashieDashModel
     end
 
     def generate_and_run
+      job_threads = 
+        begin
+          Integer(Figaro.env.job_threads)
+        rescue ArgumentError, TypeError
+          1
+        end
+
       DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
       self.jobs = nodes.map { |n| Job.new(node: n, ticket: self) }
       self.jobs.each do |job|
         DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
       end
-      self.jobs.each(&:run)
+      Parallel.each(self.jobs, in_threads: job_threads) do |job|
+        job.run
+      end
     ensure
       DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
     end
@@ -87,6 +96,7 @@ class Job < BaseHashieDashModel
     property :status
 
     def run
+      DEFAULT_LOGGER.info "Running Job: #{self.id}. Parallel worker #{Parallel.worker_number}"
       cwd = Figaro.env.working_directory_path!
       script_root = Figaro.env.command_directory_path
       script = ticket.command.lookup_script(*node.ranks)
@@ -108,7 +118,6 @@ class Job < BaseHashieDashModel
         # Environment Variables:
         #{envs.map { |k, v| "#{k}=#{v}" }.join("\n")}
       INFO
-      DEFAULT_LOGGER.info "Starting Job: #{self.id}"
       out, err, code = Open3.capture3(envs, script.path, *ticket.arguments, chdir: cwd)
       self.stdout = out
       self.stderr = err

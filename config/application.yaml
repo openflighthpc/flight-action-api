@@ -14,6 +14,7 @@
 nodes_config_path:      config/nodes.yaml
 command_directory_path: libexec
 working_directory_path: libexec
+job_threads: "4"
 
 # STATIC DEFAULTS:
 log_level: info
@@ -23,8 +24,10 @@ development:
   command_directory_path: libexec-dev
   working_directory_path: libexec-dev
   log_level:              debug
+  job_threads: "4"
 
 test:
   nodes_config_path:    config/empty.yaml
   command_directory_path: libexec-dev
   log_level:            error
+  job_threads: "1"
