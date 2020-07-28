@@ -132,11 +132,11 @@ end
 resource :commands, pkre: /[-[[:alnum:]]]+/ do
   helpers do
     def find(id)
-      CommandFacade.find_by_name(id)
+      Command.find_by_name(id)
     end
   end
 
-  index { CommandFacade.index_all }
+  index { Command.all }
 
   show
 end
@@ -172,7 +172,7 @@ resource :tickets, pkre: /\w+/ do
 
   has_one :command do
     graft(sideload_on: :create) do |rio|
-      resource.command = CommandFacade.find_by_name(rio[:id]) or not_found_relation(rio)
+      resource.command = Command.find_by_name(rio[:id]) or not_found_relation(rio)
     end
   end
 

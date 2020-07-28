@@ -30,63 +30,6 @@
 require 'securerandom'
 require 'open3'
 
-class Command < BaseHashieDashModel
-  DataHash.class_exec do
-    include Hashie::Extensions::Dash::PropertyTranslation
-
-    property :name
-    property :summary
-    property :description,  from: :summary
-    property :syntax,       default: nil
-    property :confirmation, default: nil
-    property :scripts,      default: {}
-
-    validates :name,        presence: true, format: {
-      with: /\A[^_]*\Z/,    message: 'must not contain underscores'
-    }
-    validates :summary,     presence: true
-    validates :description, presence: true
-
-    validate :validate_has_a_default_script
-    validate :validate_scripts_are_valid
-    validate :validate_scripts_have_matching_ranks
-
-    def lookup_script(*ranks)
-      scripts[(ranks & scripts.keys).first || 'default']
-    end
-
-    private
-
-    def validate_scripts_have_matching_ranks
-      return unless scripts.is_a?(Hash)
-      scripts.each do |rank, script|
-        if script.is_a?(Script) && script.rank == rank
-          # noop
-        elsif script.is_a?(Script)
-          errors.add(:"#{rank}_script",
-                     "does not match its script's rank: #{script.rank}")
-        else
-          errors.add(:"#{rank}_script", 'is not a Script object')
-        end
-      end
-    end
-
-    def validate_scripts_are_valid
-      return unless scripts.is_a?(Hash)
-      scripts.select { |_, s| s.respond_to?(:valid?) }
-             .reject { |_, s| s.valid? }
-             .each do |name, script|
-        errors.add(:"#{name}_script", script.errors.full_messages.join(','))
-      end
-    end
-
-    def validate_has_a_default_script
-      return if scripts.is_a?(Hash) && scripts['default']
-      errors.add(:scripts, 'does not contain the default script')
-    end
-  end
-end
-
 class Script < BaseHashieDashModel
   DataHash.class_exec do
     include Hashie::Extensions::Dash::PropertyTranslation
