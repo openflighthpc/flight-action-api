@@ -78,7 +78,7 @@ main() {
     initial_status=$( "${SCRIPT_ROOT:-.}"/power-status/aws.sh )
     if [ "${initial_status}" != "OFF" ] ; then
         echo -n "Powering off..."
-        timeout 5m "${SCRIPT_ROOT:-.}"/power-off/aws/sync.sh
+        timeout 2m "${SCRIPT_ROOT:-.}"/power-off/aws/sync.sh
         retval=$?
         if [ ${retval} -eq 124 ] ; then
             echo "Timed out waiting for node to power off" 1>&2
@@ -103,7 +103,7 @@ main() {
     case "$initial_status" in
         PENDING | ON )
             echo -n "Powering on..."
-	    timeout 5m "${SCRIPT_ROOT:-.}"/power-on/aws/sync.sh
+            timeout 5m "${SCRIPT_ROOT:-.}"/power-on/aws/sync.sh --wait-for-ssh
             retval=$?
             if [ ${retval} -eq 124 ] ; then
                 echo "Timed out waiting for node to power on" 1>&2

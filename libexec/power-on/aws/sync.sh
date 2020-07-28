@@ -1,5 +1,7 @@
 #!/bin/bash
 
+WAIT_FOR_SSH=0
+
 power_on_sync() {
     local retval
 
@@ -15,6 +17,12 @@ power_on_sync() {
         echo -n '.'
         sleep 10
     done
+    if [ WAIT_FOR_SSH ] ; then
+        while ! nc -zw 1 "${name}" 22 ; do
+            echo -n '.'
+            sleep 10
+        done
+    fi
 }
 
 is_powered_on() {
@@ -32,5 +40,8 @@ is_powered_on() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    if [ "$1" == "--wait-for-ssh" ] ; then
+        WAIT_FOR_SSH=1
+    fi
     power_on_sync
 fi
