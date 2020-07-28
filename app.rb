@@ -76,6 +76,7 @@ end
 
 before do
   NodeFacade.reload
+  Command.reload
 end
 
 helpers do
