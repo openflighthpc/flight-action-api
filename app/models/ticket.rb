@@ -27,51 +27,48 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-class CommandSerializer
-  include JSONAPI::Serializer
+require 'active_model'
 
-  def id
-    object.name
+class Ticket
+  include ActiveModel::Model
+  include ActiveModel::Attributes
+
+  attribute :id, default: ->() { SecureRandom.hex(20) }
+  attribute :context
+  attribute :command
+  attribute :arguments, default: []
+  attribute :jobs
+
+  validates :context,  presence: true
+  validates :command,  presence: true
+
+  def nodes
+    if context.is_a?(Node)
+      [context]
+    elsif context.is_a?(Group)
+      context.nodes
+    else
+      []
+    end
   end
 
-  attributes :name, :description, :summary, :syntax, :confirmation
-end
+  def generate_and_run
+    job_threads = 
+      begin
+        Integer(Figaro.env.job_threads)
+      rescue ArgumentError, TypeError
+        1
+      end
 
-class NodeSerializer
-  include JSONAPI::Serializer
-
-  def id
-    object.name
+    DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
+    self.jobs = nodes.map { |n| Job.new(node: n, ticket: self) }
+    self.jobs.each do |job|
+      DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
+    end
+    Parallel.each(self.jobs, in_threads: job_threads) do |job|
+      job.run
+    end
+  ensure
+    DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
   end
-
-  attributes :name
-end
-
-class GroupSerializer
-  include JSONAPI::Serializer
-
-  has_many :nodes
-
-  def id
-    object.name
-  end
-
-  attributes :name
-end
-
-class TicketSerializer
-  include JSONAPI::Serializer
-
-  has_one :command
-  has_one :context
-  has_many :jobs
-end
-
-class JobSerializer
-  include JSONAPI::Serializer
-
-  has_one :node
-  has_one :ticket
-
-  attributes :stdout, :stderr, :status
 end

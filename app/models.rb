@@ -43,49 +43,6 @@ class Script < BaseHashieDashModel
   end
 end
 
-class Ticket < BaseHashieDashModel
-  DataHash.class_exec do
-    property :id, default: ->() { SecureRandom.hex(20) }
-    property :context
-    property :command
-    property :arguments, default: []
-    property :jobs
-
-    validates :context,  presence: true
-    validates :command,  presence: true
-
-    def nodes
-      if context.is_a?(Node)
-        [context]
-      elsif context.is_a?(Group)
-        context.nodes
-      else
-        []
-      end
-    end
-
-    def generate_and_run
-      job_threads = 
-        begin
-          Integer(Figaro.env.job_threads)
-        rescue ArgumentError, TypeError
-          1
-        end
-
-      DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
-      self.jobs = nodes.map { |n| Job.new(node: n, ticket: self) }
-      self.jobs.each do |job|
-        DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
-      end
-      Parallel.each(self.jobs, in_threads: job_threads) do |job|
-        job.run
-      end
-    ensure
-      DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
-    end
-  end
-end
-
 class Job < BaseHashieDashModel
   DataHash.class_exec do
     property :id, default: ->() { SecureRandom.hex(20) }

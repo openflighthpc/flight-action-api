@@ -52,6 +52,7 @@ task require: :require_bundler do
   require 'app/errors'
   require 'app/models'
   require 'app/models/command'
+  require 'app/models/ticket'
   require 'config/initializers/facades'
   require 'app/token'
   require 'app/serializers'
