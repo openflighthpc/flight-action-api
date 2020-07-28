@@ -39,9 +39,18 @@ validate_instance_type() {
     fi
 }
 
+current_instance_type() {
+    aws ec2 describe-instances \
+        --instance-ids "${ec2_id}" \
+        --region "${aws_region}" \
+        --output text \
+        --query Reservations[0].Instances[0].InstanceType
+
+}
+
 change_instance_type() {
     local ec2_type
-    ec2_type="${TYPE_MAP[$1]}"
+    ec2_type="$1"
     aws ec2 modify-instance-attribute  \
         --output json \
         --instance-id "${ec2_id}" \
@@ -53,6 +62,18 @@ main() {
     validate_instance_type "$@"
     local initial_status
     local retval
+    local cur_ec2_type
+    local generic_type
+    local new_ec2_type
+
+    generic_type="$1"
+    new_ec2_type="${TYPE_MAP[$1]}"
+    cur_ec2_type=$( current_instance_type )
+
+    if [ "${cur_ec2_type}" == "${new_ec2_type}" ] ; then
+        echo "Machine type already ${generic_type}"
+        exit 0
+    fi
 
     initial_status=$( "${SCRIPT_ROOT:-.}"/power-status/aws.sh )
     if [ "${initial_status}" != "OFF" ] ; then
@@ -71,7 +92,7 @@ main() {
     fi
 
     echo -n "Changing machine type..."
-    change_instance_type "$@" >/dev/null
+    change_instance_type "${new_ec2_type}" >/dev/null
     retval=$?
     if [ ${retval} -ne 0 ] ; then
         # Standard error already printed should be sufficient.
