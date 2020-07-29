@@ -52,23 +52,83 @@ class Ticket
     end
   end
 
-  def generate_and_run
-    job_threads = 
+  def build_jobs
+    DEFAULT_LOGGER.info "Building Ticket: #{self.id}"
+    self.class.registry.add(self)
+    self.jobs = nodes.map do |n|
+      Job.new(node: n, ticket: self).tap do |job|
+        DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
+      end
+    end
+  end
+
+  def run
+    DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
+    job_threads =
       begin
         Integer(Figaro.env.job_threads)
       rescue ArgumentError, TypeError
         1
       end
-
-    DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
-    self.jobs = nodes.map { |n| Job.new(node: n, ticket: self) }
-    self.jobs.each do |job|
-      DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
-    end
     Parallel.each(self.jobs, in_threads: job_threads) do |job|
       job.run
     end
   ensure
     DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
+  end
+
+  def stream
+    mutex = Mutex.new
+    tag_lines = context.is_a?(Group)
+
+    threads = jobs.map do |job|
+      Thread.new(job) do |job|
+        until (line = job.read_pipe.gets).nil? do
+          tagged_line = tag_lines ? "#{job.node.name}: #{line}" : line
+          mutex.synchronize do
+            yield tagged_line
+          end
+        end
+      end
+    end
+
+    threads.each(&:join)
+    jobs.each { |job| job.read_pipe.close unless job.read_pipe.closed? }
+    self.class.registry.remove(self)
+  end
+
+  class << self
+    delegate :find_by_id, :all, to: :registry
+
+    def registry
+      @registry ||= Registry.new
+    end
+  end
+
+  class Registry
+    def initialize
+      @mutex = Mutex.new
+      @tickets = {}
+    end
+
+    def all
+      @tickets.values
+    end
+
+    def find_by_id(id)
+      @tickets[id]
+    end
+
+    def add(ticket)
+      @mutex.synchronize do
+        @tickets[ticket.id] = ticket
+      end
+    end
+
+    def remove(ticket)
+      @mutex.synchronize do
+        @tickets.delete(ticket.id)
+      end
+    end
   end
 end

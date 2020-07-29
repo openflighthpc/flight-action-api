@@ -77,7 +77,7 @@ main() {
 
     initial_status=$( "${SCRIPT_ROOT:-.}"/power-status/aws.sh )
     if [ "${initial_status}" != "OFF" ] ; then
-        echo -n "Powering off..."
+        echo "Powering off..."
         timeout 2m "${SCRIPT_ROOT:-.}"/power-off/aws/sync.sh
         retval=$?
         if [ ${retval} -eq 124 ] ; then
@@ -91,7 +91,7 @@ main() {
         echo "OK"
     fi
 
-    echo -n "Changing machine type..."
+    echo "Changing machine type..."
     change_instance_type "${new_ec2_type}" >/dev/null
     retval=$?
     if [ ${retval} -ne 0 ] ; then
@@ -102,7 +102,7 @@ main() {
 
     case "$initial_status" in
         PENDING | ON )
-            echo -n "Powering on..."
+            echo "Powering on..."
             timeout 5m "${SCRIPT_ROOT:-.}"/power-on/aws/sync.sh --wait-for-ssh
             retval=$?
             if [ ${retval} -eq 124 ] ; then

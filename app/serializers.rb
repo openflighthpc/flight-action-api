@@ -65,6 +65,12 @@ class TicketSerializer
   has_one :command
   has_one :context
   has_many :jobs
+
+  def links
+    super.tap do |h|
+      h[:output_stream] = "#{base_url}/streaming/#{type}/#{id}"
+    end
+  end
 end
 
 class JobSerializer

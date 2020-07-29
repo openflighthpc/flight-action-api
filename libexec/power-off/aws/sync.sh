@@ -9,11 +9,10 @@ power_off_sync() {
         if [ ${retval} -ne 0 ] ; then
             return ${retval}
         fi
-        sleep 10
+        sleep 5
     fi
     while ! is_powered_off ; do
-        echo -n '.'
-        sleep 10
+        sleep 5
     done
 }
 

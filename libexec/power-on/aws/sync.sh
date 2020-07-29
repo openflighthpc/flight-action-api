@@ -11,16 +11,14 @@ power_on_sync() {
         if [ ${retval} -ne 0 ] ; then
             return ${retval}
         fi
-        sleep 10
+        sleep 5
     fi
     while ! is_powered_on ; do
-        echo -n '.'
-        sleep 10
+        sleep 5
     done
     if [ WAIT_FOR_SSH ] ; then
         while ! nc -zw 1 "${name}" 22 ; do
-            echo -n '.'
-            sleep 10
+            sleep 5
         done
     fi
 }

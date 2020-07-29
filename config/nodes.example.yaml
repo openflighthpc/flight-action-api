@@ -16,11 +16,11 @@ cloudflare:
   IP:   1.1.1.1
 
 node1:
-  ranks: [metal]
+  ranks: [metal, fake]
   IP:   10.100.0.1
 
 node2:
-  ranks: [retry, metal]
+  ranks: [metal, fake]
   IP:   10.100.0.2
 
 cnode1:

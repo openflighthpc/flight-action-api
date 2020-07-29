@@ -44,56 +44,114 @@ class Script < BaseHashieDashModel
 end
 
 class Job < BaseHashieDashModel
+  attr_reader :read_pipe
+
+  def initialize(hash={})
+    super
+    @read_pipe, @write_pipe = IO.pipe
+  end
+
   DataHash.class_exec do
     property :id, default: ->() { SecureRandom.hex(20) }
     property :node
     property :ticket
-    property :stdout
-    property :stderr
+    property :stdout, default: ""
+    property :stderr, default: ""
     property :status
+  end
 
-    def run
-      DEFAULT_LOGGER.info "Running Job: #{self.id}. Parallel worker #{Parallel.worker_number}"
-      cwd = Figaro.env.working_directory_path!
-      script_root = Figaro.env.command_directory_path
-      script = ticket.command.lookup_script(*node.ranks)
-      envs = node.params
-        .tap { |e| e['name'] = node.name }
-        .tap { |e| e['command'] = ticket.command.name }
-        .tap { |e| e['SCRIPT_ROOT'] = script_root }
-        .stringify_keys
-      DEFAULT_LOGGER.info <<~INFO
+  def run
+    DEFAULT_LOGGER.info "Running Job: #{self.id}"
+    cwd = Figaro.env.working_directory_path!
+    script_root = Figaro.env.command_directory_path
+    script = ticket.command.lookup_script(*node.ranks)
+    envs = node.params
+      .tap { |e| e['name'] = node.name }
+      .tap { |e| e['command'] = ticket.command.name }
+      .tap { |e| e['SCRIPT_ROOT'] = script_root }
+      .stringify_keys
+    log_job(script, envs, cwd)
 
-        # Job Definition ===============================================================
-        # Ticket: #{ticket.id}
-        # ID:     #{id}
-        # Node:   #{node.name}
-        # Rank:   #{script.rank}
-        # Script: #{script.path}
-        # Args:   #{ticket.arguments}
-        # Working Directory: #{cwd}
-        # Environment Variables:
-        #{envs.map { |k, v| "#{k}=#{v}" }.join("\n")}
-      INFO
-      out, err, code = Open3.capture3(envs, script.path, *ticket.arguments, chdir: cwd)
-      self.stdout = out
-      self.stderr = err
-      self.status = code.exitstatus
-      DEFAULT_LOGGER.info <<~INFO
-
-        # Job Results ==================================================================
-        # Ticket: #{ticket.id}
-        # ID:     #{id}
-        # Status: #{self.status}
-        # STDOUT:
-        #{self.stdout}
-
-        # STDERR:
-        #{self.stderr}
-        # End Job Results ==============================================================
-      INFO
-    ensure
-      DEFAULT_LOGGER.info "Finished Job: #{self.id}"
+    subprocess = Subprocess.new(envs, script.path, *ticket.arguments, chdir: cwd)
+    code = subprocess.run do |stdout, stderr|
+      if stdout
+        self.stdout << stdout
+        @write_pipe << stdout unless @write_pipe.closed?
+      end
+      if stderr
+        self.stderr << stderr
+        @write_pipe << stderr unless @write_pipe.closed?
+      end
     end
+
+    self.status = code.exitstatus
+    log_result
+  ensure
+    @write_pipe.close
+    DEFAULT_LOGGER.info "Finished Job: #{self.id}"
+  end
+
+  private
+
+  def log_job(script, envs, cwd)
+    DEFAULT_LOGGER.info <<~INFO
+
+      # Job Definition ===============================================================
+      # Ticket: #{ticket.id}
+      # ID:     #{id}
+      # Node:   #{node.name}
+      # Rank:   #{script.rank}
+      # Script: #{script.path}
+      # Args:   #{ticket.arguments}
+      # Working Directory: #{cwd}
+      # Environment Variables:
+      #{envs.map { |k, v| "#{k}=#{v}" }.join("\n")}
+    INFO
+  end
+
+  def log_result
+    DEFAULT_LOGGER.info <<~INFO
+
+      # Job Results ==================================================================
+      # Ticket: #{ticket.id}
+      # ID:     #{id}
+      # Status: #{status}
+      # STDOUT:
+      #{stdout}
+
+      # STDERR:
+      #{stderr}
+      # End Job Results ==============================================================
+    INFO
+  end
+end
+
+# See: http://stackoverflow.com/a/1162850/83386
+class Subprocess
+  def initialize(env, *cmd, options)
+    @env = env
+    @cmd = cmd
+    @options = options
+  end
+
+  def run(&block)
+    exitstatus = nil
+    Open3.popen3(@env, *@cmd, @options) do |stdin, stdout, stderr, thread|
+      stdin.close
+      { :out => stdout, :err => stderr }.each do |key, stream|
+        Thread.new do
+          until (line = stream.gets).nil? do
+            if key == :out
+              yield line, nil, thread if block_given?
+            else
+              yield nil, line, thread if block_given?
+            end
+          end
+        end
+      end
+
+      exitstatus = thread.value
+    end
+    exitstatus
   end
 end

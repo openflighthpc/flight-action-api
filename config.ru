@@ -31,5 +31,11 @@ require 'rake'
 load File.expand_path(File.join(__dir__, 'Rakefile'))
 Rake::Task[:require].invoke
 
-run Sinatra::Application
+app = Rack::Builder.new do
+  map '/streaming/' do
+    run Stream
+  end
+  run App
+end
 
+run app
