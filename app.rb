@@ -31,6 +31,27 @@ require 'sinja'
 require 'sinja/method_override'
 require 'hashie'
 
+module AuthHelpers
+  BEARER_REGEX = /\ABearer\s(.*)\Z/
+
+  def jwt_token
+    if match = BEARER_REGEX.match(env['HTTP_AUTHORIZATION'] || '')
+      match.captures.first
+    else
+      ''
+    end
+  end
+
+  def role
+    token = Token.from_jwt(jwt_token)
+    if token.valid
+      :user
+    else
+      :unknown
+    end
+  end
+end
+
 class App < Sinatra::Base
   before do
     env['HTTP_ACCEPT'] = 'application/vnd.api+json'
@@ -38,8 +59,6 @@ class App < Sinatra::Base
 
   use Sinja::MethodOverride
   register Sinja
-
-  BEARER_REGEX = /\ABearer\s(.*)\Z/
 
   configure_jsonapi do |c|
     c.not_found_exceptions << NotFoundError
@@ -81,25 +100,13 @@ class App < Sinatra::Base
   end
 
   helpers do
-    def jwt_token
-      if match = BEARER_REGEX.match(env['HTTP_AUTHORIZATION'] || '')
-        match.captures.first
-      else
-        ''
-      end
-    end
+    include AuthHelpers
 
+    # Explicitly define the `role` method in the `helpers` block so that Sinja
+    # figures out that it has been defined.  Calling `super` delegates to the
+    # definition in AuthHelpers.
     def role
-      token = Token.from_jwt(jwt_token)
-      if token.admin && token.valid
-        # NOTE: Compatibility HACK with foreign admin tokens
-        # TODO: Remove once the authorization strategy has been reviewed
-        :user
-      elsif token.valid
-        :user
-      else
-        :unknown
-      end
+      super
     end
   end
 
@@ -201,8 +208,10 @@ require 'sinatra/streaming'
 
 class Stream < Sinatra::Base
   helpers Sinatra::Streaming
+  helpers AuthHelpers
 
   get('/tickets/:id') do
+    halt 403 unless role == :user
     ticket = Ticket.find_by_id(params[:id])
     halt 404 if ticket.nil?
     stream do |out|
