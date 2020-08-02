@@ -4,15 +4,15 @@ if [[ -z "$IP" ]]; then
     exit 1
 fi
 
-sleep 5
+sleep 2
 echo "Powering off..."
-sleep 5
+sleep 2
 echo "OK"
 
 echo "Changing machine type..."
-sleep 10
+sleep 5
 echo "OK"
 
 echo "Powering on..."
-sleep 15
+sleep 5
 echo "OK"
