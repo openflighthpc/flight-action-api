@@ -91,6 +91,10 @@ class Job < BaseHashieDashModel
     DEFAULT_LOGGER.info "Finished Job: #{self.id}"
   end
 
+  def completed?
+    !self.status.nil?
+  end
+
   private
 
   def log_job(script, envs, cwd)

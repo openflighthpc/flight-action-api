@@ -55,9 +55,11 @@ class Ticket
   def build_jobs
     DEFAULT_LOGGER.info "Building Ticket: #{self.id}"
     self.class.registry.add(self)
+    @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group))
     self.jobs = nodes.map do |n|
       Job.new(node: n, ticket: self).tap do |job|
         DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
+        @collated_stream.add(job)
       end
     end
   end
@@ -77,24 +79,18 @@ class Ticket
     DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
   end
 
-  def stream
-    mutex = Mutex.new
-    tag_lines = context.is_a?(Group)
+  def completed?
+    jobs.all?(&:completed?)
+  end
 
-    threads = jobs.map do |job|
-      Thread.new(job) do |job|
-        until (line = job.read_pipe.gets).nil? do
-          tagged_line = tag_lines ? "#{job.node.name}: #{line}" : line
-          mutex.synchronize do
-            yield tagged_line
-          end
-        end
-      end
-    end
-
-    threads.each(&:join)
-    jobs.each { |job| job.read_pipe.close unless job.read_pipe.closed? }
+  def remove
     self.class.registry.remove(self)
+  end
+
+  def stream
+    @collated_stream.listen do |line|
+      yield line
+    end
   end
 
   class << self
@@ -130,5 +126,47 @@ class Ticket
         @tickets.delete(ticket.id)
       end
     end
+  end
+end
+
+# Collates and records output from jobs as it is produced.
+class CollatedStream
+  def initialize(tag_lines:)
+    @lines = []
+    @listeners = []
+    @mutex = Mutex.new
+    @tag_lines = tag_lines
+    @threads = []
+  end
+
+  def add(job)
+    @threads << Thread.new(job) do
+      until (line = job.read_pipe.gets).nil? do
+        tagged_line = @tag_lines ? "#{job.node.name}: #{line}" : line
+        @mutex.synchronize do
+          @lines << tagged_line
+          @listeners.each do |listener|
+            begin
+            listener.call(tagged_line)
+            rescue
+            end
+          end
+        end
+      end
+    end
+  end
+
+  # Yields:
+  #
+  #  - all output already read from the jobs
+  #  - new output from the jobs as it is read.
+  def listen(&block)
+    @mutex.synchronize do
+      @lines.each do |line|
+        yield line
+      end
+      @listeners << block
+    end
+    @threads.each(&:join)
   end
 end

@@ -218,6 +218,7 @@ class Stream < Sinatra::Base
       ticket.stream do |line|
         out << line unless out.closed?
       end
+      ticket.remove if ticket.completed?
     end
   end
 end
