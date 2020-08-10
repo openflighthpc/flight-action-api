@@ -124,7 +124,7 @@ class Command < Hashie::Dash
     end
 
     def reload
-      self.load if @mtime < last_modified
+      self.load if @mtime.nil? || @mtime < last_modified
     end
 
     def all
