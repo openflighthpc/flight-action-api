@@ -1,0 +1,15 @@
+help:
+  summary: 'Add additional nodes to your compute estate'
+  syntax: 'TYPE NUMBER'
+  has_context: false
+  description: |
+    Grows the compute estate by the NUMBER of nodes specified. There maybe a short
+    delay before they become available. All the new nodes will be of the same TYPE.
+    The available types are:
+
+      compute-2C-3.75GB
+      compute-8C-15GB
+      general-large
+      general-small
+      gpu-1GPU-8C-61GB
+      gpu-4GPU-32C-244GB
