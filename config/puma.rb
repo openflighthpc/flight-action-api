@@ -28,5 +28,6 @@
 #===============================================================================
 
 port 6304
+log_requests
 pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
 
