@@ -51,6 +51,7 @@ class Command < Hashie::Dash
 
   validate :validate_has_a_default_script
   validate :validate_scripts_are_valid
+  validate :validate_no_context_only_has_a_default_script
 
   class << self
     delegate :load, :load!, :reload, :find_by_name, :all,
@@ -90,6 +91,12 @@ class Command < Hashie::Dash
   def validate_has_a_default_script
     if default_script.nil?
       errors.add(:scripts, 'does not contain the default script')
+    end
+  end
+
+  def validate_no_context_only_has_a_default_script
+    if scripts.is_a?(Array) && scripts.length > 1 && !has_context
+      errors.add(:scripts, 'must only contain the default script as has_context is false')
     end
   end
 

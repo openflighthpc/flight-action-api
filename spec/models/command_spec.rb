@@ -105,17 +105,26 @@ RSpec.describe Command do
     let(:scripts) do
       ranks.map { |r| Script.new(path: '/dev/null', rank: r) } << default
     end
+    let(:has_context) { true }
 
     subject do
       described_class.new(
         name: 'test',
         summary: 'test',
-        scripts: scripts
+        scripts: scripts,
+        has_context: has_context
       )
     end
 
     it 'is valid' do
       expect(subject).to be_valid
+    end
+
+    context 'when has_context is false' do
+      let(:has_context) { false }
+      it 'is not valid' do
+        expect(subject).not_to be_valid
+      end
     end
 
     describe '#lookup_script' do
