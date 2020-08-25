@@ -72,7 +72,7 @@ class Ticket
   attribute :context
   attribute :command
   attribute :arguments, default: []
-  attribute :jobs
+  attribute :jobs, default: ->() { Array.new } # Ensure a new array is created each time
 
   validates :context,  presence: true, if: :command_has_context?
   validates :context,  absence: true, unless: :command_has_context?
@@ -92,9 +92,19 @@ class Ticket
     DEFAULT_LOGGER.info "Building Ticket: #{self.id}"
     self.class.registry.add(self)
     @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group))
-    self.jobs = nodes.map do |n|
-      Job.new(node: n, ticket: self).tap do |job|
+
+    # Adds Node Base Jobs
+    nodes.map do |n|
+      self.jobs << Job.new(node: n, ticket: self).tap do |job|
         DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
+        @collated_stream.add(job)
+      end
+    end
+
+    # Adds the no-context job if required
+    unless command_has_context?
+      self.jobs << Job.new(node: nil, ticket: self).tap do |job|
+        DEFAULT_LOGGER.info "Add Job (No Contexting): #{job.id}"
         @collated_stream.add(job)
       end
     end

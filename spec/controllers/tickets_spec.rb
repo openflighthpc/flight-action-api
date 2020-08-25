@@ -68,8 +68,16 @@ RSpec.describe '/tickets' do
         })
       end
 
+      def resolve_ticket
+        Ticket.registry.find_by_id parse_last_response_body.data.id
+      end
+
       it 'returns 201' do
         expect(last_response).to be_created
+      end
+
+      it 'has a single job' do
+        expect(resolve_ticket.jobs.length).to eq(1)
       end
     end
 
