@@ -30,6 +30,41 @@
 require 'active_model'
 
 class Ticket
+  class Registry
+    def initialize
+      @mutex = Mutex.new
+      @tickets = {}
+    end
+
+    def all
+      @tickets.values
+    end
+
+    def find_by_id(id)
+      @tickets[id]
+    end
+
+    def add(ticket)
+      @mutex.synchronize do
+        @tickets[ticket.id] = ticket
+      end
+    end
+
+    def remove(ticket)
+      @mutex.synchronize do
+        @tickets.delete(ticket.id)
+      end
+    end
+  end
+
+  class << self
+    delegate :find_by_id, :all, to: :registry
+
+    def registry
+      @registry ||= Registry.new
+    end
+  end
+
   include ActiveModel::Model
   include ActiveModel::Attributes
 
@@ -39,7 +74,8 @@ class Ticket
   attribute :arguments, default: []
   attribute :jobs
 
-  validates :context,  presence: true
+  validates :context,  presence: true, if: :command_has_context?
+  validates :context,  absence: true, unless: :command_has_context?
   validates :command,  presence: true
 
   def nodes
@@ -93,39 +129,8 @@ class Ticket
     end
   end
 
-  class << self
-    delegate :find_by_id, :all, to: :registry
-
-    def registry
-      @registry ||= Registry.new
-    end
-  end
-
-  class Registry
-    def initialize
-      @mutex = Mutex.new
-      @tickets = {}
-    end
-
-    def all
-      @tickets.values
-    end
-
-    def find_by_id(id)
-      @tickets[id]
-    end
-
-    def add(ticket)
-      @mutex.synchronize do
-        @tickets[ticket.id] = ticket
-      end
-    end
-
-    def remove(ticket)
-      @mutex.synchronize do
-        @tickets.delete(ticket.id)
-      end
-    end
+  def command_has_context?
+    command.has_context
   end
 end
 

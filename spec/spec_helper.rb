@@ -29,6 +29,7 @@
 
 ENV['RACK_ENV'] = 'test'
 ENV['jwt_secret'] = 'SOME_TEST_TOKEN'
+ENV['nodes_config_path'] = File.join(__dir__, 'fixtures/nodes.yaml')
 
 require 'rake'
 load File.expand_path('../Rakefile', __dir__)
@@ -38,7 +39,7 @@ module RSpecSinatraMixin
   include Rack::Test::Methods
 
   def app()
-    Sinatra::Application.new
+    App.new
   end
 end
 
@@ -71,7 +72,7 @@ RSpec.configure do |c|
   def user_headers
     header 'Content-Type', 'application/vnd.api+json'
     header 'Accept', 'application/vnd.api+json'
-    # header 'Authorization', "Bearer #{Token.new.generate_jwt}"
+    header 'Authorization', "Bearer #{Token.new.generate_jwt}"
   end
 
   FACADE_CLASSES = [NodeFacade, GroupFacade]
@@ -107,8 +108,8 @@ RSpec.configure do |c|
   end
 
   def build_rio(model)
-    type = JSONAPI::Serializer.find_serializer(model, {}).type
-    { type: type, id: model.id }
+    serializer = JSONAPI::Serializer.find_serializer(model, {})
+    { type: serializer.type, id: serializer.id }
   end
 
   def build_payload(model, include_id: true, attributes: {}, relationships: {})
