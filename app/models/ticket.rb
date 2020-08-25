@@ -157,7 +157,7 @@ class CollatedStream
   def add(job)
     @threads << Thread.new(job) do
       until (line = job.read_pipe.gets).nil? do
-        tagged_line = @tag_lines ? "#{job.node.name}: #{line}" : line
+        tagged_line = @tag_lines ? "#{job.node&.name}: #{line}" : line
         @mutex.synchronize do
           @lines << tagged_line
           @listeners.each do |listener|

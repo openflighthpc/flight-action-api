@@ -39,7 +39,12 @@ module RSpecSinatraMixin
   include Rack::Test::Methods
 
   def app()
-    App.new
+    Rack::Builder.new do
+      map '/streaming/' do
+        run Stream
+      end
+      run App
+    end
   end
 end
 
