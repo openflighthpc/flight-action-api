@@ -73,7 +73,7 @@ class Job < BaseHashieDashModel
     log_job(script, envs, cwd)
 
     subprocess = Subprocess.new(envs, script.path, *ticket.arguments, chdir: cwd)
-    code = subprocess.run do |stdout, stderr|
+    subprocess.run do |stdout, stderr|
       if stdout
         self.stdout << stdout
         @write_pipe << stdout unless @write_pipe.closed?
@@ -84,7 +84,7 @@ class Job < BaseHashieDashModel
       end
     end
 
-    self.status = code.exitstatus
+    self.status = subprocess.exitstatus
     log_result
   ensure
     @write_pipe.close
@@ -132,18 +132,21 @@ end
 
 # See: http://stackoverflow.com/a/1162850/83386
 class Subprocess
+  attr_reader :exitstatus
+
   def initialize(env, *cmd, options)
     @env = env
     @cmd = cmd
     @options = options
+    @exitstatus = nil
+    @threads = []
   end
 
   def run(&block)
-    exitstatus = nil
     Open3.popen3(@env, *@cmd, @options) do |stdin, stdout, stderr, thread|
       stdin.close
       { :out => stdout, :err => stderr }.each do |key, stream|
-        Thread.new do
+        @threads << Thread.new do
           until (line = stream.gets).nil? do
             if key == :out
               yield line, nil, thread if block_given?
@@ -154,8 +157,8 @@ class Subprocess
         end
       end
 
-      exitstatus = thread.value
+      @exitstatus = thread.value
+      @threads.each(&:join)
     end
-    exitstatus
   end
 end

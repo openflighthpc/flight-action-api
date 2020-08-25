@@ -32,3 +32,24 @@ cnode2:
   ranks: [aws]
   ec2_id: fake2
   aws_region: eu-west-2
+
+fake00:
+  ranks: [fake]
+fake01:
+  ranks: [fake]
+fake02:
+  ranks: [fake]
+fake03:
+  ranks: [fake]
+fake04:
+  ranks: [fake]
+fake05:
+  ranks: [fake]
+fake06:
+  ranks: [fake]
+fake07:
+  ranks: [fake]
+fake08:
+  ranks: [fake]
+fake09:
+  ranks: [fake]

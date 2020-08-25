@@ -147,7 +147,7 @@ class CollatedStream
           @lines << tagged_line
           @listeners.each do |listener|
             begin
-            listener.call(tagged_line)
+              listener.call(tagged_line)
             rescue
             end
           end
