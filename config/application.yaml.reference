@@ -21,6 +21,7 @@
 jwt_secret:
 
 # =============================================================================
+# Nodes Config Path
 # The 'nodes_config_path' MUST specify either the absolute path to the config,
 # or the relative path from the installed directory.
 # =============================================================================
