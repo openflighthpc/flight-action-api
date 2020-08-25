@@ -226,7 +226,9 @@ Creating a `ticket` is dedicated way to run `jobs` through the API. All requests
 * The `context` MUST NOT be specified if the `has_context` flag is not set, otherwise
 * The response SHALL be `422 Unprocessible Entity`.
 
-The `context` SHOUlD be either a `group` or `node` resource identifier object. Requests with a `node context` SHOULD create a `ticket` with a single entity `jobs` resource for the `node`. Requests with a `group context` SHOULD return a `jobs` resource containing a `job` for each `node` within the `group`.
+The `context` SHOULD be either a `group` or `node` resource identifier object. Requests with a `node context` SHOULD create a `ticket` with a single entity `jobs` resource for the `node`. Requests with a `group context` SHOULD return a `jobs` resource containing a `job` for each `node` within the `group`.
+
+The request SHOULD specify an `arguments` array when a non-empty `syntax` has been provided. These arguments will be made available to the running script. The server does not however validate the arguments match the provided `syntax`.
 
 The life cycle of a request SHOULD complete the following stages:
 * Identify the `context` and generate a `nodes` list,
@@ -243,13 +245,11 @@ Authorization: Bearer <jwt>
 {
   "data": {
     "type": "tickets",
+    "attributes": {
+      ["arguments: ARRAY<STRING>]
     "relationships": {
-      "context": {
-        "data": <Group-or-Node-Resource-Identifier-Object>
-      },
-      "command": {
-        "data": <Command-Resource-Identifier-Object>
-      }
+      "command": COMMAND_RESOURCE_IDENTIFIER_OBJECT,
+      ["context": GROUP_OR_NODE_RESOURCE_IDENTIFIER_OBJECT]
     },
     "links": ... see JSON:API spec ...
   }, ... see JSON:API spec ...
