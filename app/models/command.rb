@@ -68,17 +68,22 @@ class Command < Hashie::Dash
   end
 
   def default_script
-    scripts.detect { |script| script.rank == 'default' }
+    scripts.detect { |script| script.rank == 'default' if script.is_a? Script }
   end
 
   private
 
   def validate_scripts_are_valid
-    return unless scripts.is_a?(Hash)
-    scripts.select { |_, s| s.respond_to?(:valid?) }
-      .reject { |_, s| s.valid? }
-      .each do |name, script|
-      errors.add(:"#{name}_script", script.errors.full_messages.join(','))
+    return unless scripts.is_a?(Array)
+    scripts.select do |script|
+      case script
+      when Script
+        unless script.valid?
+          errors.add(:"script:#{script.rank}", script.errors.full_messages.join(','))
+        end
+      else
+        errors.add(:scripts, 'must only contain Script objects')
+      end
     end
   end
 

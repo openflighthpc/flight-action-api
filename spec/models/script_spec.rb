@@ -39,13 +39,13 @@ RSpec.describe Script do
       Command.new(
         name: 'name1-something',
         summary: 'dummy',
-        scripts: { 'default' => script }
+        scripts: [script]
       )
     end
 
     subject { script }
 
-    xit 'is valid' do
+    it 'is valid' do
       expect(command).to be_valid
     end
   end

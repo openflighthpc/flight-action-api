@@ -37,68 +37,63 @@ RSpec.describe Command do
 
     let(:command) do
       Command.new(
-        name: 'name1-something',
+        name: 'command-spec-command',
         summary: 'dummy',
-        scripts: { 'default' => script }
+        scripts: [script]
       )
     end
 
     subject { command }
 
-    xit 'is valid' do
+    it 'is valid' do
       expect(subject).to be_valid
     end
 
     describe '#name' do
-      xit 'can not be blank' do
+      it 'can not be blank' do
         subject.name = ''
         expect(subject).not_to be_valid
       end
 
-      xit 'can not contain _' do
+      it 'can not contain _' do
         subject.name = 'bad_name'
         expect(subject).not_to be_valid
       end
     end
 
     describe 'summary' do
-      xit 'can not be blank' do
+      it 'can not be blank' do
         subject.summary = ''
         expect(subject).not_to be_valid
       end
     end
 
     describe 'description' do
-      xit 'can not be blank' do
+      it 'can not be blank' do
         subject.description = ''
         expect(subject).not_to be_valid
       end
     end
 
     describe 'scripts' do
-      xit 'must be a hash' do
-        subject.scripts = [script]
+      it 'must be an array' do
+        subject.scripts = { broken: script }
         expect(subject).not_to be_valid
       end
 
-      xit 'must have the default script' do
+      it 'must have the default script' do
         subject.scripts = {}
         expect(subject).not_to be_valid
       end
 
-      xit 'must contain Script objects' do
-        subject.scripts.merge!({ 'string' => 'string' })
+      it 'must contain Script objects' do
+        subject.scripts << 'string'
         expect(subject).not_to be_valid
       end
 
-      xit 'must have valid scripts' do
+      it 'must have valid scripts' do
         allow(script).to receive(:valid?).and_return(false)
         allow(script).to receive(:invalid?).and_return(true)
-        expect(subject).not_to be_valid
-      end
-
-      xit 'must having matching ranks' do
-        subject.scripts.merge!({ 'wrong' => script })
         expect(subject).not_to be_valid
       end
     end
@@ -108,9 +103,7 @@ RSpec.describe Command do
     let(:ranks) { ['first', 'second', 'third'] }
     let(:default) { Script.new(path: '/dev/null', rank: 'default') }
     let(:scripts) do
-      ranks.map { |r| [r, Script.new(path: '/dev/null', rank: r)] }
-           .to_h
-           .tap { |h| h['default'] = default }
+      ranks.map { |r| Script.new(path: '/dev/null', rank: r) } << default
     end
 
     subject do
@@ -121,28 +114,30 @@ RSpec.describe Command do
       )
     end
 
-    xit 'is valid' do
+    it 'is valid' do
       expect(subject).to be_valid
     end
 
     describe '#lookup_script' do
-      xit 'can find the default script' do
+      it 'can find the default script' do
         expect(subject.lookup_script('default')).to eq(default)
       end
 
-      xit 'returns the default if the rank is missing' do
+      it 'returns the default if the rank is missing' do
         expect(subject.lookup_script('missing', 'missing2')).to eq(default)
       end
 
-      xit 'can find an alternative script' do
+      it 'can find the specified script' do
         rank = ranks.first
-        expect(subject.lookup_script(rank)).to eq(scripts[rank])
+        script = scripts.find { |s| s.rank == rank }
+        expect(subject.lookup_script(rank)).to eq(script)
       end
 
-      xit 'selects the first match' do
+      it 'selects the first match' do
         rank = ranks.last
+        script = scripts.find { |s| s.rank == rank }
         lookup = ['missing', rank, ranks.first]
-        expect(subject.lookup_script(*lookup)).to eq(scripts[rank])
+        expect(subject.lookup_script(*lookup)).to eq(script)
       end
     end
   end
