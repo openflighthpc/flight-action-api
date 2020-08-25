@@ -194,7 +194,8 @@ Content-Type: application/vnd.api+json
     "attributes": {
       "name": "<name>",
       "summary": "<summary>",
-      "description": "<description">
+      "description": "<description">,
+      "has_context": <true|false>
     },
     "links": ... see JSON:API spec ...
   }, ... see JSON:API spec ...

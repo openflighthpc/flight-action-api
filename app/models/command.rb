@@ -41,6 +41,7 @@ class Command < Hashie::Dash
   property :syntax,       default: nil
   property :confirmation, default: nil
   property :scripts,      default: []
+  property :has_context,  default: true
 
   validates :name,        presence: true, format: {
     with: /\A[^_]*\Z/,    message: 'must not contain underscores'
