@@ -177,7 +177,14 @@ Content-Type: application/vnd.api+json
 
 ### Show
 
-Return a single `command` by its ID. The `name`, `summary`, and `description` attributes can be used to generate command line help text.
+Return a single `command` by its ID. The `name`, `summary`, `syntax`, and `description` attributes can be used to generate command line help text.
+
+A `confirmation` string MAY be included with the response. This is a challenge question which SHOULD be presented to the user before continuing.
+
+The `has-context` attribute SHALL be `true` if the command MUST be ran on a `node`; or over a `group`. Otherwise the `has-context` attribute SHALL be `false`. The `syntax` defines the method signature to use in the CLI. The `syntax` attribute MAY be overridden on a per command basis and SHOULD NOT be predicted in advance. However in general the `syntax`:
+* SHALL be a string,
+* SHOULD start with `NAME` if `has_context` is `true`, but
+* SHOULD NOT include `NAME` if `has_context` is `false`.
 
 ```
 GET /commands/:id
@@ -192,42 +199,15 @@ Content-Type: application/vnd.api+json
     "type": "commands",
     "id": "<name>",
     "attributes": {
-      "name": "<name>",
-      "summary": "<summary>",
-      "description": "<description">,
-      "has_context": <true|false>
+      "name":  STRING,
+      "summary": STRING,
+      "description": STRING,
+      "syntax": STRING,
+      "has-context": BOOLEAN,
+      ["confirmation": STRING]
     },
     "links": ... see JSON:API spec ...
   }, ... see JSON:API spec ...
-}
-```
-
-## Jobs
-
-A `job` is a completely virtual resource that does not have any dedicated end points. Instead they are returned as part of a relationship to `tickets`. They are not persisted on the server and can not be directly created or destroyed.
-
-### ID
-
-The ID for a `job` resource MUST be alphanumeric.
-
-### Resource Object
-
-The `job` resource object has the following syntax. The `stdout`, `stderr`, and `status` are from the system command associated with the `job`. The `stdout` and `stderr` will be strings, where `status` is an integer.
-
-```
-{
-  "type": "jobs",
-  "id": "<id>",
-  "attributes": {
-    "stdout": "<stdout>",
-    "stderr": "<srderr>",
-    "status": <status>
-  },
-  "relationships": {
-    "node": <Node-Resource-Identifier-Object>,
-    "ticket": <Ticket-Resource-Identifier-Object>
-  },
-  ... see JSON:API spec ...
 }
 ```
 
@@ -241,13 +221,12 @@ The ID for a `ticket` MUST be alphanumeric.
 
 ### Create
 
-Creating a `ticket` is dedicated way to run `jobs` through the API. When creating a `ticket`, the `command` and `context` relationships SHOULD be specified. Whilst the request MAY omit these relationships the response SHALL return `201 CREATED` with a blank association with the `jobs` resource; and SHALL include the other relevant related resources.
+Creating a `ticket` is dedicated way to run `jobs` through the API. All requests MUST specify a `command` relationship otherwise the response SHALL be `422 Unprocessable Entity`. Whether the `context` is required depends on if the `command` has set the `has_context` flag:
+* The `context` MUST be specified if the `has_context` flag is set, and
+* The `context` MUST NOT be specified if the `has_context` flag is not set, otherwise
+* The response SHALL be `422 Unprocessible Entity`.
 
-The `context` MUST be either a `group` or `node` resource identifier object. Requests with a `node context` SHOULD create a `ticket` with a single entity `jobs` resource for the `node`. Requests with `node context` MAY return an empty `jobs` resource if the `node` is missing. Requests with a `group context` SHOULD return a `jobs` resource containing a `job` for each `node` within the `group`. The `jobs` resource SHALL NOT contain `jobs` for missing nodes.
-
-The response MAY contain a `true` attribute with value `true`. This is a compatibility fix with clients that are not fully JSON:API compliant. The `true` attribute MAY be permanently removed without notice.
-
-This method "creates" an ephemeral `ticket` resource that only lives during the lifetime of the request. The ticket SHALL NOT be saved and/or persisted after the response has been issued. Due to this ephemeral nature the response SHALL include the related `command`, `context`, `jobs`, `jobs.node` resources. The request SHOULD NOT specify an `include` query as it SHALL be ignored.
+The `context` SHOUlD be either a `group` or `node` resource identifier object. Requests with a `node context` SHOULD create a `ticket` with a single entity `jobs` resource for the `node`. Requests with a `group context` SHOULD return a `jobs` resource containing a `job` for each `node` within the `group`.
 
 The life cycle of a request SHOULD complete the following stages:
 * Identify the `context` and generate a `nodes` list,
@@ -305,3 +284,6 @@ Content-Type: application/vnd.api+json
 }
 ```
 
+### Streaming
+
+... Needs Documenting ...
