@@ -30,11 +30,11 @@
 require 'spec_helper'
 
 RSpec.describe Command do
-  context 'with a simple command setup' do
-    let(:script) do
-      Script.new(path: '/dev/null', rank: 'default')
-    end
+  let(:script) do
+    Script.new(path: '/dev/null', rank: 'default')
+  end
 
+  context 'with a simple command setup' do
     let(:command) do
       Command.new(
         name: 'command-spec-command',
@@ -147,6 +147,84 @@ RSpec.describe Command do
         script = scripts.find { |s| s.rank == rank }
         lookup = ['missing', rank, ranks.first]
         expect(subject.lookup_script(*lookup)).to eq(script)
+      end
+    end
+  end
+
+  describe '#syntax' do
+    let(:syntax) { raise NotImplementedError }
+    let(:has_context) { raise NotImplementedError }
+
+    subject do
+      opts = {
+        name: 'Syntax Demo',
+        summary: 'demo',
+        description: 'demo',
+        scripts: [script],
+        has_context: has_context
+      }.tap { |o| o[:syntax] = syntax unless syntax.nil? }
+      described_class.new(**opts)
+    end
+
+    context 'with the default syntax' do
+      let(:syntax) { nil }
+
+      context 'with has_context' do
+        let(:has_context) { true }
+        it { should be_valid }
+
+        it 'should be NAME' do
+          expect(subject.syntax).to eq('NAME')
+        end
+      end
+
+      context 'without has_context' do
+        let(:has_context) { false }
+        it { should be_valid }
+
+        it 'should be empty string' do
+          expect(subject.syntax).to eq('')
+        end
+      end
+    end
+
+    context 'with a syntax prefixed with NAME' do
+      let(:syntax) { 'NAME OTHER STUFF' }
+
+      context 'with has_context' do
+        let(:has_context) { true }
+        it { should be_valid }
+
+        it 'returns unmodified' do
+          expect(subject.syntax).to eq(syntax)
+        end
+      end
+
+      context 'without has_context' do
+        let(:has_context) { false }
+        it { should be_valid }
+
+        it 'returns unmodified' do
+          expect(subject.syntax).to eq(syntax)
+        end
+      end
+    end
+
+    context 'with a syntax without the NAME prefix' do
+      let(:syntax) { 'OTHER STUFF' }
+
+      context 'with has_context' do
+        let(:has_context) { true }
+        it { should_not be_valid }
+      end
+
+      context 'without has_context' do
+        let(:has_context) { false }
+        it { should be_valid }
+
+        it 'returns unmodified' do
+          expect(subject.syntax).to eq(syntax)
+        end
       end
     end
   end

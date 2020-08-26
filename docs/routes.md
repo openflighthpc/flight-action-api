@@ -3,7 +3,7 @@
 This API broadly conforms the [JSON:API Specifications](https://jsonapi.org/). The major deviations are:
 1. The resource's `id` are alphanumeric and are quasi dependent on the attributes,
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14) \[[RFC2119](https://tools.ietf.org/html/rfc2119)\] \[[RFC8174](https://tools.ietf.org/html/rfc8174)\] when, and only when, they appear in all capitals, as shown here.
 
 ## Nodes
 
@@ -181,10 +181,12 @@ Return a single `command` by its ID. The `name`, `summary`, `syntax`, and `descr
 
 A `confirmation` string MAY be included with the response. This is a challenge question which SHOULD be presented to the user before continuing.
 
-The `has-context` attribute SHALL be `true` if the command MUST be ran on a `node`; or over a `group`. Otherwise the `has-context` attribute SHALL be `false`. The `syntax` defines the method signature to use in the CLI. The `syntax` attribute MAY be overridden on a per command basis and SHOULD NOT be predicted in advance. However in general the `syntax`:
-* SHALL be a string,
-* SHOULD start with `NAME` if `has_context` is `true`, but
-* SHOULD NOT include `NAME` if `has_context` is `false`.
+The `has-context` attribute SHALL be `true` if the command MUST be ran on a `node`; or over a `group`. Otherwise the `has-context` attribute SHALL be `false`. The `syntax` defines the method signature to use in the CLI.
+
+The `syntax` attribute MAY be overridden on a per command basis and SHOULD NOT be predicted in advance. The `syntax` has the following restrictions:
+* It SHALL be a string,
+* It SHALL start with `NAME` if `has_context` is `true`, and
+* It SHOULD NOT start with `NAME` if `has_context` is `false`.
 
 ```
 GET /commands/:id
