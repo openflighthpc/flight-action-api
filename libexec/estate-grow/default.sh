@@ -36,6 +36,11 @@ echo "${flight_ESTATE_cluster:?The flight_ESTATE_cluster has not been set!}" >/d
 echo "${flight_ESTATE_slack_key:?The flight_ESTATE_slack_key has not been set!}" >/dev/null
 echo "${flight_ESTATE_slack_channels:?The flight_ESTATE_slack_channels has not been set!}" >/dev/null
 
+# Sets the default action
+if [[ -z "$__flight_ESTATE_action" ]]; then
+  __flight_ESTATE_action='Grow'
+fi
+
 # Sets the types
 declare -a types=(
  compute-2C-3.75GB compute-8C-15GB general-large general-small gpu-1GPU-8C-61GB gpu-4GPU-32C-244GB
@@ -81,7 +86,12 @@ for channel in "${channels[@]}"; do
 {
   "channel": "$channel",
   "as_user": true,
-  "text": "Hello Slack"
+  "text": "Received a \`flight-estate\` modification request!",
+  "attachments": [
+    {
+      "text": "*Cluster*: $flight_ESTATE_cluster\n*Action*: $__flight_ESTATE_action\n*Machine Type*: $machine_type\n*Number*: $number"
+    }
+  ]
 }
 PAYLOAD
 done
