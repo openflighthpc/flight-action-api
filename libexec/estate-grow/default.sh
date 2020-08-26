@@ -34,29 +34,37 @@ source "$DIR"/keys.conf
 set -e
 echo "${flight_ESTATE_cluster:?The flight_ESTATE_cluster has not been set!}" >/dev/null
 echo "${flight_ESTATE_slack_key:?The flight_ESTATE_slack_key has not been set!}" >/dev/null
-echo "${flight_ESTATE_slack_channels: The flight_ESTATE_slack_channels has not been set!}" >/dev/null
+echo "${flight_ESTATE_slack_channels:?The flight_ESTATE_slack_channels has not been set!}" >/dev/null
 
 # Sets the types
-types=()
-types+="compute-2C-3.75GB"
-types+="compute-8C-15GB"
-types+="general-large"
-types+="general-small"
-types+="gpu-1GPU-8C-61GB"
-types+="gpu-4GPU-32C-244GB"
+declare -a types=(
+ compute-2C-3.75GB compute-8C-15GB general-large general-small gpu-1GPU-8C-61GB gpu-4GPU-32C-244GB
+)
 
 # Unpacks the arguments
 machine_type="$1"
 number="$2"
 
 # Ensures the type is valid
-if [[ "${types[*]}" != *"$machine_type" ]]; then
-  echo "Unrecognized type: $machine_type" >&2
+found=''
+for current in ${types[@]}; do
+  if [[ "$current" == "$machine_type" ]]; then
+    found="$current"
+    break
+  fi
+done
+if [ "$found" ]; then
+  echo "Type OK: $found"
+else
+  echo "Not a type: $machine_type"
   exit 1
 fi
 
 # Ensures the number is indeed a number
-if [[ "number" =~ '^[0-9]+$' ]]; then
+if [[ "$number" =~ ^[0-9]+$ ]]; then
+  echo "Number OK: $number"
+else
   echo "Not a number: $number" >&2
   exit 1
 fi
+
