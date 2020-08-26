@@ -41,6 +41,9 @@ declare -a types=(
  compute-2C-3.75GB compute-8C-15GB general-large general-small gpu-1GPU-8C-61GB gpu-4GPU-32C-244GB
 )
 
+# Unpacks the channels
+IFS=':' read -r -a channels <<< "$flight_ESTATE_slack_channels"
+
 # Unpacks the arguments
 machine_type="$1"
 number="$2"
@@ -68,3 +71,17 @@ else
   exit 1
 fi
 
+# Creates the JSON payload for slack
+for channel in "${channels[@]}"; do
+  curl  -H 'Content-Type: application/json; charset=UTF-8' \
+        -H "Authorization: Bearer $flight_ESTATE_slack_key" \
+        -d @- \
+        "https://slack.com/api/chat.postMessage" \
+        << PAYLOAD
+{
+  "channel": "$channel",
+  "as_user": true,
+  "text": "Hello Slack"
+}
+PAYLOAD
+done
