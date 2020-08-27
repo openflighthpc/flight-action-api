@@ -92,11 +92,11 @@ fi
 
 # Creates the JSON payload for slack
 for channel in "${channels[@]}"; do
-  curl  -H 'Content-Type: application/json; charset=UTF-8' \
-        -H "Authorization: Bearer $flight_ESTATE_slack_key" \
-        -d @- \
-        "https://slack.com/api/chat.postMessage" \
-        << PAYLOAD
+  output=$(curl -H 'Content-Type: application/json; charset=UTF-8' \
+                -H "Authorization: Bearer $flight_ESTATE_slack_key" \
+                -d @- \
+                "https://slack.com/api/chat.postMessage" \
+                2>/dev/null << PAYLOAD
 {
   "channel": "$channel",
   "as_user": true,
@@ -108,4 +108,12 @@ for channel in "${channels[@]}"; do
   ]
 }
 PAYLOAD
+)
+  if echo "$output" | grep '"ok":false' >/dev/null; then
+    error=$(echo "$output" | sed 's/.*"error":"\([^"]*\)".*/\1/g')
+    cat >&2 <<ERROR
+Error: An unexpected error has occurred ($error)!
+Please contact your system administrator for further assistance.
+ERROR
+  fi
 done
