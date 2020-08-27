@@ -43,7 +43,7 @@ fi
 
 if [ -n "$missing" ]; then
   cat >&2 <<ERROR
-Error: Could not complete request due to an internal configuration error ($missing).
+Error: Could not complete the request due to an internal configuration error ($missing).
 Please contact your system administrator for further assistance.
 ERROR
   exit 1
@@ -74,10 +74,11 @@ for current in ${types[@]}; do
     break
   fi
 done
-if [ "$found" ]; then
-  echo "Type OK: $found"
-else
-  echo "Not a type: $machine_type"
+if [ -z "$found" ]; then
+  cat >&2 <<ERROR
+Error: Can not continue as the machine type is unrecognized. Please select from the following:
+${types[@]}
+ERROR
   exit 1
 fi
 
