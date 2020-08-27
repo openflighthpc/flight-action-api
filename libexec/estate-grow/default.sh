@@ -76,17 +76,17 @@ for current in ${types[@]}; do
 done
 if [ -z "$found" ]; then
   cat >&2 <<ERROR
-Error: Can not continue as the machine type is unrecognized. Please select from the following:
+Error: Can not continue as TYPE is unrecognized. Please select from the following:
 ${types[@]}
 ERROR
   exit 1
 fi
 
 # Ensures the number is indeed a number
-if [[ "$number" =~ ^[0-9]+$ ]]; then
-  echo "Number OK: $number"
-else
-  echo "Not a number: $number" >&2
+if [[ ! "$number" =~ ^[0-9]+$ ]]; then
+  cat >&2 <<ERROR
+Error: Can not continue as NUMBER is not a whole number.
+ERROR
   exit 1
 fi
 
