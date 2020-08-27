@@ -115,5 +115,6 @@ PAYLOAD
 Error: An unexpected error has occurred ($error)!
 Please contact your system administrator for further assistance.
 ERROR
+    exit 1
   fi
 done
