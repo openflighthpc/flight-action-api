@@ -32,9 +32,22 @@ source "$DIR"/keys.conf
 
 # Ensure all the required keys are set
 set -e
-echo "${flight_ESTATE_cluster:?The flight_ESTATE_cluster has not been set!}" >/dev/null
-echo "${flight_ESTATE_slack_key:?The flight_ESTATE_slack_key has not been set!}" >/dev/null
-echo "${flight_ESTATE_slack_channels:?The flight_ESTATE_slack_channels has not been set!}" >/dev/null
+missing=
+if [ -z "$flight_ESTATE_cluster" ]; then
+  missing="flight_ESTATE_cluster"
+elif [ -z "$flight_ESTATE_slack_key" ]; then
+  missing="flight_ESTATE_slack_key"
+elif [ -z "$flight_ESTATE_slack_channels" ]; then
+  missing="flight_ESTATE_slack_channels"
+fi
+
+if [ -n "$missing" ]; then
+  cat >&2 <<ERROR
+Error: Could not complete request due to an internal configuration error ($missing).
+Please contact your system administrator for further assistance.
+ERROR
+  exit 1
+fi
 
 # Sets the default action
 if [[ -z "$__flight_ESTATE_action" ]]; then
