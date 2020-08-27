@@ -118,3 +118,7 @@ ERROR
     exit 1
   fi
 done
+
+# Notifies the user the request is complete
+echo Your request has been received and will be processed shortly.
+exit 0
