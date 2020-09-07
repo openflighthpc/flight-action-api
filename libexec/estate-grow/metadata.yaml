@@ -32,6 +32,7 @@ help:
   description: |
     Grows the compute estate by the NUMBER of nodes specified. There maybe a short
     delay before they become available. All the new nodes will be of the same TYPE.
+
     The available types are:
 
       compute-2C-3.75GB

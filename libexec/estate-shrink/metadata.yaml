@@ -32,6 +32,7 @@ help:
   description: |
     Remove NUMBER of nodes of the given TYPE from the compute estate. There maybe
     a short delay before they are removed.
+
     The available types are:
 
       compute-2C-3.75GB
