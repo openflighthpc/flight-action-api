@@ -94,7 +94,7 @@ class Ticket
     @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group))
 
     # Adds Node Base Jobs
-    nodes.map do |n|
+    nodes.each do |n|
       self.jobs << Job.new(node: n, ticket: self).tap do |job|
         DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
         @collated_stream.add(job)
