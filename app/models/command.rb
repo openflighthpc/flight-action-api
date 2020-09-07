@@ -85,16 +85,19 @@ class Command < Hashie::Dash
   private
 
   def validate_scripts_are_valid
-    return unless scripts.is_a?(Array)
-    scripts.select do |script|
-      case script
-      when Script
-        unless script.valid?
-          errors.add(:"script:#{script.rank}", script.errors.full_messages.join(','))
+    if scripts.is_a? Array
+      scripts.select do |script|
+        case script
+        when Script
+          unless script.valid?
+            errors.add(:"script:#{script.rank}", script.errors.full_messages.join(','))
+          end
+        else
+          errors.add(:scripts, 'must only contain Script objects')
         end
-      else
-        errors.add(:scripts, 'must only contain Script objects')
       end
+    else
+      errors.add(:scripts, 'must be an array')
     end
   end
 

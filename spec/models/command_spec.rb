@@ -151,6 +151,23 @@ RSpec.describe Command do
     end
   end
 
+  context 'with a hash of scripts' do
+    subject do
+      Command.new(
+        name: 'command-spec-command',
+        summary: 'dummy',
+        scripts: { default: script}
+      )
+    end
+
+    it { should_not be_valid }
+
+    it 'contains the invalid array message' do
+      subject.valid?
+      expect(subject.errors[:scripts].join("\n")).to include('array')
+    end
+  end
+
   describe '#syntax' do
     let(:syntax) { raise NotImplementedError }
     let(:has_context) { raise NotImplementedError }
