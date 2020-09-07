@@ -1,6 +1,7 @@
 help:
   summary: 'Profile the local network using nmap'
   has_context: false
+  confirmation: 'This may take a few moments, do you wish to continue?'
   description: >
     Detects other hosts running on the same network as the server. The default
     script will preform a ping scan over the first external network interface.
