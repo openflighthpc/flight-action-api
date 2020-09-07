@@ -76,8 +76,8 @@ for current in ${types[@]}; do
 done
 if [ -z "$found" ]; then
   cat >&2 <<ERROR
-Error: Can not continue as TYPE is unrecognized. Please select from the following:
-${types[@]}
+Unknown machine type $machine_type.  Available machine types:
+$(echo ${types[@]} | xargs -n1)
 ERROR
   exit 1
 fi
