@@ -30,4 +30,4 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # Runs the estate-grow script with the 'Shrink' type
 __flight_ESTATE_action='Shrink'
-bash "${SCRIPT_ROOT:-.}"/estate-grow/default.sh
+bash "${SCRIPT_ROOT:-.}"/estate-grow/default.sh "$@"
