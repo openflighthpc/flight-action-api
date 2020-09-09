@@ -210,6 +210,9 @@ class Stream < Sinatra::Base
   helpers Sinatra::Streaming
   helpers AuthHelpers
 
+  # Directs nginx not to buffer the streaming response
+  before { response.headers['X-Accel-Buffering'] = 'no' }
+
   get('/tickets/:id') do
     halt 403 unless role == :user
     ticket = Ticket.find_by_id(params[:id])
