@@ -214,6 +214,8 @@ class Stream < Sinatra::Base
   # NOTE: nginx will always compress text/html if gzip is on
   before do
     response.headers['X-Accel-Buffering'] = 'no'
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['Last-Modified'] = Time.current.httpdate
     response.headers['Content-Type'] = 'text/plain'
   end
 
