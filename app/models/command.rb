@@ -38,9 +38,19 @@ class Command < Hashie::Dash
   property :name
   property :summary
   property :description,  from: :summary
-  property :syntax,       default: nil
   property :confirmation, default: nil
   property :scripts,      default: []
+  property :has_context,  default: true
+  property :syntax,       from: :has_context, with: ->(s) do
+    case s
+    when String
+      s
+    when TrueClass
+      'NAME'
+    else
+      ''
+    end
+  end
 
   validates :name,        presence: true, format: {
     with: /\A[^_]*\Z/,    message: 'must not contain underscores'
@@ -50,6 +60,8 @@ class Command < Hashie::Dash
 
   validate :validate_has_a_default_script
   validate :validate_scripts_are_valid
+  validate :validate_no_context_only_has_a_default_script
+  validate :validate_syntax_name_prefix, if: :has_context
 
   class << self
     delegate :load, :load!, :reload, :find_by_name, :all,
@@ -67,23 +79,43 @@ class Command < Hashie::Dash
   end
 
   def default_script
-    scripts.detect { |script| script.rank == 'default' }
+    scripts.detect { |script| script.rank == 'default' if script.is_a? Script }
   end
 
   private
 
   def validate_scripts_are_valid
-    return unless scripts.is_a?(Hash)
-    scripts.select { |_, s| s.respond_to?(:valid?) }
-      .reject { |_, s| s.valid? }
-      .each do |name, script|
-      errors.add(:"#{name}_script", script.errors.full_messages.join(','))
+    if scripts.is_a? Array
+      scripts.select do |script|
+        case script
+        when Script
+          unless script.valid?
+            errors.add(:"script:#{script.rank}", script.errors.full_messages.join(','))
+          end
+        else
+          errors.add(:scripts, 'must only contain Script objects')
+        end
+      end
+    else
+      errors.add(:scripts, 'must be an array')
     end
   end
 
   def validate_has_a_default_script
     if default_script.nil?
       errors.add(:scripts, 'does not contain the default script')
+    end
+  end
+
+  def validate_no_context_only_has_a_default_script
+    if scripts.is_a?(Array) && scripts.length > 1 && !has_context
+      errors.add(:scripts, 'must only contain the default script as has_context is false')
+    end
+  end
+
+  def validate_syntax_name_prefix
+    unless syntax.to_s.match?(/\ANAME(\s.*)?/)
+      errors.add(:syntax, 'must be prefixed with NAME as has_context has been set')
     end
   end
 
@@ -148,6 +180,8 @@ class Command < Hashie::Dash
 
           COMMAND DETAILS:
           name:         #{command.name.to_s}
+          syntax:       #{command.syntax.to_s}
+          has-context:  #{command.has_context.to_s}
           summary:      #{command.summary.to_s}
           description:  #{command.description.to_s}
         ERROR

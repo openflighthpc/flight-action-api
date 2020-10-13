@@ -30,6 +30,41 @@
 require 'active_model'
 
 class Ticket
+  class Registry
+    def initialize
+      @mutex = Mutex.new
+      @tickets = {}
+    end
+
+    def all
+      @tickets.values
+    end
+
+    def find_by_id(id)
+      @tickets[id]
+    end
+
+    def add(ticket)
+      @mutex.synchronize do
+        @tickets[ticket.id] = ticket
+      end
+    end
+
+    def remove(ticket)
+      @mutex.synchronize do
+        @tickets.delete(ticket.id)
+      end
+    end
+  end
+
+  class << self
+    delegate :find_by_id, :all, to: :registry
+
+    def registry
+      @registry ||= Registry.new
+    end
+  end
+
   include ActiveModel::Model
   include ActiveModel::Attributes
 
@@ -37,9 +72,10 @@ class Ticket
   attribute :context
   attribute :command
   attribute :arguments, default: []
-  attribute :jobs
+  attribute :jobs, default: ->() { Array.new } # Ensure a new array is created each time
 
-  validates :context,  presence: true
+  validates :context,  presence: true, if: :command_has_context?
+  validates :context,  absence: true, unless: :command_has_context?
   validates :command,  presence: true
 
   def nodes
@@ -56,9 +92,19 @@ class Ticket
     DEFAULT_LOGGER.info "Building Ticket: #{self.id}"
     self.class.registry.add(self)
     @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group))
-    self.jobs = nodes.map do |n|
-      Job.new(node: n, ticket: self).tap do |job|
+
+    # Adds Node Base Jobs
+    nodes.each do |n|
+      self.jobs << Job.new(node: n, ticket: self).tap do |job|
         DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
+        @collated_stream.add(job)
+      end
+    end
+
+    # Adds the no-context job if required
+    unless command_has_context?
+      self.jobs << Job.new(node: nil, ticket: self).tap do |job|
+        DEFAULT_LOGGER.info "Add Job (No Contexting): #{job.id}"
         @collated_stream.add(job)
       end
     end
@@ -93,39 +139,8 @@ class Ticket
     end
   end
 
-  class << self
-    delegate :find_by_id, :all, to: :registry
-
-    def registry
-      @registry ||= Registry.new
-    end
-  end
-
-  class Registry
-    def initialize
-      @mutex = Mutex.new
-      @tickets = {}
-    end
-
-    def all
-      @tickets.values
-    end
-
-    def find_by_id(id)
-      @tickets[id]
-    end
-
-    def add(ticket)
-      @mutex.synchronize do
-        @tickets[ticket.id] = ticket
-      end
-    end
-
-    def remove(ticket)
-      @mutex.synchronize do
-        @tickets.delete(ticket.id)
-      end
-    end
+  def command_has_context?
+    command.has_context
   end
 end
 
@@ -142,7 +157,7 @@ class CollatedStream
   def add(job)
     @threads << Thread.new(job) do
       until (line = job.read_pipe.gets).nil? do
-        tagged_line = @tag_lines ? "#{job.node.name}: #{line}" : line
+        tagged_line = @tag_lines ? "#{job.node&.name}: #{line}" : line
         @mutex.synchronize do
           @lines << tagged_line
           @listeners.each do |listener|

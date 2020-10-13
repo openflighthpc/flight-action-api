@@ -30,16 +30,16 @@
 require 'spec_helper'
 
 RSpec.describe Command do
-  context 'with a simple command setup' do
-    let(:script) do
-      Script.new(path: '/dev/null', rank: 'default')
-    end
+  let(:script) do
+    Script.new(path: '/dev/null', rank: 'default')
+  end
 
+  context 'with a simple command setup' do
     let(:command) do
       Command.new(
-        name: 'name1-something',
+        name: 'command-spec-command',
         summary: 'dummy',
-        scripts: { 'default' => script }
+        scripts: [script]
       )
     end
 
@@ -76,8 +76,8 @@ RSpec.describe Command do
     end
 
     describe 'scripts' do
-      it 'must be a hash' do
-        subject.scripts = [script]
+      it 'must be an array' do
+        subject.scripts = { broken: script }
         expect(subject).not_to be_valid
       end
 
@@ -87,18 +87,13 @@ RSpec.describe Command do
       end
 
       it 'must contain Script objects' do
-        subject.scripts.merge!({ 'string' => 'string' })
+        subject.scripts << 'string'
         expect(subject).not_to be_valid
       end
 
       it 'must have valid scripts' do
         allow(script).to receive(:valid?).and_return(false)
         allow(script).to receive(:invalid?).and_return(true)
-        expect(subject).not_to be_valid
-      end
-
-      it 'must having matching ranks' do
-        subject.scripts.merge!({ 'wrong' => script })
         expect(subject).not_to be_valid
       end
     end
@@ -108,21 +103,28 @@ RSpec.describe Command do
     let(:ranks) { ['first', 'second', 'third'] }
     let(:default) { Script.new(path: '/dev/null', rank: 'default') }
     let(:scripts) do
-      ranks.map { |r| [r, Script.new(path: '/dev/null', rank: r)] }
-           .to_h
-           .tap { |h| h['default'] = default }
+      ranks.map { |r| Script.new(path: '/dev/null', rank: r) } << default
     end
+    let(:has_context) { true }
 
     subject do
       described_class.new(
         name: 'test',
         summary: 'test',
-        scripts: scripts
+        scripts: scripts,
+        has_context: has_context
       )
     end
 
     it 'is valid' do
       expect(subject).to be_valid
+    end
+
+    context 'when has_context is false' do
+      let(:has_context) { false }
+      it 'is not valid' do
+        expect(subject).not_to be_valid
+      end
     end
 
     describe '#lookup_script' do
@@ -134,15 +136,112 @@ RSpec.describe Command do
         expect(subject.lookup_script('missing', 'missing2')).to eq(default)
       end
 
-      it 'can find an alternative script' do
+      it 'can find the specified script' do
         rank = ranks.first
-        expect(subject.lookup_script(rank)).to eq(scripts[rank])
+        script = scripts.find { |s| s.rank == rank }
+        expect(subject.lookup_script(rank)).to eq(script)
       end
 
       it 'selects the first match' do
         rank = ranks.last
+        script = scripts.find { |s| s.rank == rank }
         lookup = ['missing', rank, ranks.first]
-        expect(subject.lookup_script(*lookup)).to eq(scripts[rank])
+        expect(subject.lookup_script(*lookup)).to eq(script)
+      end
+    end
+  end
+
+  context 'with a hash of scripts' do
+    subject do
+      Command.new(
+        name: 'command-spec-command',
+        summary: 'dummy',
+        scripts: { default: script}
+      )
+    end
+
+    it { should_not be_valid }
+
+    it 'contains the invalid array message' do
+      subject.valid?
+      expect(subject.errors[:scripts].join("\n")).to include('array')
+    end
+  end
+
+  describe '#syntax' do
+    let(:syntax) { raise NotImplementedError }
+    let(:has_context) { raise NotImplementedError }
+
+    subject do
+      opts = {
+        name: 'Syntax Demo',
+        summary: 'demo',
+        description: 'demo',
+        scripts: [script],
+        has_context: has_context
+      }.tap { |o| o[:syntax] = syntax unless syntax.nil? }
+      described_class.new(**opts)
+    end
+
+    context 'with the default syntax' do
+      let(:syntax) { nil }
+
+      context 'with has_context' do
+        let(:has_context) { true }
+        it { should be_valid }
+
+        it 'should be NAME' do
+          expect(subject.syntax).to eq('NAME')
+        end
+      end
+
+      context 'without has_context' do
+        let(:has_context) { false }
+        it { should be_valid }
+
+        it 'should be empty string' do
+          expect(subject.syntax).to eq('')
+        end
+      end
+    end
+
+    context 'with a syntax prefixed with NAME' do
+      let(:syntax) { 'NAME OTHER STUFF' }
+
+      context 'with has_context' do
+        let(:has_context) { true }
+        it { should be_valid }
+
+        it 'returns unmodified' do
+          expect(subject.syntax).to eq(syntax)
+        end
+      end
+
+      context 'without has_context' do
+        let(:has_context) { false }
+        it { should be_valid }
+
+        it 'returns unmodified' do
+          expect(subject.syntax).to eq(syntax)
+        end
+      end
+    end
+
+    context 'with a syntax without the NAME prefix' do
+      let(:syntax) { 'OTHER STUFF' }
+
+      context 'with has_context' do
+        let(:has_context) { true }
+        it { should_not be_valid }
+      end
+
+      context 'without has_context' do
+        let(:has_context) { false }
+        it { should be_valid }
+
+        it 'returns unmodified' do
+          expect(subject.syntax).to eq(syntax)
+        end
       end
     end
   end

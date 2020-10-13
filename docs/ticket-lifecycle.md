@@ -1,4 +1,5 @@
 # Ticket (and Job) Creation Life Cycle
+# STALE: NEEDS UPDATING
 
 This document primary purposes is to describe the creation cycle of `tickets`/`jobs` and will cover the following concepts:
 * `tickets`

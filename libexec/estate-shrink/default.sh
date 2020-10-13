@@ -1,5 +1,4 @@
-# frozen_string_literal: true
-
+#!/bin/bash
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -27,7 +26,8 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-port 6304
-log_requests
-pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# Runs the estate-grow script with the 'Shrink' type
+export __flight_ESTATE_action='Shrink'
+bash "${SCRIPT_ROOT:-.}"/estate-grow/default.sh "$@"

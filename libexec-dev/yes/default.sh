@@ -1,5 +1,4 @@
-# frozen_string_literal: true
-
+#!/bin/bash
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -27,7 +26,4 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-port 6304
-log_requests
-pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
-
+timeout 60 yes

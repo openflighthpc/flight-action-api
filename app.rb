@@ -210,6 +210,13 @@ class Stream < Sinatra::Base
   helpers Sinatra::Streaming
   helpers AuthHelpers
 
+  # Directs nginx not to buffer the streaming response
+  # NOTE: nginx will always compress text/html if gzip is on
+  before do
+    response.headers['X-Accel-Buffering'] = 'no'
+    response.headers['Content-Type'] = 'text/plain'
+  end
+
   get('/tickets/:id') do
     halt 403 unless role == :user
     ticket = Ticket.find_by_id(params[:id])

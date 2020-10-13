@@ -39,7 +39,7 @@ RSpec.describe Script do
       Command.new(
         name: 'name1-something',
         summary: 'dummy',
-        scripts: { 'default' => script }
+        scripts: [script]
       )
     end
 

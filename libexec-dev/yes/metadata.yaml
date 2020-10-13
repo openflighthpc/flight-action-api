@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -27,7 +25,10 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-port 6304
-log_requests
-pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
-
+help:
+  summary: "repeatable print 'y' to the terminal"
+  has_context: false
+  description: >
+    Repeatable prints 'y' to the terminal to test the streaming ability of the
+    application and external integration. By default it will timeout after
+    60 seconds.

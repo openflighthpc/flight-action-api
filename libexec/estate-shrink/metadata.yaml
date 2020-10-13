@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -27,7 +25,19 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-port 6304
-log_requests
-pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
+help:
+  summary: 'Remove nodes from your compute estate'
+  syntax: 'TYPE NUMBER'
+  has_context: false
+  description: |
+    Remove NUMBER of nodes of the given TYPE from the compute estate. There maybe
+    a short delay before they are removed.
 
+    The available types are:
+
+      compute-2C-3.75GB
+      compute-8C-15GB
+      general-large
+      general-small
+      gpu-1GPU-8C-61GB
+      gpu-4GPU-32C-244GB

@@ -34,7 +34,16 @@ class CommandSerializer
     object.name
   end
 
-  attributes :name, :description, :summary, :syntax, :confirmation
+  attributes :name, :description, :summary, :confirmation, :has_context
+  attribute :syntax do
+    if object.syntax
+      object.syntax
+    elsif object.has_context
+      'NAME'
+    else
+      ''
+    end
+  end
 end
 
 class NodeSerializer

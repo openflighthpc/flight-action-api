@@ -63,16 +63,9 @@ class Job < BaseHashieDashModel
   def run
     DEFAULT_LOGGER.info "Running Job: #{self.id}"
     cwd = Figaro.env.working_directory_path!
-    script_root = Figaro.env.command_directory_path
-    script = ticket.command.lookup_script(*node.ranks)
-    envs = node.params
-      .tap { |e| e['name'] = node.name }
-      .tap { |e| e['command'] = ticket.command.name }
-      .tap { |e| e['SCRIPT_ROOT'] = script_root }
-      .stringify_keys
-    log_job(script, envs, cwd)
+    log_job(script, cmd_envs, cwd)
 
-    subprocess = Subprocess.new(envs, script.path, *ticket.arguments, chdir: cwd)
+    subprocess = Subprocess.new(cmd_envs, script.path, *ticket.arguments, chdir: cwd)
     subprocess.run do |stdout, stderr|
       if stdout
         self.stdout << stdout
@@ -91,6 +84,23 @@ class Job < BaseHashieDashModel
     DEFAULT_LOGGER.info "Finished Job: #{self.id}"
   end
 
+  def script
+    @script ||= if node
+      ticket.command.lookup_script(*node.ranks)
+    else
+      ticket.command.lookup_script
+    end
+  end
+
+  def cmd_envs
+    if node
+      node.params.stringify_keys.dup.tap { |e| e['name'] = node.name }
+    else
+      {}
+    end.tap { |e| e['SCRIPT_ROOT'] = Figaro.env.command_directory_path }
+       .tap { |e| e['command'] = ticket.command.name }
+  end
+
   def completed?
     !self.status.nil?
   end
@@ -103,7 +113,7 @@ class Job < BaseHashieDashModel
       # Job Definition ===============================================================
       # Ticket: #{ticket.id}
       # ID:     #{id}
-      # Node:   #{node.name}
+      # Node:   #{node ? node.name : 'Not Applicable - No Context'}
       # Rank:   #{script.rank}
       # Script: #{script.path}
       # Args:   #{ticket.arguments}

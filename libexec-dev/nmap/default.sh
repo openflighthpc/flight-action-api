@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -27,7 +25,7 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-port 6304
-log_requests
-pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
-
+set -e
+first_ip=$(hostname -I | cut -f1 -d ' ')
+subnet=$(echo "$first_ip" | cut -f1 -d ' ' | sed "s/^\([0-9]\+\)\.\([0-9]\+\).\([0-9]\+\).*/\1.\2.\3.0\/24/g")
+nmap -sn "$subnet"

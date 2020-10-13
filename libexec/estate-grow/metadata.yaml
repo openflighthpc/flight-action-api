@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -27,7 +25,19 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-port 6304
-log_requests
-pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
+help:
+  summary: 'Add additional nodes to your compute estate'
+  syntax: 'TYPE NUMBER'
+  has_context: false
+  description: |
+    Grows the compute estate by the NUMBER of nodes specified. There maybe a short
+    delay before they become available. All the new nodes will be of the same TYPE.
 
+    The available types are:
+
+      compute-2C-3.75GB
+      compute-8C-15GB
+      general-large
+      general-small
+      gpu-1GPU-8C-61GB
+      gpu-4GPU-32C-244GB

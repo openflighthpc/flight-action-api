@@ -3,7 +3,7 @@
 This API broadly conforms the [JSON:API Specifications](https://jsonapi.org/). The major deviations are:
 1. The resource's `id` are alphanumeric and are quasi dependent on the attributes,
 
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119).
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [BCP 14](https://tools.ietf.org/html/bcp14) \[[RFC2119](https://tools.ietf.org/html/rfc2119)\] \[[RFC8174](https://tools.ietf.org/html/rfc8174)\] when, and only when, they appear in all capitals, as shown here.
 
 ## Nodes
 
@@ -177,7 +177,16 @@ Content-Type: application/vnd.api+json
 
 ### Show
 
-Return a single `command` by its ID. The `name`, `summary`, and `description` attributes can be used to generate command line help text.
+Return a single `command` by its ID. The `name`, `summary`, `syntax`, and `description` attributes can be used to generate command line help text.
+
+A `confirmation` string MAY be included with the response. This is a challenge question which SHOULD be presented to the user before continuing.
+
+The `has-context` attribute SHALL be `true` if the command MUST be ran on a `node`; or over a `group`. Otherwise the `has-context` attribute SHALL be `false`. The `syntax` defines the method signature to use in the CLI.
+
+The `syntax` attribute MAY be overridden on a per command basis and SHOULD NOT be predicted in advance. The `syntax` has the following restrictions:
+* It SHALL be a string,
+* It SHALL start with `NAME` if `has_context` is `true`, and
+* It SHOULD NOT start with `NAME` if `has_context` is `false`.
 
 ```
 GET /commands/:id
@@ -192,41 +201,15 @@ Content-Type: application/vnd.api+json
     "type": "commands",
     "id": "<name>",
     "attributes": {
-      "name": "<name>",
-      "summary": "<summary>",
-      "description": "<description">
+      "name":  STRING,
+      "summary": STRING,
+      "description": STRING,
+      "syntax": STRING,
+      "has-context": BOOLEAN,
+      ["confirmation": STRING]
     },
     "links": ... see JSON:API spec ...
   }, ... see JSON:API spec ...
-}
-```
-
-## Jobs
-
-A `job` is a completely virtual resource that does not have any dedicated end points. Instead they are returned as part of a relationship to `tickets`. They are not persisted on the server and can not be directly created or destroyed.
-
-### ID
-
-The ID for a `job` resource MUST be alphanumeric.
-
-### Resource Object
-
-The `job` resource object has the following syntax. The `stdout`, `stderr`, and `status` are from the system command associated with the `job`. The `stdout` and `stderr` will be strings, where `status` is an integer.
-
-```
-{
-  "type": "jobs",
-  "id": "<id>",
-  "attributes": {
-    "stdout": "<stdout>",
-    "stderr": "<srderr>",
-    "status": <status>
-  },
-  "relationships": {
-    "node": <Node-Resource-Identifier-Object>,
-    "ticket": <Ticket-Resource-Identifier-Object>
-  },
-  ... see JSON:API spec ...
 }
 ```
 
@@ -240,13 +223,14 @@ The ID for a `ticket` MUST be alphanumeric.
 
 ### Create
 
-Creating a `ticket` is dedicated way to run `jobs` through the API. When creating a `ticket`, the `command` and `context` relationships SHOULD be specified. Whilst the request MAY omit these relationships the response SHALL return `201 CREATED` with a blank association with the `jobs` resource; and SHALL include the other relevant related resources.
+Creating a `ticket` is dedicated way to run `jobs` through the API. All requests MUST specify a `command` relationship otherwise the response SHALL be `422 Unprocessable Entity`. Whether the `context` is required depends on if the `command` has set the `has_context` flag:
+* The `context` MUST be specified if the `has_context` flag is set, and
+* The `context` MUST NOT be specified if the `has_context` flag is not set, otherwise
+* The response SHALL be `422 Unprocessible Entity`.
 
-The `context` MUST be either a `group` or `node` resource identifier object. Requests with a `node context` SHOULD create a `ticket` with a single entity `jobs` resource for the `node`. Requests with `node context` MAY return an empty `jobs` resource if the `node` is missing. Requests with a `group context` SHOULD return a `jobs` resource containing a `job` for each `node` within the `group`. The `jobs` resource SHALL NOT contain `jobs` for missing nodes.
+The `context` SHOULD be either a `group` or `node` resource identifier object. Requests with a `node context` SHOULD create a `ticket` with a single entity `jobs` resource for the `node`. Requests with a `group context` SHOULD return a `jobs` resource containing a `job` for each `node` within the `group`.
 
-The response MAY contain a `true` attribute with value `true`. This is a compatibility fix with clients that are not fully JSON:API compliant. The `true` attribute MAY be permanently removed without notice.
-
-This method "creates" an ephemeral `ticket` resource that only lives during the lifetime of the request. The ticket SHALL NOT be saved and/or persisted after the response has been issued. Due to this ephemeral nature the response SHALL include the related `command`, `context`, `jobs`, `jobs.node` resources. The request SHOULD NOT specify an `include` query as it SHALL be ignored.
+The request SHOULD specify an `arguments` array when a non-empty `syntax` has been provided. These arguments will be made available to the running script. The server does not however validate the arguments match the provided `syntax`.
 
 The life cycle of a request SHOULD complete the following stages:
 * Identify the `context` and generate a `nodes` list,
@@ -263,13 +247,11 @@ Authorization: Bearer <jwt>
 {
   "data": {
     "type": "tickets",
+    "attributes": {
+      ["arguments: ARRAY<STRING>]
     "relationships": {
-      "context": {
-        "data": <Group-or-Node-Resource-Identifier-Object>
-      },
-      "command": {
-        "data": <Command-Resource-Identifier-Object>
-      }
+      "command": COMMAND_RESOURCE_IDENTIFIER_OBJECT,
+      ["context": GROUP_OR_NODE_RESOURCE_IDENTIFIER_OBJECT]
     },
     "links": ... see JSON:API spec ...
   }, ... see JSON:API spec ...
@@ -304,3 +286,6 @@ Content-Type: application/vnd.api+json
 }
 ```
 
+### Streaming
+
+... Needs Documenting ...
