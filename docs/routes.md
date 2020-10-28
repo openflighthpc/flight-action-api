@@ -248,7 +248,9 @@ Authorization: Bearer <jwt>
   "data": {
     "type": "tickets",
     "attributes": {
-      ["arguments: ARRAY<STRING>]
+      ["arguments: ARRAY<STRING>],
+      ["request_username": STRING],
+      ["request_UID": INTEGER|STRING]
     "relationships": {
       "command": COMMAND_RESOURCE_IDENTIFIER_OBJECT,
       ["context": GROUP_OR_NODE_RESOURCE_IDENTIFIER_OBJECT]

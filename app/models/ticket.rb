@@ -74,6 +74,10 @@ class Ticket
   attribute :arguments, default: []
   attribute :jobs, default: ->() { Array.new } # Ensure a new array is created each time
 
+  # NOTE: For backwards compatibility purposes, these are not required
+  attribute :request_username,  default: ''
+  attribute :request_uid,       default: ''
+
   validates :context,  presence: true, if: :command_has_context?
   validates :context,  absence: true, unless: :command_has_context?
   validates :command,  presence: true

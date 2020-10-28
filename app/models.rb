@@ -97,8 +97,12 @@ class Job < BaseHashieDashModel
       node.params.stringify_keys.dup.tap { |e| e['name'] = node.name }
     else
       {}
-    end.tap { |e| e['SCRIPT_ROOT'] = Figaro.env.command_directory_path }
-       .tap { |e| e['command'] = ticket.command.name }
+    end.tap do |env|
+      env['SCRIPT_ROOT']      = Figaro.env.command_directory_path
+      env['command']          = ticket.command.name
+      env['request_username'] = ticket.request_username.to_s
+      env['request_uid']      = ticket.request_uid.to_s
+    end
   end
 
   def completed?
