@@ -100,7 +100,7 @@ class Ticket
   def build_jobs
     DEFAULT_LOGGER.info "Building Ticket: #{self.id}"
     self.class.registry.add(self)
-    @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group))
+    @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group), sequential: false)
 
     # Adds Node Base Jobs
     nodes.each do |n|
@@ -155,16 +155,21 @@ end
 
 # Collates and records output from jobs as it is produced.
 class CollatedStream
-  def initialize(tag_lines:)
+  def initialize(tag_lines:, sequential:)
     @lines = []
     @listeners = []
     @mutex = Mutex.new
     @tag_lines = tag_lines
     @threads = []
+    @sequential = sequential
   end
 
   def add(job)
     @threads << Thread.new(job) do
+      # Stop the child to allow the main thread to schedule its execution
+      Thread.stop
+
+      # Process the output line by line
       until (line = job.read_pipe.gets).nil? do
         tagged_line = @tag_lines ? "#{job.node&.name}: #{line}" : line
         @mutex.synchronize do
@@ -176,6 +181,10 @@ class CollatedStream
             end
           end
         end
+
+        # Allow another thread to run, this helps interlace the lines of
+        # each job it there was a delay in starting the listener
+        Thread.pass
       end
     end
   end
@@ -191,6 +200,15 @@ class CollatedStream
       end
       @listeners << block
     end
-    @threads.each(&:join)
+
+    if @sequential
+      @threads.each do |tr|
+        tr.wakeup
+        tr.join
+      end
+    else
+      @threads.each(&:wakeup)
+      @threads.each(&:join)
+    end
   end
 end
