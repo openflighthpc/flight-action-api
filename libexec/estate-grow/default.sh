@@ -103,7 +103,7 @@ for channel in "${channels[@]}"; do
   "text": "Received a \`flight-estate\` modification request!",
   "attachments": [
     {
-      "text": "*Cluster*: $flight_ESTATE_cluster\n*Action*: $__flight_ESTATE_action\n*Machine Type*: $machine_type\n*Number*: $number"
+      "text": "*Unauthenticated User:* $request_username($request_uid)\n*Cluster*: $flight_ESTATE_cluster\n*Action*: $__flight_ESTATE_action\n*Machine Type*: $machine_type\n*Number*: $number"
     }
   ]
 }
