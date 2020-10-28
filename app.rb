@@ -175,6 +175,7 @@ class App < Sinatra::Base
       attrs = [:arguments, :request_uid, :request_username].map do |key|
         [key, attributes[key]]
       end.to_h
+      attrs[:sequential] = (attributes[:sequential] ? true : false)
       ticket = Ticket.new(**attrs)
       next [ticket.id, ticket]
     end
