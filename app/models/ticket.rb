@@ -76,10 +76,12 @@ class Ticket
 
   attribute :request_username,  default: ''
   attribute :request_uid
+  attribute :sequential, default: false
 
   validates :context,  presence: true, if: :command_has_context?
   validates :context,  absence: true, unless: :command_has_context?
   validates :command,  presence: true
+  validates :sequential, inclusion: { in: [true, false, nil] }
 
   # NOTE: For backwards compatibility purposes, the request_username/uid maybe empty
   validates :request_username, format: {
@@ -100,7 +102,7 @@ class Ticket
   def build_jobs
     DEFAULT_LOGGER.info "Building Ticket: #{self.id}"
     self.class.registry.add(self)
-    @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group), sequential: false)
+    @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group), sequential: sequential)
 
     # Adds Node Base Jobs
     nodes.each do |n|
