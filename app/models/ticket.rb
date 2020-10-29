@@ -124,7 +124,7 @@ class Ticket
     end
 
     # Adds the no-context job if no other jobs where added
-    unless jobs.empty?
+    if jobs.empty?
       self.jobs << Job.new(node: nil, ticket: self).tap do |job|
         DEFAULT_LOGGER.info "Add Job (No Contexting): #{job.id}"
         @collated_stream.add(job)
