@@ -41,6 +41,11 @@ class Command < Hashie::Dash
   property :confirmation, default: nil
   property :scripts,      default: []
   property :has_context,  default: true
+
+  # TODO: Reconsider how the default is set. Currently it can't tell the
+  # difference between 'has_context: all_nodes' and an explicitly defined
+  # string. For the time being `has_context: all_nodes' flag needs to be
+  # combined with 'syntax: ""'
   property :syntax,       from: :has_context, with: ->(s) do
     case s
     when String
@@ -58,10 +63,12 @@ class Command < Hashie::Dash
   validates :summary,     presence: true
   validates :description, presence: true
 
+  validates :has_context, inclusion: { in: [true, false, nil, 'all_nodes'] }
+
   validate :validate_has_a_default_script
   validate :validate_scripts_are_valid
   validate :validate_no_context_only_has_a_default_script
-  validate :validate_syntax_name_prefix, if: :has_context
+  validate :validate_syntax_name_prefix, if: :has_explicit_context?
 
   class << self
     delegate :load, :load!, :reload, :find_by_name, :all,
@@ -80,6 +87,18 @@ class Command < Hashie::Dash
 
   def default_script
     scripts.detect { |script| script.rank == 'default' if script.is_a? Script }
+  end
+
+  ##
+  # Checks if the context needs to be explicitly set
+  def has_explicit_context?
+    has_context == true
+  end
+
+  ##
+  # Checks if the context is not explcitly/implicitly set
+  def has_no_context?
+    !has_context
   end
 
   private
@@ -108,7 +127,7 @@ class Command < Hashie::Dash
   end
 
   def validate_no_context_only_has_a_default_script
-    if scripts.is_a?(Array) && scripts.length > 1 && !has_context
+    if scripts.is_a?(Array) && scripts.length > 1 && has_no_context?
       errors.add(:scripts, 'must only contain the default script as has_context is false')
     end
   end

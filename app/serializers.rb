@@ -44,6 +44,18 @@ class CommandSerializer
       ''
     end
   end
+
+  attribute :has_context do
+    case object.has_context
+    when String
+      # Assumes all strings are some form of implicit context
+      # This will need update if this assumption no longer holds
+      false
+    else
+      # Ensures a true/false is returned
+      object.has_context ? true : false
+    end
+  end
 end
 
 class NodeSerializer

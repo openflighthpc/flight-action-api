@@ -1,0 +1,6 @@
+help:
+  summary: 'List all the nodes'
+  has_context: all_nodes
+  syntax: ''
+  description: List all the defined nodes
+
