@@ -3,4 +3,5 @@ help:
   has_context: all_nodes
   syntax: ''
   description: List all the defined nodes
+  sequential_output: true
 
