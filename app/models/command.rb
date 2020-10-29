@@ -42,6 +42,10 @@ class Command < Hashie::Dash
   property :scripts,      default: []
   property :has_context,  default: true
 
+  # Flags the output to be displayed sequentially, the jobs will still run
+  # concurrently
+  property :sequential_output, default: false
+
   # TODO: Reconsider how the default is set. Currently it can't tell the
   # difference between 'has_context: all_nodes' and an explicitly defined
   # string. For the time being `has_context: all_nodes' flag needs to be
@@ -64,6 +68,7 @@ class Command < Hashie::Dash
   validates :description, presence: true
 
   validates :has_context, inclusion: { in: [true, false, nil, 'all_nodes'] }
+  validates :sequential_output, inclusion: { in: [true, false, nil] }
 
   validate :validate_has_a_default_script
   validate :validate_scripts_are_valid
