@@ -1,0 +1,6 @@
+help:
+  summary: 'Display details about all nodes within the estate'
+  has_context: all_nodes
+  syntax: ''
+  sequential_output: true
+
