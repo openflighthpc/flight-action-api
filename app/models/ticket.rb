@@ -78,8 +78,8 @@ class Ticket
   attribute :request_uid
   attribute :sequential, default: false
 
-  validates :context,  presence: true, if: :command_has_context?
-  validates :context,  absence: true, unless: :command_has_context?
+  validates :context,  presence: true, if: :command_has_explicit_context?
+  validates :context,  absence: true, unless: :command_has_explicit_context?
   validates :command,  presence: true
   validates :sequential, inclusion: { in: [true, false, nil] }
 
@@ -90,10 +90,14 @@ class Ticket
   validates :request_uid, numericality: { only_integer: true, allow_nil: true }
 
   def nodes
-    if context.is_a?(Node)
+    @nodes ||= if context.is_a?(Node)
       [context]
     elsif context.is_a?(Group)
       context.nodes
+    elsif command.has_context  == 'all_nodes'
+      # NOTE: This does not guarantee output order by itself due to
+      # the interlacing effect. It needs to be combined with sequential ordering
+      NodeFacade.index_all.sort
     else
       []
     end
@@ -112,8 +116,8 @@ class Ticket
       end
     end
 
-    # Adds the no-context job if required
-    unless command_has_context?
+    # Adds the no-context job if no other jobs where added
+    unless jobs.empty?
       self.jobs << Job.new(node: nil, ticket: self).tap do |job|
         DEFAULT_LOGGER.info "Add Job (No Contexting): #{job.id}"
         @collated_stream.add(job)
@@ -150,8 +154,9 @@ class Ticket
     end
   end
 
-  def command_has_context?
-    command.has_context
+  # Ensures the context is set iff there is an explicit context
+  def command_has_explicit_context?
+    command.has_explicit_context?
   end
 end
 
