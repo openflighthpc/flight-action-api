@@ -1,5 +1,4 @@
 #!/bin/bash
-LIBEXEC="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )"
 
 # Get the last line from the show output
-bash "$LIBEXEC"/estate-show/default.sh "$@" | tail -n1
+bash "$SCRIPT_ROOT"/estate-show/default.sh "$@" | tail -n1
