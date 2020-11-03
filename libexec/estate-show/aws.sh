@@ -56,7 +56,7 @@ if [ ${exit_code} -eq 0 ] ; then
   (*) 'unknown' ;;
   esac)
 
-  echo "$name": "$machine_type"
+  echo "$machine_type"
 else
     # Standard error from the `aws` call should be enough to debug this.
     :
