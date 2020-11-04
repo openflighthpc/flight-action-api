@@ -53,7 +53,7 @@ if [ ${exit_code} -eq 0 ] ; then
   ('"c4.2xlarge"')  echo "compute-8C-15GB" ;;
   ('"p3.2xlarge"')  echo "gpu-1GPU-8C-61GB" ;;
   ('"p3.8xlarge"')  echo "gpu-4GPU-32C-244GB" ;;
-  (*) 'unknown' ;;
+  (*)               echo "unknown" ;;
   esac)
 
   echo "$machine_type"
