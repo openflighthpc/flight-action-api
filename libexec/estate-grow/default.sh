@@ -26,77 +26,56 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-# Sources the configuration script
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source "$DIR"/keys.conf
-
-# Ensure all the required keys are set
 set -e
-missing=
-if [ -z "$flight_ESTATE_cluster" ]; then
-  missing="flight_ESTATE_cluster"
-elif [ -z "$flight_ESTATE_slack_key" ]; then
-  missing="flight_ESTATE_slack_key"
-elif [ -z "$flight_ESTATE_slack_channels" ]; then
-  missing="flight_ESTATE_slack_channels"
+
+source "${SCRIPT_ROOT:-.}"/estate-grow/keys.conf
+source "${SCRIPT_ROOT:-.}"/estate-change/machine-type-definitions.sh
+
+# Sets the default action.  This script is also used by the estate-shrink
+# script with a different action set.
+if [[ -z "$__flight_ESTATE_action" ]]; then
+    __flight_ESTATE_action='Grow'
 fi
 
-if [ -n "$missing" ]; then
-  cat >&2 <<ERROR
+validate_slack_configuration() {
+    local missing
+    missing=
+    if [ -z "$flight_ESTATE_cluster" ]; then
+        missing="flight_ESTATE_cluster"
+    elif [ -z "$flight_ESTATE_slack_key" ]; then
+        missing="flight_ESTATE_slack_key"
+    elif [ -z "$flight_ESTATE_slack_channels" ]; then
+        missing="flight_ESTATE_slack_channels"
+    fi
+    if [ -n "$missing" ]; then
+        cat 1>&2 <<ERROR
 Error: Could not complete the request due to an internal configuration error ($missing).
 Please contact your system administrator for further assistance.
 ERROR
-  exit 1
-fi
-
-# Sets the default action
-if [[ -z "$__flight_ESTATE_action" ]]; then
-  __flight_ESTATE_action='Grow'
-fi
-
-# Sets the types
-declare -a types=(
- compute-2C-3.75GB compute-8C-15GB general-large general-small gpu-1GPU-8C-61GB gpu-4GPU-32C-244GB
-)
-
-# Unpacks the channels
-IFS=':' read -r -a channels <<< "$flight_ESTATE_slack_channels"
-
-# Unpacks the arguments
-machine_type="$1"
-number="$2"
-
-# Ensures the type is valid
-found=''
-for current in ${types[@]}; do
-  if [[ "$current" == "$machine_type" ]]; then
-    found="$current"
-    break
-  fi
-done
-if [ -z "$found" ]; then
-  cat >&2 <<ERROR
-Unknown machine type $machine_type.  Available machine types:
-$(echo ${types[@]} | xargs -n1)
-ERROR
-  exit 1
-fi
+        exit 1
+    fi
+}
 
 # Ensures the number is indeed a number
-if [[ ! "$number" =~ ^[0-9]+$ ]]; then
-  cat >&2 <<ERROR
-Error: Can not continue as NUMBER is not a whole number.
+validate_number_format() {
+  if [[ ! "${1}" =~ ^[0-9]+$ ]]; then
+    cat 1>&2 <<ERROR
+Error:  Unrecognised number format ${1}.
 ERROR
-  exit 1
-fi
+    exit 1
+  fi
+}
 
-# Creates the JSON payload for slack
-for channel in "${channels[@]}"; do
-  output=$(curl -H 'Content-Type: application/json; charset=UTF-8' \
-                -H "Authorization: Bearer $flight_ESTATE_slack_key" \
-                -d @- \
-                "https://slack.com/api/chat.postMessage" \
-                2>/dev/null << PAYLOAD
+# Expects ${channel}, ${machine_type} and ${number} to be set in the calling
+# scope.
+#
+# Sends message to ${channel}.
+send_slack_message() {
+    output=$(curl -H 'Content-Type: application/json; charset=UTF-8' \
+                  -H "Authorization: Bearer $flight_ESTATE_slack_key" \
+                  -d @- \
+                  "https://slack.com/api/chat.postMessage" \
+                  2>/dev/null << PAYLOAD
 {
   "channel": "$channel",
   "as_user": true,
@@ -108,17 +87,38 @@ for channel in "${channels[@]}"; do
   ]
 }
 PAYLOAD
-)
-  if echo "$output" | grep '"ok":false' >/dev/null; then
-    error=$(echo "$output" | sed 's/.*"error":"\([^"]*\)".*/\1/g')
-    cat >&2 <<ERROR
+  )
+    if echo "$output" | grep '"ok":false' >/dev/null; then
+        error=$(echo "$output" | sed 's/.*"error":"\([^"]*\)".*/\1/g')
+        cat >&2 <<ERROR
 Error: An unexpected error has occurred ($error)!
 Please contact your system administrator for further assistance.
 ERROR
-    exit 1
-  fi
-done
+        exit 1
+    fi
+}
 
-# Notifies the user the request is complete
-echo Your request has been received and will be processed shortly.
-exit 0
+main() {
+  validate_slack_configuration
+
+  local channels
+  local machine_type
+  local number
+
+  machine_type="$1"
+  number="$2"
+  validate_machine_type "${machine_type}"
+  validate_number_format "${number}"
+
+  IFS=':' read -r -a channels <<< "$flight_ESTATE_slack_channels"
+  for channel in "${channels[@]}"; do
+    send_slack_message
+  done
+
+  echo Your request has been received and will be processed shortly.
+  exit 0
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

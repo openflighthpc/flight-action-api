@@ -35,6 +35,8 @@ if [[ -z "${aws_region}" ]]; then
     exit 1
 fi
 
+source "${SCRIPT_ROOT:-.}"/estate-change/machine-type-definitions.sh
+
 aws_instance_type=$(
 aws ec2 describe-instance-attribute \
   --attribute instanceType \
@@ -46,17 +48,16 @@ aws ec2 describe-instance-attribute \
 exit_code=$?
 
 if [ ${exit_code} -eq 0 ] ; then
-  machine_type=$(case "$aws_instance_type" in
-  ('"t2.small"')    echo "general-small" ;;
-  ('"t2.large"')    echo "general-large" ;;
-  ('"c4.large"')    echo "compute-2C-3.75GB" ;;
-  ('"c4.2xlarge"')  echo "compute-8C-15GB" ;;
-  ('"p3.2xlarge"')  echo "gpu-1GPU-8C-61GB" ;;
-  ('"p3.8xlarge"')  echo "gpu-4GPU-32C-244GB" ;;
-  (*)               echo "unknown" ;;
-  esac)
+    # Remove the surrounding quotes.
+    aws_instance_type="${aws_instance_type%\"}"
+    aws_instance_type="${aws_instance_type#\"}"
 
-  echo "$machine_type"
+    machine_type="${REVERSE_MACHINE_TYPE_MAP[$aws_instance_type]}"
+    if [ "${machine_type}" == "" ]; then
+        echo "unknown"
+    else
+        echo "${machine_type}"
+    fi
 else
     # Standard error from the `aws` call should be enough to debug this.
     :
