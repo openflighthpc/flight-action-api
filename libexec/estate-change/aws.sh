@@ -39,31 +39,7 @@ if [[ -z "${1}" ]]; then
     exit 1
 fi
 
-declare -A TYPE_MAP
-# NOTE: If changing this map also change the types listed in the metadata
-# description.
-TYPE_MAP=(
-  [general-small]=t2.small
-  [general-large]=t2.large
-  [compute-2C-3.75GB]=c4.large
-  [compute-8C-15GB]=c4.2xlarge
-  [gpu-1GPU-8C-61GB]=p3.2xlarge
-  [gpu-4GPU-32C-244GB]=p3.8xlarge
-)
-
-validate_instance_type() {
-    if [ "${TYPE_MAP[${1}]}" == "" ]; then
-        echo -e "Unknown machine type ${1}.  Available machine types:\n" 1>&2
-        sorted_keys=()
-        while IFS= read -rd '' key; do
-            sorted_keys+=( "$key" )
-        done < <(printf '%s\0' "${!TYPE_MAP[@]}" | sort -z)
-        for key in "${sorted_keys[@]}" ; do
-            echo "${key}" 1>&2
-        done
-        exit 1
-    fi
-}
+source "${SCRIPT_ROOT:-.}"/estate-change/machine-type-definitions.sh
 
 current_instance_type() {
     aws ec2 describe-instances \
@@ -85,19 +61,19 @@ change_instance_type() {
 }
 
 main() {
-    validate_instance_type "$@"
     local initial_status
     local retval
     local cur_ec2_type
-    local generic_type
+    local machine_type
     local new_ec2_type
 
-    generic_type="$1"
-    new_ec2_type="${TYPE_MAP[$1]}"
+    machine_type="$1"
+    validate_machine_type "${machine_type}"
+    new_ec2_type="${MACHINE_TYPE_MAP[$1]}"
     cur_ec2_type=$( current_instance_type )
 
     if [ "${cur_ec2_type}" == "${new_ec2_type}" ] ; then
-        echo "Machine type already ${generic_type}"
+        echo "Machine type already ${machine_type}"
         exit 0
     fi
 

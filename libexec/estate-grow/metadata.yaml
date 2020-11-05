@@ -29,6 +29,8 @@ help:
   summary: 'Add additional nodes to your compute estate'
   syntax: 'TYPE NUMBER'
   has_context: false
+  # NOTE: If changing the machine type list below also change the
+  # MACHINE_TYPE_MAP in machine-type-definitions.sh.
   description: |
     Grows the compute estate by the NUMBER of nodes specified. There maybe a short
     delay before they become available. All the new nodes will be of the same TYPE.

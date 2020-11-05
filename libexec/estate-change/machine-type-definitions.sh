@@ -1,3 +1,4 @@
+#!/bin/bash
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -25,21 +26,36 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-help:
-  summary: 'Remove nodes from your compute estate'
-  syntax: 'TYPE NUMBER'
-  has_context: false
-  # NOTE: If changing the machine type list below also change the
-  # MACHINE_TYPE_MAP in machine-type-definitions.sh.
-  description: |
-    Remove NUMBER of nodes of the given TYPE from the compute estate. There maybe
-    a short delay before they are removed.
+# A map from generic machine types to the equivalent AWS EC2 instance type.
+#
+# NOTE: If changing this map also change the types listed in the estate
+# metadata files.
+declare -A MACHINE_TYPE_MAP
+MACHINE_TYPE_MAP=(
+  [general-small]=t2.small
+  [general-large]=t2.large
+  [compute-2C-3.75GB]=c4.large
+  [compute-8C-15GB]=c4.2xlarge
+  [gpu-1GPU-8C-61GB]=p3.2xlarge
+  [gpu-4GPU-32C-244GB]=p3.8xlarge
+)
 
-    The available types are:
+# An array of machine types.
+declare -a MACHINE_TYPE_NAMES
+set_type_names() {
+    local key
+    while IFS= read -rd '' key; do
+        MACHINE_TYPE_NAMES+=( "$key" )
+    done < <(printf '%s\0' "${!MACHINE_TYPE_MAP[@]}" | sort -z)
+}
+set_type_names
 
-      compute-2C-3.75GB
-      compute-8C-15GB
-      general-large
-      general-small
-      gpu-1GPU-8C-61GB
-      gpu-4GPU-32C-244GB
+validate_machine_type() {
+    if [ "${MACHINE_TYPE_MAP[${1}]}" == "" ]; then
+        cat 1>&2 <<ERROR
+Unknown machine type ${1}.  Available machine types:
+$( printf '%s\n' "${MACHINE_TYPE_NAMES[@]}" )
+ERROR
+        exit 1
+    fi
+}
