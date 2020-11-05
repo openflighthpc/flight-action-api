@@ -172,7 +172,10 @@ class App < Sinatra::Base
     show
 
     create do |attributes|
-      ticket = Ticket.new(arguments: attributes[:arguments])
+      attrs = [:arguments, :request_uid, :request_username].map do |key|
+        [key, attributes[key]]
+      end.to_h
+      ticket = Ticket.new(**attrs)
       next [ticket.id, ticket]
     end
 

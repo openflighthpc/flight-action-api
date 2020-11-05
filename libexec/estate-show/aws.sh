@@ -1,5 +1,4 @@
-# frozen_string_literal: true
-
+#!/bin/bash
 #==============================================================================
 # Copyright (C) 2020-present Alces Flight Ltd.
 #
@@ -27,35 +26,41 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-source "https://rubygems.org"
+if [[ -z "${ec2_id}" ]]; then
+    echo "The ec2_id for node '$name' has not been set!" >&2
+    exit 1
+fi
+if [[ -z "${aws_region}" ]]; then
+    echo "The aws_region for node '$name' has not been set!" >&2
+    exit 1
+fi
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+aws_instance_type=$(
+aws ec2 describe-instance-attribute \
+  --attribute instanceType \
+  --query InstanceType.Value \
+  --instance-id "$ec2_id" \
+  --region "$aws_region"
+)
 
-gem 'activemodel', require: 'active_model'
-gem 'activesupport', ">= 5.2.4.3", require: 'active_support/core_ext'
-gem 'figaro'
-gem 'flight_facade', '>= 0.1.5', require: 'flight_facade/included'
-gem 'hashie'
-# gem 'json_api_client'
-gem 'jwt'
-gem 'rake'
-gem 'puma'
-gem 'sinatra'
-gem 'sinja', '> 1.0.0'
-gem 'parallel'
+exit_code=$?
 
-group :development, :test do
-  group :pry do
-    gem 'pry'
-    gem 'pry-byebug'
-  end
-end
+if [ ${exit_code} -eq 0 ] ; then
+  machine_type=$(case "$aws_instance_type" in
+  ('"t2.small"')    echo "general-small" ;;
+  ('"t2.large"')    echo "general-large" ;;
+  ('"c4.large"')    echo "compute-2C-3.75GB" ;;
+  ('"c4.2xlarge"')  echo "compute-8C-15GB" ;;
+  ('"p3.2xlarge"')  echo "gpu-1GPU-8C-61GB" ;;
+  ('"p3.8xlarge"')  echo "gpu-4GPU-32C-244GB" ;;
+  (*)               echo "unknown" ;;
+  esac)
 
-group :test do
-  gem 'climate_control'
-  gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-  # gem 'webmock'
-  # gem 'vcr'
-end
+  echo "$machine_type"
+else
+    # Standard error from the `aws` call should be enough to debug this.
+    :
+fi
+
+exit ${exit_code}
+
