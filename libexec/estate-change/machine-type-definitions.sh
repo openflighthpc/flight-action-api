@@ -50,6 +50,18 @@ set_type_names() {
 }
 set_type_names
 
+# A map from AWS EC2 instance type to generic machine type.
+declare -A REVERSE_MACHINE_TYPE_MAP
+set_reverse_map() {
+    local machine_type
+    local instance_type
+    for machine_type in "${!MACHINE_TYPE_MAP[@]}" ; do
+        instance_type="${MACHINE_TYPE_MAP[${machine_type}]}"
+        REVERSE_MACHINE_TYPE_MAP[$instance_type]="${machine_type}"
+    done
+}
+set_reverse_map
+
 validate_machine_type() {
     if [ "${MACHINE_TYPE_MAP[${1}]}" == "" ]; then
         cat 1>&2 <<ERROR
