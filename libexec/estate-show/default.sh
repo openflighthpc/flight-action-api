@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "$name: unknown"
+echo "unknown"
