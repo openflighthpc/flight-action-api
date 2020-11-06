@@ -75,7 +75,8 @@ validate_machine_type() {
     if [ "${MACHINE_TYPE_MAP[${1}]}" == "" ]; then
         cat 1>&2 <<ERROR
 Unknown machine type ${1}.  Available machine types:
-$( printf '%s\n' "${MACHINE_TYPE_NAMES[@]}" )
+
+$( printf '  %s\n' "${MACHINE_TYPE_NAMES[@]}" )
 ERROR
         exit 1
     fi
