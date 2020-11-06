@@ -32,12 +32,21 @@
 # metadata files.
 declare -A MACHINE_TYPE_MAP
 MACHINE_TYPE_MAP=(
-  [general-small]=t2.small
-  [general-large]=t2.large
-  [compute-2C-3.75GB]=c4.large
-  [compute-8C-15GB]=c4.2xlarge
-  [gpu-1GPU-8C-61GB]=p3.2xlarge
-  [gpu-4GPU-32C-244GB]=p3.8xlarge
+  [general-small]=t3.medium
+  [general-medium]=t3.xlarge
+  [general-large]=t3.2xlarge
+
+  [compute-small]=c5.large
+  [compute-medium]=c5.xlarge
+  [compute-large]=c5.2xlarge
+
+  [gpu-small]=p3.2xlarge
+  [gpu-medium]=p3.8xlarge
+  [gpu-large]=p3.16xlarge
+
+  [mem-small]=r5.large
+  [mem-medium]=r5.xlarge
+  [mem-large]=r5.2xlarge
 )
 
 # An array of machine types.

@@ -37,9 +37,15 @@ help:
 
     The available types are:
 
-      compute-2C-3.75GB
-      compute-8C-15GB
+      compute-large
+      compute-medium
+      compute-small
       general-large
+      general-medium
       general-small
-      gpu-1GPU-8C-61GB
-      gpu-4GPU-32C-244GB
+      gpu-large
+      gpu-medium
+      gpu-small
+      mem-large
+      mem-medium
+      mem-small
