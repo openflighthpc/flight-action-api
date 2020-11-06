@@ -54,7 +54,7 @@ if [ ${exit_code} -eq 0 ] ; then
 
     machine_type="${REVERSE_MACHINE_TYPE_MAP[$aws_instance_type]}"
     if [ "${machine_type}" == "" ]; then
-        echo "unknown"
+        echo "unknown (${aws_instance_type})"
     else
         echo "${machine_type}"
     fi
