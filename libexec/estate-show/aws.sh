@@ -35,7 +35,7 @@ if [[ -z "${aws_region}" ]]; then
     exit 1
 fi
 
-source "${SCRIPT_ROOT:-.}"/estate-change/machine-type-definitions.sh
+source "${SCRIPT_ROOT:-.}"/helpers/aws-machine-type-definitions.sh
 
 aws_instance_type=$(
 aws ec2 describe-instance-attribute \

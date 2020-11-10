@@ -30,7 +30,7 @@ help:
   syntax: 'TYPE NUMBER'
   has_context: false
   # NOTE: If changing the machine type list below also change the
-  # MACHINE_TYPE_MAP in machine-type-definitions.sh.
+  # MACHINE_TYPE_MAP in helpers/aws-machine-type-definitions.sh.
   description: |
     Remove NUMBER of nodes of the given TYPE from the compute estate. There maybe
     a short delay before they are removed.
