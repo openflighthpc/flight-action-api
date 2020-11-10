@@ -33,20 +33,20 @@
 declare -A MACHINE_TYPE_MAP
 MACHINE_TYPE_MAP=(
   [general-small]=Standard_B2s
-  [general-medium]=Undefined_general_medium
-  [general-large]=Undefiend_general_large
+  #[general-medium]=
+  #[general-large]=
 
-  [compute-small]=Undefined_compute_small
-  [compute-medium]=Undefined_compute_medium
-  [compute-large]=Undefined_compute_large
+  [compute-small]=Standard_F2s_v2
+  [compute-medium]=Standard_F4s_v2
+  [compute-large]=Standard_F8s_v2
 
-  [gpu-small]=Undefined_gpu_small
-  [gpu-medium]=Undefined_gpu_medium
-  [gpu-large]=Undefined_gpu_large
+  [gpu-small]=Standard_NC6s_v3
+  [gpu-medium]=Standard_NC24s_v3
+  # [gpu-large]=Undefined_gpu_large
 
-  [mem-small]=Undefined_mem_small
-  [mem-medium]=Undefined_mem_medium
-  [mem-large]=Undefined_mem_large
+  [mem-small]=Standard_E2_v4
+  [mem-medium]=Standard_E4_v4
+  [mem-large]=Standard_E8_v4
 )
 
 # An array of machine types.

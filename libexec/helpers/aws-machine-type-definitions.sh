@@ -58,6 +58,7 @@ set_type_names() {
     done < <(printf '%s\0' "${!MACHINE_TYPE_MAP[@]}" | sort -z)
 }
 set_type_names
+unset -f set_type_names
 
 # A map from AWS EC2 instance type to generic machine type.
 declare -A REVERSE_MACHINE_TYPE_MAP
@@ -70,6 +71,7 @@ set_reverse_map() {
     done
 }
 set_reverse_map
+unset -f set_reverse_map
 
 validate_machine_type() {
     if [ "${MACHINE_TYPE_MAP[${1}]}" == "" ]; then
