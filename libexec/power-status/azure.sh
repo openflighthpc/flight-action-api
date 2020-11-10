@@ -26,40 +26,57 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-if [[ -z "${ec2_id}" ]]; then
-    echo "The ec2_id for node '$name' has not been set!" >&2
-    exit 1
-fi
-if [[ -z "${aws_region}" ]]; then
-    echo "The aws_region for node '$name' has not been set!" >&2
+# Error if the resource group has not been given
+if [[ -z "${azure_resource_group}" ]]; then
+    echo "The azure_resource_group for node '$name' has not been set!" >&2
     exit 1
 fi
 
-status=$(aws ec2 describe-instances \
-                 --instance-ids "${ec2_id}" \
-                 --region "${aws_region}" \
-                 --output json \
-                 --query Reservations[0].Instances[0].State.Name
-                 )
+# Default the azure_name to be the same as name
+echo "${azure_name:=$name}" >/dev/null
 
+status=$(
+  az vm get-instance-view \
+    --resource-group  "$azure_resource_group" \
+    --name "$azure_name" \
+    --query instanceView.statuses[-1].code
+)
+
+# For reference on azure's states
+# https://docs.microsoft.com/en-us/azure/virtual-machines/states-lifecycle
 case "$status" in
-    "\"pending\"")
-        echo PENDING
+    "\"PowerState/starting\"")
+        echo 'PENDING'
         exit 0
         ;;
-    "\"running\"")
+    "\"PowerState/running\"")
         echo ON
         exit 0
         ;;
-    "\"stopping\"")
+    "\"PowerState/deallocating\"")
         echo STOPPING
         exit 123
         ;;
-    "\"stopped\"")
+    # Azure's deallocated state is when the machine is (*mostly) not charged for
+    # * Charges apply for the disk and os
+    "\"PowerState/deallocated\"")
         echo OFF
         exit 123
         ;;
+    # Asure charges for "stopped"/"stopping" machines. These states should not
+    # be exposed directly to the user. Instead the machine is more "sleeping"
+    "\"PowerState/stopping\"")
+        echo "SLEEPING"
+        exit 124
+        ;;
+    "\"PowerState/stopped\"")
+        echo "SLEEPING"
+        exit 124
+        ;;
     *)
+        # The request may return a ProvisioningState/* state instead of a
+        # PowerState. This means the power state is currently undefined
+        # Provisioning states can not be meaningfully translated
         echo "Unknown status: ${status}" >&2
         exit 1
         ;;
