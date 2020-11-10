@@ -38,6 +38,7 @@ echo "${azure_name:=$name}" >/dev/null
 az vm deallocate \
   --resource-group "$azure_resource_group" \
   --name "$azure_name" \
+  --no-wait \
   >/dev/null
 
 exit_code=$?
