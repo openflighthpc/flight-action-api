@@ -37,7 +37,7 @@ if [[ -z "${ipmi_password}" ]]; then
 fi
 
 # Allows the ipmi host to be overridden
-echo ${ipmi_host:="$name.bmc"} >/dev/null
+ipmi_host="${ipmi_host:-"$name.bmc"}"
 
 output=$(
   ipmitool -U "$ipmi_username" -P "$ipmi_password" -H "$ipmi_host" -I lanplus \
