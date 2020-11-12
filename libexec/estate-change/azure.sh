@@ -43,10 +43,25 @@ fi
 source "${SCRIPT_ROOT:-.}"/helpers/azure-machine-type-definitions.sh
 
 current_instance_type() {
-  az vm get-instance-view \
-    --resource-group  "$azure_resource_group" \
-    --name "$azure_name" \
-    --query hardwareProfile.vmSize
+  local output=$(
+    az vm get-instance-view \
+      --resource-group  "$azure_resource_group" \
+      --name "$azure_name" \
+      --query hardwareProfile.vmSize
+  )
+  local exit_code=$?
+
+  if [ "$exit_code" -eq 0 ]; then
+    output="${output%\"}"
+    output="${output#\"}"
+    echo "$output"
+    return 0
+  else
+    # End the script if the current instance type can not be determined
+    # Whilst "technically" `az vm resize` may still work, there is probably
+    # a configuration error
+    exit "$exit_code"
+  fi
 }
 
 change_instance_type() {
@@ -66,8 +81,6 @@ main() {
     validate_machine_type "${machine_type}"
     new_azure_type="${MACHINE_TYPE_MAP[$1]}"
     cur_azure_type=$( current_instance_type )
-    cur_azure_type="${cur_azure_type%\"}"
-    cur_azure_type="${cur_azure_type#\"}"
 
     if [ "${cur_azure_type}" == "${new_azure_type}" ] ; then
         echo "Machine type already ${machine_type}"
