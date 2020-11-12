@@ -26,11 +26,13 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
+# Load the basic definitions
+source "${SCRIPT_ROOT:-.}"/helpers/basic-machine-type-definitions.sh
+
 # A map from generic machine types to the equivalent AWS EC2 instance type.
 #
 # NOTE: If changing this map also change the types listed in the estate
 # metadata files.
-declare -A MACHINE_TYPE_MAP
 MACHINE_TYPE_MAP=(
   [general-small]=t3.medium
   [general-medium]=t3.xlarge
@@ -48,38 +50,5 @@ MACHINE_TYPE_MAP=(
   [mem-medium]=r5.xlarge
   [mem-large]=r5.2xlarge
 )
-
-# An array of machine types.
-declare -a MACHINE_TYPE_NAMES
-set_type_names() {
-    local key
-    while IFS= read -rd '' key; do
-        MACHINE_TYPE_NAMES+=( "$key" )
-    done < <(printf '%s\0' "${!MACHINE_TYPE_MAP[@]}" | sort -z)
-}
-set_type_names
-unset -f set_type_names
-
-# A map from AWS EC2 instance type to generic machine type.
-declare -A REVERSE_MACHINE_TYPE_MAP
-set_reverse_map() {
-    local machine_type
-    local instance_type
-    for machine_type in "${!MACHINE_TYPE_MAP[@]}" ; do
-        instance_type="${MACHINE_TYPE_MAP[${machine_type}]}"
-        REVERSE_MACHINE_TYPE_MAP[$instance_type]="${machine_type}"
-    done
-}
-set_reverse_map
-unset -f set_reverse_map
-
-validate_machine_type() {
-    if [ "${MACHINE_TYPE_MAP[${1}]}" == "" ]; then
-        cat 1>&2 <<ERROR
-Unknown machine type ${1}.  Available machine types:
-
-$( printf '  %s\n' "${MACHINE_TYPE_NAMES[@]}" )
-ERROR
-        exit 1
-    fi
-}
+define_reverse_machine_type_map
+unset -f define_reverse_machine_type_map
