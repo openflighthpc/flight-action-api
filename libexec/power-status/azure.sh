@@ -33,7 +33,7 @@ if [[ -z "${azure_resource_group}" ]]; then
 fi
 
 # Default the azure_name to be the same as name
-echo "${azure_name:=$name}" >/dev/null
+azure_name="${azure_name:-$name}"
 
 status=$(
   az vm get-instance-view \
