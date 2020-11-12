@@ -48,4 +48,4 @@ help:
 
     WARNING: If the node is currently powered on, it will be powered off and then powered back on.
 
-confirmation: Change machine type for %{nodes}. It will be briefly unavailable if power on. Confirm to proceed [y/n]?
+confirmation: Change machine type for %{nodes}. It will be briefly unavailable if powered on. Confirm to proceed [y/n]?
