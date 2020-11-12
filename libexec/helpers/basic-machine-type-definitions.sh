@@ -26,29 +26,52 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-# Load the basic definitions
-source "${SCRIPT_ROOT:-.}"/helpers/basic-machine-type-definitions.sh
+# Define all known machine types
+# NOTE: Not all of them will be defined on every platform
+MACHINE_TYPE_NAMES=(
+  general-small
+  general-medium
+  general-large
 
-# A map from generic machine types to the equivalent Azure instance type.
-#
-# NOTE: If changing this map also change the types listed in the estate
-# metadata files.
-MACHINE_TYPE_MAP=(
-  [general-small]=Standard_B2s
-  #[general-medium]=
-  #[general-large]=
+  compute-small
+  compute-medium
+  compute-large
 
-  [compute-small]=Standard_F2s_v2
-  [compute-medium]=Standard_F4s_v2
-  [compute-large]=Standard_F8s_v2
+  gpu-small
+  gpu-medium
+  gpu-large
 
-  [gpu-small]=Standard_NC6s_v3
-  [gpu-medium]=Standard_NC24s_v3
-  # [gpu-large]=Undefined_gpu_large
-
-  [mem-small]=Standard_E2_v4
-  [mem-medium]=Standard_E4_v4
-  [mem-large]=Standard_E8_v4
+  mem-small
+  mem-medium
+  mem-large
 )
-define_reverse_machine_type_map
-unset -f define_reverse_machine_type_map
+
+# Define the empty mapping variables
+# NOTE: These maps should not contain any types not defined above
+#       In case of conflict, the above list should be considered definitive
+declare -A MACHINE_TYPE_MAP
+declare -A REVERSE_MACHINE_TYPE_MAP
+
+# Helper method for generating the reverse mapping variable
+# NOTE: The method is commonly undefined after being called
+define_reverse_machine_type_map() {
+  local machine_type
+  local instance_type
+
+  for machine_type in "${!MACHINE_TYPE_MAP[@]}" ; do
+      instance_type="${MACHINE_TYPE_MAP[${machine_type}]}"
+      REVERSE_MACHINE_TYPE_MAP[$instance_type]="${machine_type}"
+  done
+}
+
+# Check if the machine type is valid
+validate_machine_type() {
+    if [ "${MACHINE_TYPE_MAP[${1}]}" == "" ]; then
+        cat 1>&2 <<ERROR
+Unknown machine type ${1}.  Available machine types:
+
+$( printf '  %s\n' "${MACHINE_TYPE_NAMES[@]}" )
+ERROR
+        exit 1
+    fi
+}
