@@ -64,26 +64,14 @@ define_reverse_machine_type_map() {
   done
 }
 
-# Determines the machine types with a family
-update_filtered_type_names_by_family() {
-  # Create an array named according to $1. The family is given by $2
-  local family=$1
-  local machine_type
-  FILTERED_TYPE_NAMES=()
-
-  for machine_type in "${!MACHINE_TYPE_MAP[@]}" ; do
-    if [[ "$machine_type" =~ "^${family}-" ]]; then
-      FILTERED_TYPE_NAMES+=("$machine_type")
-    fi
-  done
-}
-
 # Check if the machine type is valid
 validate_machine_type() {
-  # Unpack args
+  # Define local variables
   local new_type="$1"
   local family=$(echo "$2" | sed 's/-.*//')
   local valid=0
+  local machine_type
+  local -a valid_types
 
   # Determines if the new_type is unknown
   # NOTE: This reason maybe overridden when valid_types is generated
@@ -94,7 +82,6 @@ validate_machine_type() {
   # Loops through all the known machine types, doing the following:
   # 1. Generating the valid list of types (optionally filtered by family)
   # 2. Detects if the type is unsupported or outside the family
-  local -a valid_types
   for machine_type in "${MACHINE_TYPE_NAMES[@]}" ; do
     # Filters out unsupported types
     if [ -z ${MACHINE_TYPE_MAP["$machine_type"]} ]; then

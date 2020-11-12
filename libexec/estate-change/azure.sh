@@ -77,10 +77,18 @@ main() {
     local cur_azure_type
     local new_azure_type
 
-    machine_type="$1"
-    validate_machine_type "${machine_type}"
-    new_azure_type="${MACHINE_TYPE_MAP[$1]}"
     cur_azure_type=$( current_instance_type )
+    # NOTE: If this fails and returns empty string then the validation
+    #       will ignore the family filter
+    cur_machine_type="${REVERSE_MACHINE_TYPE_MAP["$cur_azure_type"]}"
+
+    machine_type="$1"
+    new_azure_type="${MACHINE_TYPE_MAP["$machine_type"]}"
+
+    # Validate the machine_type
+    # NOTE: Azure does not like changing the machine type dramatically
+    #       Hence the change is limited to within the family
+    validate_machine_type "${machine_type}" "${cur_machine_type}"
 
     if [ "${cur_azure_type}" == "${new_azure_type}" ] ; then
         echo "Machine type already ${machine_type}"
