@@ -41,12 +41,6 @@ Regardless of the following mode selection, the `jwt_secret` must be exported in
 export jwt_secret=<keep-this-secret-safe>
 ```
 
-The default modes the application ships with is `standalone` nodes and `exploding` groups. They are responsible for the following:
-* `standalone`: read the available `nodes` from the node config,
-* `exploding`: expand group names into a list of nodes
-
-There also needs to be a predefined set of `commands` available to be ran.
-
 *NOTE*: For System Administrators and Integrators
 Please refer to the [additional documentation](docs/ticket-lifecycle.md) on how the application processes tickets. This covers the advanced functioning of the application and security implications. It also gives context to the various configuration options.
 
@@ -82,7 +76,7 @@ In additional to the `default.sh` script, other scripts can optionally be define
 
 #### Standalone Nodes
 
-When the `nodes` are in `standalone` mode, they are read from a static YAML file with the following structure. See the [example nodes config](config/nodes.example.yaml) for the version which is used when running in the `development` environment.
+The `nodes` are read from a static YAML file with the following structure. See the [example nodes config](config/nodes.example.yaml) for the version which is used when running in the `development` environment.
 
 ```
 <node-name>:
@@ -96,18 +90,6 @@ When the `nodes` are in `standalone` mode, they are read from a static YAML file
 The `ranks` key is optional and maybe either a single string or an array of them. This alters the `script` lookup order against the `command` according to the `ranks` mechanism.
 
 All other keys are considered `parameters` to the `node` and are available to the `variables` mechanism.
-
-#### Exploding Nodes
-
-This mode enables `group` support by performing name expansion on the name. No specific configuration is required for this `mode`. Refer to the [routes documentation](docs/routes.md) for further details.
-
-#### Partial Upstream Mode
-
-Not Supported
-
-#### Full Upstream Mode
-
-Not Supported
 
 ### Integrating with systemd and OpenFlightHPC/FlightRunway
 

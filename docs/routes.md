@@ -58,13 +58,11 @@ Content-Type: application/vnd.api+json
 
 ### ID
 
-The `id` of the group is dependant of the mode the server is in. In general, the `id` SHOULD be alphanumeric but MAY contain the following: `,_-[]`. Not all combinations of the valid symbols will produce a valid `id`, this behaviour is mode specific.
+In general, the `id` SHOULD be alphanumeric but MAY contain the following: `,_-[]`. Not all combinations of the valid symbols will produce a valid `id`.
 
-*Exploding Mode*
+The `id` represents a comma separated list of `node` names. Refer to the `Node#ID` section for valid `node_id` syntax.
 
-When in exploding mode, the `id` represents comma separated list of `node` names. Refer to the `Node#ID` section for valid `node_id` syntax.
-
-Multiple `node_id` can be joined together as a single group as a comma separated list.
+Multiple `node_id`s can be joined together into a single group id as a comma separated list.
 E.G. `node1,node2` would be a group containing `node1`, and `node2`.
 
 Multiple nodes maybe generated using a "range expression". All range expressions must follow the following syntax: `\w+[\d+-\d+]`. There must be a starting "base name" which SHOULD be alphanumeric but MAY contain `-` and `_`. The range expression MUST be two non negative integers separated by a hyphen contained within brackets. This will cause the parser to repeat the "base name" for every integer within the inclusive range.
@@ -100,8 +98,8 @@ node01,node03,node04,node05
 
 ### List
 
-Returns a list of static groups. This will always be an empty array in exploding mode.
-*TBA*: Returns a list of statically configured groups in upstream mode.
+Returns a list of static groups. NOTE: This is currently always be an empty
+array.
 
 ```
 GET /groups
@@ -123,7 +121,7 @@ Return a single `group` by its ID. It is possible to show groups that do not app
   
 The related `nodes` resource will contain a different set of `node` resources depending on the mode.
 
-In exploding mode, the set of `nodes` is determined by the name expansion first, which is then filtered to remove any missing nodes. This means nodes my be missing from the set even if they are specified in the range.
+The set of `nodes` is determined by the name expansion first, which is then filtered to remove any missing nodes. This means nodes my be missing from the set even if they are specified in the range.
 
 ```
 GET /groups/:id
