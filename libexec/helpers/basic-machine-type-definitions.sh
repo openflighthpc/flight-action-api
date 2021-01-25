@@ -68,63 +68,16 @@ define_reverse_machine_type_map() {
 validate_machine_type() {
   # Define local variables
   local new_type="$1"
-  local family=$(echo "$2" | sed 's/-.*//')
-  local valid=0
-  local machine_type
-  local -a valid_types
+  local sorted_types
 
   # Determines if the new_type is unknown
-  # NOTE: This reason maybe overridden when valid_types is generated
   if [ -z "${MACHINE_TYPE_MAP["$new_type"]}" ]; then
-    valid=1
-  fi
-
-  # Loops through all the known machine types, doing the following:
-  # 1. Generating the valid list of types (optionally filtered by family)
-  # 2. Detects if the type is unsupported or outside the family
-  for machine_type in "${MACHINE_TYPE_NAMES[@]}" ; do
-    # Filters out unsupported types
-    if [ -z ${MACHINE_TYPE_MAP["$machine_type"]} ]; then
-      if [ "$new_type" == "$machine_type" ]; then
-        valid=2
-      fi
-
-    # Adds the type if it is within the family (or if the filter is off)
-    elif [[ -z "$family" || "$machine_type" =~ ^${family}- ]]; then
-      valid_types+=("$machine_type")
-
-    # Flags the new_type as invalid due to the family filter
-    elif [ "$new_type" == "$machine_type" ]; then
-      valid=3
-    fi
-  done
-
-  # Processes the error messages
-  case "$valid" in
-    1)
-      cat 1>&2 <<ERROR
+    sorted_types=($(echo ${REVERSE_MACHINE_TYPE_MAP[@]} | xargs -n1 | sort -g | sort))
+    cat 1>&2 <<ERROR
 Unknown machine type ${new_type}. Available machine types:
 
-$( printf '  %s\n' "${valid_types[@]}" )
+$( printf '  %s\n' "${sorted_types[@]}" )
 ERROR
-      exit 101
-      ;;
-    2)
-      cat 1>&2 <<ERROR
-This platform does not suport ${new_type}. Available machine types:
-
-$( printf '  %s\n' "${valid_types[@]}" )
-ERROR
-      exit 102
-      ;;
-    3)
-      cat 1>&2 <<ERROR
-Changing the machine type family is not support on this platform.
-Please select a '$family' type:
-
-$( printf '  %s\n' "${valid_types[@]}" )
-ERROR
-      exit 103
-      ;;
-  esac
+    exit 101
+  fi
 }
