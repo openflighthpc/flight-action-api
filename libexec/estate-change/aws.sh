@@ -41,6 +41,11 @@ fi
 
 source "${SCRIPT_ROOT:-.}"/helpers/aws-machine-type-definitions.sh
 
+# Configures the sync helper library
+export SYNC_STATUS_SCRIPT="${SCRIPT_ROOT:-.}"/power-status/aws.sh
+export SYNC_POWER_ON_SCRIPT="${SCRIPT_ROOT:-.}"/power-on/aws.sh
+export SYNC_POWER_OFF_SCRIPT="${SCRIPT_ROOT:-.}"/power-off/aws.sh
+
 current_instance_type() {
     aws ec2 describe-instances \
         --instance-ids "${ec2_id}" \
@@ -80,7 +85,7 @@ main() {
     initial_status=$( "${SCRIPT_ROOT:-.}"/power-status/aws.sh )
     if [ "${initial_status}" != "OFF" ] ; then
         echo "Powering off..."
-        timeout 2m "${SCRIPT_ROOT:-.}"/power-off/aws/sync.sh
+        timeout 2m "${SCRIPT_ROOT:-.}"/helpers/power-off-sync.sh
         retval=$?
         if [ ${retval} -eq 124 ] ; then
             echo "Timed out waiting for node to power off" 1>&2
@@ -105,7 +110,7 @@ main() {
     case "$initial_status" in
         PENDING | ON )
             echo "Powering on..."
-            timeout 5m "${SCRIPT_ROOT:-.}"/power-on/aws/sync.sh --wait-for-ssh
+            timeout 5m "${SCRIPT_ROOT:-.}"/helpers/power-on-sync.sh
             retval=$?
             if [ ${retval} -eq 124 ] ; then
                 echo "Timed out waiting for node to power on" 1>&2

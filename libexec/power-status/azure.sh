@@ -63,7 +63,7 @@ case "$status" in
         echo OFF
         exit 123
         ;;
-    # Asure charges for "stopped"/"stopping" machines. These states should not
+    # Azure charges for "stopped"/"stopping" machines. These states should not
     # be exposed directly to the user. Instead the machine is more "sleeping"
     "\"PowerState/stopping\"")
         echo "SLEEPING"
