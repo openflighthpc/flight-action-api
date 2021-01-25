@@ -42,6 +42,11 @@ fi
 
 source "${SCRIPT_ROOT:-.}"/helpers/azure-machine-type-definitions.sh
 
+# Configures the sync helper library
+export SYNC_STATUS_SCRIPT="${SCRIPT_ROOT:-.}"/power-status/azure.sh
+export SYNC_POWER_ON_SCRIPT="${SCRIPT_ROOT:-.}"/power-on/azure.sh
+export SYNC_POWER_OFF_SCRIPT="${SCRIPT_ROOT:-.}"/power-off/azure.sh
+
 current_instance_type() {
   local output=$(
     az vm get-instance-view \
@@ -72,37 +77,63 @@ change_instance_type() {
 }
 
 main() {
+    local initial_status
     local retval
+    local cur_machine_type
     local machine_type
-    local cur_azure_type
-    local new_azure_type
-
-    cur_azure_type=$( current_instance_type )
-    # NOTE: If this fails and returns empty string then the validation
-    #       will ignore the family filter
-    cur_machine_type="${REVERSE_MACHINE_TYPE_MAP["$cur_azure_type"]}"
+    local new_machine_type
 
     machine_type="$1"
-    new_azure_type="${MACHINE_TYPE_MAP["$machine_type"]}"
+    validate_machine_type "${machine_type}"
+    new_machine_type="${MACHINE_TYPE_MAP[$1]}"
+    cur_machine_type=$( current_instance_type )
 
-    # Validate the machine_type
-    # NOTE: Azure does not like changing the machine type dramatically
-    #       Hence the change is limited to within the family
-    validate_machine_type "${machine_type}" "${cur_machine_type}"
-
-    if [ "${cur_azure_type}" == "${new_azure_type}" ] ; then
+    if [ "${cur_machine_type}" == "${new_machine_type}" ] ; then
         echo "Machine type already ${machine_type}"
         exit 0
     fi
 
+    initial_status=$( "${SCRIPT_ROOT:-.}"/power-status/azure.sh )
+    if [ "${initial_status}" != "OFF" ] ; then
+        echo "Powering off..."
+        timeout 2m "${SCRIPT_ROOT:-.}"/helpers/power-off-sync.sh
+        retval=$?
+        if [ ${retval} -eq 124 ] ; then
+            echo "Timed out waiting for node to power off" 1>&2
+            exit ${retval}
+        fi
+        if [ ${retval} -ne 0 ] ; then
+            # Standard error already printed should be sufficient.
+            exit ${retval}
+        fi
+        echo "OK"
+    fi
+
     echo "Changing machine type..."
-    change_instance_type "${new_azure_type}" >/dev/null
+    change_instance_type "${new_machine_type}" >/dev/null
     retval=$?
     if [ ${retval} -ne 0 ] ; then
         # Standard error already printed should be sufficient.
         exit ${retval}
     fi
     echo "OK"
+
+    case "$initial_status" in
+        PENDING | ON )
+            echo "Powering on..."
+            timeout 5m "${SCRIPT_ROOT:-.}"/helpers/power-on-sync.sh
+            retval=$?
+            if [ ${retval} -eq 124 ] ; then
+                echo "Timed out waiting for node to power on" 1>&2
+                exit ${retval}
+            fi
+            if [ ${retval} -ne 0 ] ; then
+                # Standard error already printed should be sufficient.
+                exit ${retval}
+            fi
+            echo "OK"
+            ;;
+    esac
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
