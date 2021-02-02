@@ -36,47 +36,45 @@ fi
 azure_name="${azure_name:-$name}"
 
 status=$(
-  az vm get-instance-view \
+  az vm show \
     --resource-group  "$azure_resource_group" \
     --name "$azure_name" \
-    --query instanceView.statuses[-1].code
+    --query "[powerState]" \
+    --output tsv
 )
 
 # For reference on azure's states
 # https://docs.microsoft.com/en-us/azure/virtual-machines/states-lifecycle
 case "$status" in
-    "\"PowerState/starting\"")
+    "VM starting")
         echo 'PENDING'
         exit 0
         ;;
-    "\"PowerState/running\"")
+    "VM running")
         echo ON
         exit 0
         ;;
-    "\"PowerState/deallocating\"")
+    "VM deallocating")
         echo STOPPING
         exit 123
         ;;
     # Azure's deallocated state is when the machine is (*mostly) not charged for
     # * Charges apply for the disk and os
-    "\"PowerState/deallocated\"")
+    "VM deallocated")
         echo OFF
         exit 123
         ;;
     # Asure charges for "stopped"/"stopping" machines. These states should not
     # be exposed directly to the user. Instead the machine is more "sleeping"
-    "\"PowerState/stopping\"")
+    "VM stopping")
         echo "SLEEPING"
         exit 124
         ;;
-    "\"PowerState/stopped\"")
+    "VM stopped")
         echo "SLEEPING"
         exit 124
         ;;
     *)
-        # The request may return a ProvisioningState/* state instead of a
-        # PowerState. This means the power state is currently undefined
-        # Provisioning states can not be meaningfully translated
         echo "Unknown status: ${status}" >&2
         exit 1
         ;;
