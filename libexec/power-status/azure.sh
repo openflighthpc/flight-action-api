@@ -40,6 +40,7 @@ status=$(
     --resource-group  "$azure_resource_group" \
     --name "$azure_name" \
     --query "[powerState]" \
+    --show-details \
     --output tsv
 )
 
