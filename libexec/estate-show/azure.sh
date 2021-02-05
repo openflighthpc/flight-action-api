@@ -26,4 +26,41 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-echo "unknown"
+# Error if the resource group has not been given
+if [[ -z "${azure_resource_group}" ]]; then
+    echo "The azure_resource_group for node '$name' has not been set!" >&2
+    exit 1
+fi
+
+# Default the azure_name to be the same as name
+azure_name="${azure_name:-$name}"
+
+# Source the resource mappings
+source "${SCRIPT_ROOT:-.}"/helpers/azure-machine-type-definitions.sh
+
+azure_instance_type=$(
+  az vm get-instance-view \
+    --resource-group  "$azure_resource_group" \
+    --name "$azure_name" \
+    --query hardwareProfile.vmSize
+)
+
+exit_code=$?
+
+if [ ${exit_code} -eq 0 ] ; then
+    # Remove the surrounding quotes.
+    azure_instance_type="${azure_instance_type%\"}"
+    azure_instance_type="${azure_instance_type#\"}"
+
+    machine_type="${REVERSE_MACHINE_TYPE_MAP[$azure_instance_type]}"
+    if [ "${machine_type}" == "" ]; then
+        echo "unknown (${azure_instance_type})"
+    else
+        echo "${machine_type}"
+    fi
+else
+    # Standard error from the `az` call should be enough to debug this.
+    :
+fi
+
+exit ${exit_code}

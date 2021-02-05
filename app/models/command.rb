@@ -125,7 +125,7 @@ class Command < Hashie::Dash
       old_mtime = @mtime.dup
       self.load!
     rescue
-      DEFAULT_LOGGER.info("Unable to load nodes: #{$!.message}")
+      DEFAULT_LOGGER.info("Unable to load commands: #{$!.message}")
       @commands = old_commands
       @mtime = old_mtime
     end
@@ -150,6 +150,7 @@ class Command < Hashie::Dash
           **md['help'].symbolize_keys,
         )
       end
+      commands.reject!(&:nil?)
       assert_commands_valid(commands)
       @commands = commands
       @mtime = last_modified

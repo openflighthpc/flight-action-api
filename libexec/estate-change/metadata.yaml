@@ -29,7 +29,7 @@ help:
   syntax: 'NAME TYPE'
   summary: 'Change the machine type for a node or group'
   # NOTE: If changing the machine type list below also change the
-  # MACHINE_TYPE_MAP in machine-type-definitions.sh.
+  # MACHINE_TYPE_* in helpers/*-machine-type-definitions.sh.
   description: |
     Change the machine type for a node or all nodes in the specified group to TYPE.  The available types are:
 

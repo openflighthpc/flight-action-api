@@ -26,4 +26,8 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-echo "unknown"
+cat >&2 <<EOF
+The estate-change command is not support for the selected node.
+
+EOF
+exit 1

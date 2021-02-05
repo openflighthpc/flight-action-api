@@ -39,7 +39,7 @@ if [[ -z "${1}" ]]; then
     exit 1
 fi
 
-source "${SCRIPT_ROOT:-.}"/estate-change/machine-type-definitions.sh
+source "${SCRIPT_ROOT:-.}"/helpers/aws-machine-type-definitions.sh
 
 current_instance_type() {
     aws ec2 describe-instances \

@@ -29,7 +29,7 @@
 set -e
 
 source "${SCRIPT_ROOT:-.}"/estate-grow/keys.conf
-source "${SCRIPT_ROOT:-.}"/estate-change/machine-type-definitions.sh
+source "${SCRIPT_ROOT:-.}"/helpers/aws-machine-type-definitions.sh
 
 # Sets the default action.  This script is also used by the estate-shrink
 # script with a different action set.

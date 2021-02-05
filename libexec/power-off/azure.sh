@@ -26,4 +26,28 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-echo "unknown"
+# Error if the resource group has not been given
+if [[ -z "${azure_resource_group}" ]]; then
+    echo "The azure_resource_group for node '$name' has not been set!" >&2
+    exit 1
+fi
+
+# Default the azure_name to be the same as name
+azure_name="${azure_name:-$name}"
+
+az vm deallocate \
+  --resource-group "$azure_resource_group" \
+  --name "$azure_name" \
+  --no-wait \
+  >/dev/null
+
+exit_code=$?
+
+if [ ${exit_code} -eq 0 ] ; then
+    echo OK
+else
+    # Standard error from the `aws` call should be enough to debug this.
+    :
+fi
+
+exit ${exit_code}
