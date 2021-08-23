@@ -33,6 +33,8 @@ module FlightActionApi
   class ConfigError < StandardError; end
 
   class Configuration
+    LEGACY_CONFIG = File.expand_path("../../config/application.yaml", __dir__)
+
     include FlightConfiguration::DSL
     # NOTE: Does not support ActiveModel version 5
     # include FlightConfiguration::RichActiveValidationErrorMessage
@@ -41,8 +43,28 @@ module FlightActionApi
     root_path File.expand_path("../..", __dir__)
     application_name 'action-api'
 
+    # Load configs from the legacy file
+    config_files LEGACY_CONFIG
+
     # Disable the user config files
     def self.user_config_files; []; end
+
+    # Log the legacy config warning on build
+    def self.build(*_)
+      super.tap do |c|
+        next unless File.exists? LEGACY_CONFIG
+        c.__logs__.warn <<~WARN
+          The default configuration path has changed!
+          The legacy config will be removed in a future release.
+
+          Please migrate your configs from:
+          #{LEGACY_CONFIG}
+
+          To the new config path:
+          #{config_files.first}
+        WARN
+      end
+    end
 
     attribute :bind_address, default: 'tcp://127.0.0.1:917'
     attribute :command_directory_path, default: 'libexec',
