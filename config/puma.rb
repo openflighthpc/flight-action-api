@@ -27,7 +27,8 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-port 6304
+require_relative 'boot.rb'
+
+bind Flight.config.bind_address
 log_requests
-pidfile File.expand_path(File.join(__dir__, '..', 'var', 'puma.pid'))
 

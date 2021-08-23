@@ -125,14 +125,14 @@ class Command < Hashie::Dash
       old_mtime = @mtime.dup
       self.load!
     rescue
-      DEFAULT_LOGGER.info("Unable to load commands: #{$!.message}")
+      Flight.logger.info("Unable to load commands: #{$!.message}")
       @commands = old_commands
       @mtime = old_mtime
     end
 
     def load!
-      pathname = Pathname.new(Figaro.env.command_directory_path)
-      DEFAULT_LOGGER.info("Loading commands from #{pathname}")
+      pathname = Pathname.new(Flight.config.command_directory_path)
+      Flight.logger.info("Loading commands from #{pathname}")
       commands = pathname.children.map do |c|
         next unless c.directory?
         next unless c.join("metadata.yaml").exist?
@@ -203,7 +203,7 @@ class Command < Hashie::Dash
     end
 
     def last_modified
-      pathname = Pathname.new(Figaro.env.command_directory_path)
+      pathname = Pathname.new(Flight.config.command_directory_path)
       pathname.children.map { |c| File.mtime(c) }.max
     end
   end

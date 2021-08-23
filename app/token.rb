@@ -43,7 +43,7 @@ class Token < Hashie::Trash
 
   class << self
     def jwt_secret
-      Figaro.env.jwt_secret
+      Flight.config.jwt_secret
     end
 
     def from_jwt(token)

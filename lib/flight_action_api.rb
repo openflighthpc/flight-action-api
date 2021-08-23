@@ -1,7 +1,6 @@
 # frozen_string_literal: true
-
 #==============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2021-present Alces Flight Ltd.
 #
 # This file is part of Flight Action API.
 #
@@ -27,26 +26,6 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-task :require do
-  require_relative 'config/boot.rb'
+module FlightActionApi
+  autoload :Configuration, "flight_action_api/configuration.rb"
 end
-
-task console: :require do
-  Bundler.require(:default, ENV['RACK_ENV'].to_sym, :pry)
-  binding.pry
-end
-
-# Intentionally disabled
-task 'token:admin', [:days] => :require do |task, args|
-  raise NotImplementedError
-  token = Token.new(admin: true)
-               .tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-  puts token.generate_jwt
-end
-
-desc 'Generate a token'
-task 'token:user', [:days] => :require do |task, args|
-  token = Token.new.tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-  puts token.generate_jwt
-end
-

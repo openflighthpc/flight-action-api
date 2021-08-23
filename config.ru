@@ -27,9 +27,13 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-require 'rake'
-load File.expand_path(File.join(__dir__, 'Rakefile'))
-Rake::Task[:require].invoke
+require_relative 'config/boot.rb'
+
+configure do
+  set :show_exceptions, :after_handler
+  set :logger, Flight.logger
+  enable :logging
+end
 
 app = Rack::Builder.new do
   map '/streaming/' do

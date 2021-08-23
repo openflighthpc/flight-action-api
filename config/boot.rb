@@ -1,7 +1,6 @@
 # frozen_string_literal: true
-
 #==============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2021-present Alces Flight Ltd.
 #
 # This file is part of Flight Action API.
 #
@@ -27,26 +26,44 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-task :require do
-  require_relative 'config/boot.rb'
+
+ENV['RACK_ENV'] ||= 'development'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__)
+
+require 'rubygems'
+require 'bundler'
+require 'securerandom'
+
+if ENV['RACK_ENV'] == 'development'
+  Bundler.require(:default, :development)
+else
+  Bundler.require(:default)
 end
 
-task console: :require do
-  Bundler.require(:default, ENV['RACK_ENV'].to_sym, :pry)
-  binding.pry
-end
+# Shared activesupport libraries
+require 'active_support/core_ext/hash/keys'
 
-# Intentionally disabled
-task 'token:admin', [:days] => :require do |task, args|
-  raise NotImplementedError
-  token = Token.new(admin: true)
-               .tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-  puts token.generate_jwt
-end
+# Ensure ApplicationModel::ValidationError is defined in advance
+require 'active_model/validations.rb'
 
-desc 'Generate a token'
-task 'token:user', [:days] => :require do |task, args|
-  token = Token.new.tap { |t| t.exp_days = args[:days].to_i if args[:days] }
-  puts token.generate_jwt
-end
+lib = File.expand_path('../lib', __dir__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
+# NOTE: The following LOAD_PATH modification is non-idiomatic but required for legacy support
+root = File.expand_path('..', __dir__)
+$LOAD_PATH.unshift(root) unless $LOAD_PATH.include?(root)
+
+# Load the config
+require 'flight_action_api/configuration'
+Flight.load_configuration
+
+require 'flight_action_api'
+
+require 'app/errors'
+require 'app/models'
+require 'app/models/command'
+require 'app/models/ticket'
+require 'config/initializers/facades'
+require 'app/token'
+require 'app/serializers'
+require 'app'
