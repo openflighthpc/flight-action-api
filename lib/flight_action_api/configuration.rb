@@ -49,23 +49,6 @@ module FlightActionApi
     # Disable the user config files
     def self.user_config_files; []; end
 
-    # Log the legacy config warning on build
-    def self.build(*_)
-      super.tap do |c|
-        next unless File.exists? LEGACY_CONFIG
-        c.__logs__.warn <<~WARN
-          The default configuration path has changed!
-          The legacy config will be removed in a future release.
-
-          Please migrate your configs from:
-          #{LEGACY_CONFIG}
-
-          To the new config path:
-          #{config_files.first}
-        WARN
-      end
-    end
-
     attribute :bind_address, default: 'tcp://127.0.0.1:917'
     attribute :command_directory_path, default: 'libexec',
               transform: relative_to(root_path)
