@@ -1,7 +1,6 @@
 # frozen_string_literal: true
-
 #==============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2021-present Alces Flight Ltd.
 #
 # This file is part of Flight Action API.
 #
@@ -27,26 +26,26 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-# Loads the configurations into the environment
-Figaro.application = Figaro::Application.new(
-  environment: (ENV['RACK_ENV'] || 'development').to_sym,
-  path: File.expand_path('../application.yaml', __dir__)
-)
-Figaro.load
-      .reject { |_, v| v.nil? }
-      .each { |key, value| ENV[key] ||= value.to_s }
+require 'flight'
+require 'flight_configuration'
 
-# Hard sets the app's root directory to the current code base
-ENV['app_root_dir'] = File.expand_path('../..', __dir__)
-root_dir = ENV['app_root_dir']
+module FlightActionApi
+  class Configuration
+    include FlightConfiguration::DSL
+    include FlightConfiguration::RichActiveValidationErrorMessage
 
-# Enforce the generally required keys
-relative_keys = ['nodes_config_path',
-                 'command_directory_path',
-                 'working_directory_path']
-Figaro.require_keys(*['jwt_secret', 'log_level', *relative_keys])
+    root_path File.expand_path("../..", __dir__)
+    application_name 'action_api'
 
-# Sets relative keys from the install directory
-# NOTE: Does not affect the path if it is already absolute
-relative_keys.each { |k| ENV[k] = File.absolute_path(ENV[k], root_dir) }
 
+    attribute :command_directory_path, default: 'libexec',
+              transform: relative_to(root_path)
+    attribute :nodes_config_path, default: 'config/nodes.yaml',
+              transform: relative_to(root_path)
+    attribute :log_level, default: 'warn'
+    attribute :job_threads, default: 4
+    attribute :jwt_secret, required: true
+    attribute :working_directory_path, default: 'libexec',
+              transform: relative_to(root_path)
+  end
+end

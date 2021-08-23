@@ -98,14 +98,14 @@ class Ticket
   end
 
   def build_jobs
-    DEFAULT_LOGGER.info "Building Ticket: #{self.id}"
+    Flight.logger.info "Building Ticket: #{self.id}"
     self.class.registry.add(self)
     @collated_stream = CollatedStream.new(tag_lines: context.is_a?(Group))
 
     # Adds Node Base Jobs
     nodes.each do |n|
       self.jobs << Job.new(node: n, ticket: self).tap do |job|
-        DEFAULT_LOGGER.info "Add Job \"#{job.node.name}\": #{job.id}"
+        Flight.logger.info "Add Job \"#{job.node.name}\": #{job.id}"
         @collated_stream.add(job)
       end
     end
@@ -113,17 +113,17 @@ class Ticket
     # Adds the no-context job if required
     unless command_has_context?
       self.jobs << Job.new(node: nil, ticket: self).tap do |job|
-        DEFAULT_LOGGER.info "Add Job (No Contexting): #{job.id}"
+        Flight.logger.info "Add Job (No Contexting): #{job.id}"
         @collated_stream.add(job)
       end
     end
   end
 
   def run
-    DEFAULT_LOGGER.info "Starting Ticket: #{self.id}"
+    Flight.logger.info "Starting Ticket: #{self.id}"
     job_threads =
       begin
-        Integer(Figaro.env.job_threads)
+        Integer(Flight.config.job_threads)
       rescue ArgumentError, TypeError
         1
       end
@@ -131,7 +131,7 @@ class Ticket
       job.run
     end
   ensure
-    DEFAULT_LOGGER.info "Finished Ticket: #{self.id}"
+    Flight.logger.info "Finished Ticket: #{self.id}"
   end
 
   def completed?

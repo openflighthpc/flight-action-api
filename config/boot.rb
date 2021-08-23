@@ -1,7 +1,6 @@
 # frozen_string_literal: true
-
 #==============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2021-present Alces Flight Ltd.
 #
 # This file is part of Flight Action API.
 #
@@ -27,36 +26,44 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-source "https://rubygems.org"
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+ENV['RACK_ENV'] ||= 'development'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__)
 
-gem 'activemodel', require: 'active_model'
-gem 'activesupport', ">= 5.2.4.3", require: 'active_support/core_ext'
-gem 'figaro'
-gem 'flight_configuration', github: 'openflighthpc/flight_configuration', branch: "a1e4555eb965433d9974e94eff28ecc27a297969"
-gem 'flight_facade', '>= 0.1.5', require: 'flight_facade/included'
-gem 'hashie'
-# gem 'json_api_client'
-gem 'jwt'
-gem 'rake'
-gem 'puma'
-gem 'sinatra'
-gem 'sinja', '> 1.0.0'
-gem 'parallel'
+require 'rubygems'
+require 'bundler'
 
-group :development, :test do
-  group :pry do
-    gem 'pry'
-    gem 'pry-byebug'
-  end
+if ENV['RACK_ENV'] == 'development'
+  Bundler.require(:default, :development)
+else
+  Bundler.require(:default)
 end
 
-group :test do
-  gem 'climate_control'
-  gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-  # gem 'webmock'
-  # gem 'vcr'
-end
+# Shared activesupport libraries
+require 'active_support/core_ext/hash/keys'
+
+# Ensure ApplicationModel::ValidationError is defined in advance
+require 'active_model/validations.rb'
+
+lib = File.expand_path('../lib', __dir__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+# NOTE: The following LOAD_PATH modification is non-idiomatic but required for legacy support
+root = File.expand_path('..', __dir__)
+$LOAD_PATH.unshift(root) unless $LOAD_PATH.include?(root)
+
+require 'flight_action_api'
+require 'config/initializers/figaro'
+require 'config/initializers/logger'
+
+# Ensures the shared secret exists
+FlightJobScriptAPI.config.auth_decoder
+
+require 'app/errors'
+require 'app/models'
+require 'app/models/command'
+require 'app/models/ticket'
+require 'config/initializers/facades'
+require 'app/token'
+require 'app/serializers'
+require 'app'

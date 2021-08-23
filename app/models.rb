@@ -61,8 +61,8 @@ class Job < BaseHashieDashModel
   end
 
   def run
-    DEFAULT_LOGGER.info "Running Job: #{self.id}"
-    cwd = Figaro.env.working_directory_path!
+    Flight.logger.info "Running Job: #{self.id}"
+    cwd = Flight.config.working_directory_path
     log_job(script, cmd_envs, cwd)
 
     subprocess = Subprocess.new(cmd_envs, script.path, *ticket.arguments, chdir: cwd)
@@ -81,7 +81,7 @@ class Job < BaseHashieDashModel
     log_result
   ensure
     @write_pipe.close
-    DEFAULT_LOGGER.info "Finished Job: #{self.id}"
+    Flight.logger.info "Finished Job: #{self.id}"
   end
 
   def script
@@ -98,7 +98,7 @@ class Job < BaseHashieDashModel
     else
       {}
     end.tap do |env|
-      env['SCRIPT_ROOT']      = Figaro.env.command_directory_path
+      env['SCRIPT_ROOT']      = Flight.config.command_directory_path
       env['command']          = ticket.command.name
       env['request_username'] = ticket.request_username.to_s
       env['request_uid']      = ticket.request_uid.to_s
@@ -112,7 +112,7 @@ class Job < BaseHashieDashModel
   private
 
   def log_job(script, envs, cwd)
-    DEFAULT_LOGGER.info <<~INFO
+    Flight.logger.info <<~INFO
 
       # Job Definition ===============================================================
       # Ticket: #{ticket.id}
@@ -128,7 +128,7 @@ class Job < BaseHashieDashModel
   end
 
   def log_result
-    DEFAULT_LOGGER.info <<~INFO
+    Flight.logger.info <<~INFO
 
       # Job Results ==================================================================
       # Ticket: #{ticket.id}

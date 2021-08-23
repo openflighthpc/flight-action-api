@@ -1,7 +1,5 @@
-# frozen_string_literal: true
-
 #==============================================================================
-# Copyright (C) 2020-present Alces Flight Ltd.
+# Copyright (C) 2021-present Alces Flight Ltd.
 #
 # This file is part of Flight Action API.
 #
@@ -27,36 +25,9 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-source "https://rubygems.org"
+command_directory_path: libexec-dev
+job_threads: 4
+log_level:          debug
+nodes_config_path:  config/nodes.example.yaml
+working_directory_path: libexec-dev
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem 'activemodel', require: 'active_model'
-gem 'activesupport', ">= 5.2.4.3", require: 'active_support/core_ext'
-gem 'figaro'
-gem 'flight_configuration', github: 'openflighthpc/flight_configuration', branch: "a1e4555eb965433d9974e94eff28ecc27a297969"
-gem 'flight_facade', '>= 0.1.5', require: 'flight_facade/included'
-gem 'hashie'
-# gem 'json_api_client'
-gem 'jwt'
-gem 'rake'
-gem 'puma'
-gem 'sinatra'
-gem 'sinja', '> 1.0.0'
-gem 'parallel'
-
-group :development, :test do
-  group :pry do
-    gem 'pry'
-    gem 'pry-byebug'
-  end
-end
-
-group :test do
-  gem 'climate_control'
-  gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-  # gem 'webmock'
-  # gem 'vcr'
-end

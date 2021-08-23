@@ -47,6 +47,8 @@ end
 
 task require: :require_bundler do
   require 'sinatra'
+  require 'flight_action_api'
+  require 'config/boot'
   require 'config/initializers/figaro'
   require 'config/initializers/logger'
   require 'app/errors'
