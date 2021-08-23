@@ -33,16 +33,7 @@ bin/bundle install --without development test pry --path vendor
 
 ### Configuration
 
-This application can be configured by setting the configuration values into the environment. Refer to the configuration [reference](config/application.yaml.reference) and [defaults](config/application.yaml) for an exhaustive list.
-
-Regardless of the following mode selection, the `jwt_secret` must be exported into the environment. This will be used to generate and validate the authorization tokens and must be kept private.
-
-```
-export jwt_secret=<keep-this-secret-safe>
-```
-
-*NOTE*: For System Administrators and Integrators
-Please refer to the [additional documentation](docs/ticket-lifecycle.md) on how the application processes tickets. This covers the advanced functioning of the application and security implications. It also gives context to the various configuration options.
+Please refer to the [configuration file](etc/action-api.yaml).
 
 #### Commands Config
 
