@@ -25,6 +25,7 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
+bind_address: 'tcp://0.0.0.0:6304'
 command_directory_path: libexec-dev
 job_threads: 4
 log_level:          debug

@@ -26,6 +26,14 @@
 #===============================================================================
 
 # ==============================================================================
+# Bind Address
+# The address the web server will be started on.
+#
+# The environment variable flight_ACTION_API_bind_address takes precedence.
+# ==============================================================================
+# bind_address: tcp://127.0.0.1:917
+
+# ==============================================================================
 # Command Directory Path
 # Specify the path to the command directory.
 #

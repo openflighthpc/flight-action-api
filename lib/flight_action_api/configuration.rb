@@ -44,6 +44,7 @@ module FlightActionApi
     # Disable the user config files
     def self.user_config_files; []; end
 
+    attribute :bind_address, default: 'tcp://127.0.0.1:917'
     attribute :command_directory_path, default: 'libexec',
               transform: relative_to(root_path)
     attribute :nodes_config_path, default: 'config/nodes.yaml',
@@ -85,14 +86,14 @@ module FlightActionApi
       begin
         FileUtils.mkdir_p File.dirname(shared_secret_path)
         File.write shared_secret_path, secret, perm: 0440, mode: 'w'
+        __logs__.warn("Generated the shared secret config: #{shared_secret_path}")
+        if ENV['jwt_secret']
+          __logs__.warn("The 'jwt_secret' environment variable is now obsolete and can be unset")
+        end
       rescue
         __logs__.error("Failed to generate: #{shared_secret_path}")
         __logs__.error($!)
         errors.add(:shared_secret_path, "could not be generated")
-      end
-      __logs__.warn("Generated the shared secret config: #{shared_secret_path}")
-      if ENV['jwt_secret']
-        __logs__.warn("The 'jwt_secret' environment variable is now obsolete and can be unset")
       end
     end
 
