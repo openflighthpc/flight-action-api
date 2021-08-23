@@ -27,38 +27,8 @@
 # https://github.com/openflighthpc/flight-action-api
 #===============================================================================
 
-task :require_bundler do
-  $: << __dir__
-  $: << File.join(__dir__, 'lib')
-  ENV['BUNDLE_GEMFILE'] ||= File.join(__dir__, 'Gemfile')
-
-  require 'rubygems'
-  require 'bundler'
-
-  raise <<~ERROR.chomp unless ENV['RACK_ENV']
-    Can not require the application because the RACK_ENV has not been set.
-    Please export the env to your environment and try again:
-
-    export RACK_ENV=production
-  ERROR
-
-  Bundler.require(:default, ENV['RACK_ENV'].to_sym)
-end
-
-task require: :require_bundler do
-  require 'sinatra'
-  require 'flight_action_api'
-  require 'config/boot'
-  require 'config/initializers/figaro'
-  require 'config/initializers/logger'
-  require 'app/errors'
-  require 'app/models'
-  require 'app/models/command'
-  require 'app/models/ticket'
-  require 'config/initializers/facades'
-  require 'app/token'
-  require 'app/serializers'
-  require 'app'
+task :require do
+  require_relative 'config/boot.rb'
 end
 
 task console: :require do
