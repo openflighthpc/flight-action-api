@@ -67,7 +67,7 @@ In additional to the `default.sh` script, other scripts can optionally be define
 
 #### Standalone Nodes
 
-The `nodes` are read from a static YAML file with the following structure. See the [example nodes config](config/nodes.example.yaml) for the version which is used when running in the `development` environment.
+The `nodes` are read from a static YAML file with the following structure. See the [example nodes config](etc/nodes.example.yaml) for the version which is used when running in the `development` environment.
 
 ```
 <node-name>:

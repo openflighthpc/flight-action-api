@@ -29,6 +29,6 @@ bind_address: 'tcp://0.0.0.0:6304'
 command_directory_path: libexec-dev
 job_threads: 4
 log_level:          debug
-nodes_config_path:  config/nodes.example.yaml
+nodes_config_path:  etc/nodes.example.yaml
 working_directory_path: libexec-dev
 

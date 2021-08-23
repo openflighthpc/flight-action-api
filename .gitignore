@@ -16,10 +16,7 @@
 tags
 etc/action-api/shared-secret.conf
 etc/*.local.yaml
-
-# NOTE: This is a general ignore all yaml files in the config directory
-# There are a couple of configs which have manually be checked in
-/config/*.yaml
+etc/nodes.yaml
 
 # Used by dotenv library to load environment variables.
 # .env

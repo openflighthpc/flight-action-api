@@ -28,6 +28,6 @@
 command_directory_path: libexec-dev
 job_threads: 1
 log_level:          error
-nodes_config_path:  config/empty.yaml
+nodes_config_path:  etc/empty.yaml
 working_directory_patt: libexec-dev
 
