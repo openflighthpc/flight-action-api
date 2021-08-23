@@ -83,35 +83,14 @@ module FlightActionApi
 
     validate do
       # Skip the validation if shared_secret_path exists
-      if File.exists? shared_secret_path
-        Flight.logger.warn <<~WARN if ENV['jwt_secret']
-          The configuration mechanism for flight-action-api has changed!
-          The JWT shared secret is now stored within:
-          #{shared_secret_path}
+      next if File.exists? shared_secret_path
 
-          The legacy 'jwt_secret' environment variable is now being ignored.
-          Unsetting the env-var will suppress this warning.
-        WARN
-        next
-      end
-
-      # Attempt to generate the shared secret from the legacy env-var
-      secret = if ENV['jwt_secret']
-        Flight.logger.warn <<~WARN.chomp
-          Attempting to generate the shared secret config from the 'jwt_secret' env var
-        WARN
-        ENV['jwt_secret']
-      else
-        SecureRandom.alphanumeric(50)
-      end
-
+      # Attempt to generate a shared secret when required
       begin
         FileUtils.mkdir_p File.dirname(shared_secret_path)
+        secret = SecureRandom.alphanumeric(50)
         File.write shared_secret_path, secret, perm: 0440, mode: 'w'
         __logs__.warn("Generated the shared secret config: #{shared_secret_path}")
-        if ENV['jwt_secret']
-          __logs__.warn("The 'jwt_secret' environment variable is now obsolete and can be unset")
-        end
       rescue
         __logs__.error("Failed to generate: #{shared_secret_path}")
         __logs__.error($!)
