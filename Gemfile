@@ -33,7 +33,7 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 gem 'activemodel', require: 'active_model'
 gem 'activesupport', ">= 5.2.4.3", require: 'active_support/core_ext'
-gem 'flight_configuration', github: 'openflighthpc/flight_configuration', branch: "a1e4555eb965433d9974e94eff28ecc27a297969"
+gem 'flight_configuration', github: 'openflighthpc/flight_configuration', branch: "c34464854db4fbefe3434669864ff087100808e9"
 gem 'flight_facade', '>= 0.1.5', require: 'flight_facade/included'
 gem 'hashie'
 # gem 'json_api_client'

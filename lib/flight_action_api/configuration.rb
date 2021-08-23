@@ -36,8 +36,7 @@ module FlightActionApi
     LEGACY_CONFIG = File.expand_path("../../config/application.yaml", __dir__)
 
     include FlightConfiguration::DSL
-    # NOTE: Does not support ActiveModel version 5
-    # include FlightConfiguration::RichActiveValidationErrorMessage
+    include FlightConfiguration::RichActiveValidationErrorMessage
     include ActiveModel::Validations
 
     root_path File.expand_path("../..", __dir__)
@@ -65,6 +64,8 @@ module FlightActionApi
               transform: relative_to(root_path)
 
     validate do
+      # Skip the validation if shared_secret_path_before_type_cast isn't a string
+      next unless shared_secret_path_before_type_cast.is_a? String
       # Skip the validation if shared_secret_path exists
       next if File.exists? shared_secret_path
 

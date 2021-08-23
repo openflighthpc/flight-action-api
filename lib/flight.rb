@@ -39,7 +39,7 @@ module Flight
       @config.tap do |c|
         valid = c.valid?
         c.__logs__.log_with(logger)
-        raise FlightActionApi::ConfigError, c.errors.full_messages.join("\n") unless valid
+        raise FlightActionApi::ConfigError, c.rich_error_message unless valid
       end
     end
     alias_method :load_configuration, :config
