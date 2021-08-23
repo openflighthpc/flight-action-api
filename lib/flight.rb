@@ -50,12 +50,16 @@ module Flight
       )
     end
 
+    # NOTE: action-api has not been updated to be able to move its files into flight_ROOT
+    # def root
+    #   @root ||= if env.production? && ENV["flight_ROOT"].present?
+    #     File.expand_path(ENV["flight_ROOT"])
+    #   else
+    #     File.expand_path('..', __dir__)
+    #   end
+    # end
     def root
-      @root ||= if env.production? && ENV["flight_ROOT"].present?
-        File.expand_path(ENV["flight_ROOT"])
-      else
-        File.expand_path('..', __dir__)
-      end
+      @root ||= File.expand_path('..', __dir__)
     end
 
     def logger

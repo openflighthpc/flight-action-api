@@ -39,7 +39,7 @@
 #
 # The environment variable flight_ACTION_API_command_directory_path
 #
-# Relative paths are expanded from flight_ROOT. **
+# Relative paths are expanded from the install directory.
 # ==============================================================================
 # command_directory_path: libexec
 
@@ -49,7 +49,7 @@
 #
 # The environment variable flight_ACTION_API_node_config_path
 #
-# Relative paths are expanded from flight_ROOT. **
+# Relative paths are expanded from the install directory.
 # ==============================================================================
 # nodes_config_path: 'config/nodes.yaml'
 
@@ -84,14 +84,6 @@
 #
 # The environment variable flight_ACTION_API_command_directory_path
 #
-# Relative paths are expanded from flight_ROOT. **
+# Relative paths are expanded from the install directory.
 # ==============================================================================
 # working_directory_path: libexec
-
-# ==============================================================================
-# ** Relative Paths to flight_ROOT
-#
-# NOTES:
-# 1. This only applies in production and if flight_ROOT is set, otherwise
-# 2. It will default to the installation directory.
-# ==============================================================================
