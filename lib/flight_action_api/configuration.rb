@@ -44,7 +44,7 @@ module FlightActionApi
     application_name 'action-api'
 
     # Load configs from the legacy file
-    config_files LEGACY_CONFIG
+    config_files.tap { |c| c.unshift LEGACY_CONFIG }
 
     # Disable the user config files
     def self.user_config_files; []; end
