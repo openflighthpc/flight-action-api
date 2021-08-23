@@ -37,17 +37,17 @@ module Flight
       return @config if @config
       @config = FlightActionApi::Configuration.build
       @config.tap do |c|
+        valid = c.valid?
         c.__logs__.log_with(logger)
-        raise FlightActionApi::ConfigError, c.rich_error_message unless c.valid?
+        raise FlightActionApi::ConfigError, c.errors.full_messages.join("\n") unless valid
       end
     end
     alias_method :load_configuration, :config
 
-    # NOTE: This assumes that RACK_ENV has been set
-    # At the time of writing, this was enforced by the Rakefile
-    # Revisit this if/when the boot mechanism becomes more idiomatic
     def env
-      @env ||= ENV['RACK_ENV']
+      @env ||= ActiveSupport::StringInquirer.new(
+        ENV["RACK_ENV"]
+      )
     end
 
     def root

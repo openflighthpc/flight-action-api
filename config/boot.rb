@@ -32,6 +32,7 @@ ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__)
 
 require 'rubygems'
 require 'bundler'
+require 'securerandom'
 
 if ENV['RACK_ENV'] == 'development'
   Bundler.require(:default, :development)
@@ -52,12 +53,11 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 root = File.expand_path('..', __dir__)
 $LOAD_PATH.unshift(root) unless $LOAD_PATH.include?(root)
 
-require 'flight_action_api'
-require 'config/initializers/figaro'
-require 'config/initializers/logger'
+# Load the config
+require 'flight_action_api/configuration'
+Flight.load_configuration
 
-# Ensures the shared secret exists
-FlightJobScriptAPI.config.auth_decoder
+require 'flight_action_api'
 
 require 'app/errors'
 require 'app/models'
